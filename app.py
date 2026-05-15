@@ -90,7 +90,7 @@ if prompt:
             data = {
 
                 # MODEL FREE ỔN ĐỊNH
-                "model": "meta-llama/llama-3.3-8b-instruct:free",
+                "deepseek/deepseek-r1-0528:free"
 
                 "messages": [
 
