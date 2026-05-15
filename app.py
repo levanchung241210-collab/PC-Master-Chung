@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+import anthropic
 
 st.set_page_config(
     page_title="Chatbot Giải Lỗi PC - Chung 10A4",
@@ -7,15 +7,13 @@ st.set_page_config(
 )
 
 try:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    API_KEY = st.secrets["ANTHROPIC_API_KEY"]
+    client = anthropic.Anthropic(api_key=API_KEY)
 except KeyError:
-    st.error("❌ Chưa cấu hình GEMINI_API_KEY trong Secrets!")
-    st.info("👉 Vào Settings > Secrets > thêm: GEMINI_API_KEY = 'your_key_here'")
+    st.error("❌ Chưa cấu hình ANTHROPIC_API_KEY trong Secrets!")
     st.stop()
 except Exception as e:
-    st.error(f"❌ Lỗi khởi tạo AI: {str(e)}")
+    st.error(f"❌ Lỗi: {str(e)}")
     st.stop()
 
 st.title("🖥️ Chatbot Giải Lỗi PC")
@@ -38,8 +36,6 @@ Quy tắc trả lời:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "chat" not in st.session_state:
-    st.session_state.chat = model.start_chat(history=[])
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -65,9 +61,13 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("🔍 Đang phân tích..."):
             try:
-                full_prompt = f"{SYSTEM_PROMPT}\n\nCâu hỏi: {prompt}"
-                response = st.session_state.chat.send_message(full_prompt)
-                answer = response.text
+                response = client.messages.create(
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=1024,
+                    system=SYSTEM_PROMPT,
+                    messages=st.session_state.messages
+                )
+                answer = response.content[0].text
                 st.markdown(answer)
                 st.session_state.messages.append({
                     "role": "assistant",
@@ -75,7 +75,6 @@ if prompt:
                 })
             except Exception as e:
                 st.error(f"❌ Lỗi AI: {str(e)}")
-                st.info("Thử reload trang và hỏi lại nhé!")
 
 with st.sidebar:
     st.markdown("### ℹ️ Hướng dẫn")
@@ -87,7 +86,6 @@ with st.sidebar:
     st.markdown("---")
     if st.button("🗑️ Xóa lịch sử chat"):
         st.session_state.messages = []
-        st.session_state.chat = model.start_chat(history=[])
         st.rerun()
     st.markdown("---")
     st.caption("Made by Lê Văn Chung 10A4 🎓")
