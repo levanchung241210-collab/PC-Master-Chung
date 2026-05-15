@@ -28,7 +28,7 @@ except Exception:
 # =========================
 # MODEL
 # =========================
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "models/gemini-1.5-flash-latest"
 
 try:
     model = genai.GenerativeModel(MODEL_NAME)
