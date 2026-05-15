@@ -5,13 +5,13 @@ import requests
 # PAGE CONFIG
 # =========================
 st.set_page_config(
-    page_title="AI PC Assistant - Chung 10A4",
-    page_icon="🤖",
+    page_title="PC Assistant - Chung 10A4",
+    page_icon="🖥️",
     layout="wide"
 )
 
 # =========================
-# CUSTOM CSS
+# CSS
 # =========================
 st.markdown("""
 <style>
@@ -29,9 +29,10 @@ st.markdown("""
 
 /* ===== TITLE ===== */
 h1 {
-    color: #60a5fa !important;
+    color: #93c5fd !important;
     text-align: center;
-    font-size: 45px !important;
+    font-size: 42px !important;
+    font-weight: 700 !important;
 }
 
 /* ===== SUBTITLE ===== */
@@ -43,37 +44,30 @@ h3 {
 /* ===== CHAT USER ===== */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
     background-color: #1d4ed8;
-    border-radius: 15px;
+    border-radius: 16px;
     padding: 12px;
     margin-bottom: 12px;
 }
 
-/* ===== CHAT AI ===== */
+/* ===== CHAT BOT ===== */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
     background-color: #111827;
-    border-radius: 15px;
+    border-radius: 16px;
     padding: 12px;
     margin-bottom: 12px;
-    border: 1px solid #374151;
+    border: 1px solid #334155;
 }
 
 /* ===== INPUT ===== */
 .stChatInput input {
     background-color: #111827 !important;
     color: white !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
 }
 
 /* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"] {
     background-color: #0f172a;
-}
-
-/* ===== BUTTON ===== */
-.stButton button {
-    background-color: #2563eb;
-    color: white;
-    border-radius: 10px;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -82,7 +76,7 @@ section[data-testid="stSidebar"] {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #2563eb;
+    background: #3b82f6;
     border-radius: 10px;
 }
 
@@ -107,31 +101,34 @@ except:
 # =========================
 with st.sidebar:
 
-    st.title("⚙️ AI System")
+    st.title("🖥️ PC Assistant")
 
     st.success("🟢 Online")
 
     st.markdown("---")
 
-    st.markdown("## 🧠 Chức năng")
+    st.markdown("### 🔧 Hỗ trợ")
 
-    st.write("✔️ Giải lỗi Windows")
-    st.write("✔️ Giải mã BSOD")
-    st.write("✔️ Tư vấn CPU")
-    st.write("✔️ Tư vấn Mainboard")
+    st.write("✔️ Lỗi Windows")
+    st.write("✔️ Màn hình xanh")
+    st.write("✔️ CPU & Mainboard")
+    st.write("✔️ RAM & GPU")
     st.write("✔️ Chẩn đoán phần cứng")
-    st.write("✔️ Tư vấn RAM/GPU")
 
     st.markdown("---")
 
-    st.info("👨‍💻 STEM Project\n\nLê Văn Chung - 10A4")
+    st.info(
+        "👨‍💻 Sản phẩm STEM\n\nLê Văn Chung - 10A4"
+    )
 
 # =========================
-# MAIN TITLE
+# TITLE
 # =========================
-st.title("🤖 AI PC Assistant")
+st.title("🖥️ Chatbot PC Assistant")
 
-st.markdown("### Chatbot Chuyên Gia Máy Tính")
+st.markdown(
+    "### Hỗ trợ giải lỗi và tư vấn linh kiện máy tính"
+)
 
 st.markdown("---")
 
@@ -143,7 +140,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # =========================
-# DISPLAY OLD CHAT
+# SHOW OLD CHAT
 # =========================
 for msg in st.session_state.messages:
 
@@ -152,7 +149,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # =========================
-# CHAT INPUT
+# INPUT
 # =========================
 prompt = st.chat_input(
     "Nhập lỗi Windows hoặc tên linh kiện..."
@@ -163,7 +160,6 @@ prompt = st.chat_input(
 # =========================
 if prompt:
 
-    # SAVE USER MESSAGE
     st.session_state.messages.append({
 
         "role": "user",
@@ -180,7 +176,7 @@ if prompt:
 
         try:
 
-            with st.spinner("🤖 AI đang phân tích lỗi..."):
+            with st.spinner("🔍 Đang phân tích..."):
 
                 headers = {
 
@@ -205,7 +201,7 @@ Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4.
 
 Nhiệm vụ:
 - giải lỗi Windows
-- giải mã BSOD
+- giải mã màn hình xanh
 - tư vấn CPU Intel AMD
 - tư vấn Mainboard
 - chẩn đoán phần cứng
@@ -243,9 +239,7 @@ Yêu cầu:
 
                 result = response.json()
 
-                # =========================
                 # SUCCESS
-                # =========================
                 if response.status_code == 200 and "choices" in result:
 
                     answer = result["choices"][0]["message"]["content"]
@@ -260,9 +254,6 @@ Yêu cầu:
 
                     })
 
-                # =========================
-                # ERROR
-                # =========================
                 else:
 
                     error_message = result.get(
