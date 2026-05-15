@@ -209,9 +209,11 @@ Nhiệm vụ:
 
 Yêu cầu:
 - trả lời tiếng Việt
-- chuyên nghiệp
-- dễ hiểu
-- chia bước 1 2 3 rõ ràng
+- cực kỳ ngắn gọn
+- không giải thích lan man
+- tối đa 5 dòng
+- chia bước 1 2 3
+- ưu tiên giải pháp nhanh
 """
                         },
 
