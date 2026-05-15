@@ -9,7 +9,7 @@ st.set_page_config(
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash-8b")
+    model = genai.GenerativeModel("gemini-1.5-flash")
 except KeyError:
     st.error("❌ Chưa cấu hình GEMINI_API_KEY trong Secrets!")
     st.info("👉 Vào Settings > Secrets > thêm: GEMINI_API_KEY = 'your_key_here'")
