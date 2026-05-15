@@ -26,11 +26,7 @@ except Exception as e:
 # =========================
 # LOAD MODEL
 # =========================
-try:
-    model = genai.GenerativeModel("gemini-2.0-flash")
-except:
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
-
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 # =========================
 # SYSTEM PROMPT
 # =========================
@@ -149,6 +145,7 @@ Người dùng hỏi:
             })
 
         except Exception as e:
-
-            st.error("❌ AI đang gặp lỗi!")
-            st.exception(e)
+            if "429" in str(e):
+                st.error("⚠️ AI đang bận xử lý một chút (quá tải lượt dùng). Chung hãy đợi khoảng 10-15 giây rồi nhấn gửi lại nhé!")
+            else:
+                st.error("❌ Kết nối AI gặp sự cố. Chung hãy kiểm tra lại Internet hoặc Reboot App.")
