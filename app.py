@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 st.set_page_config(
     page_title="Chatbot Giải Lỗi PC - Chung 10A4",
@@ -8,14 +8,12 @@ st.set_page_config(
 
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    client = genai.Client(api_key=API_KEY)
 except KeyError:
     st.error("❌ Chưa cấu hình GEMINI_API_KEY trong Secrets!")
-    st.info("👉 Vào Settings > Secrets > thêm: GEMINI_API_KEY = 'your_key_here'")
     st.stop()
 except Exception as e:
-    st.error(f"❌ Lỗi khởi tạo AI: {str(e)}")
+    st.error(f"❌ Lỗi: {str(e)}")
     st.stop()
 
 st.title("🖥️ Chatbot Giải Lỗi PC")
@@ -31,15 +29,11 @@ Nhiệm vụ của bạn:
 
 Quy tắc trả lời:
 - Luôn dùng tiếng Việt
-- Chia thành các bước đánh số rõ ràng (Bước 1, Bước 2...)
-- Ngắn gọn, dễ hiểu cho học sinh
-- Nếu là mã lỗi, giải thích nguyên nhân trước rồi mới đưa cách fix
-- Kết thúc bằng lời khuyên phòng tránh nếu có thể"""
+- Chia thành các bước đánh số rõ ràng
+- Ngắn gọn, dễ hiểu cho học sinh"""
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "chat" not in st.session_state:
-    st.session_state.chat = model.start_chat(history=[])
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -65,8 +59,10 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("🔍 Đang phân tích..."):
             try:
-                full_prompt = f"{SYSTEM_PROMPT}\n\nCâu hỏi: {prompt}"
-                response = st.session_state.chat.send_message(full_prompt)
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=f"{SYSTEM_PROMPT}\n\nCâu hỏi: {prompt}"
+                )
                 answer = response.text
                 st.markdown(answer)
                 st.session_state.messages.append({
@@ -75,7 +71,6 @@ if prompt:
                 })
             except Exception as e:
                 st.error(f"❌ Lỗi AI: {str(e)}")
-                st.info("Thử reload trang và hỏi lại nhé!")
 
 with st.sidebar:
     st.markdown("### ℹ️ Hướng dẫn")
@@ -87,7 +82,6 @@ with st.sidebar:
     st.markdown("---")
     if st.button("🗑️ Xóa lịch sử chat"):
         st.session_state.messages = []
-        st.session_state.chat = model.start_chat(history=[])
         st.rerun()
     st.markdown("---")
     st.caption("Made by Lê Văn Chung 10A4 🎓")
