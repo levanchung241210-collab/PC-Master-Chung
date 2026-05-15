@@ -2,10 +2,10 @@ import streamlit as st
 import requests
 
 # =========================
-# PAGE CONFIG
+# CẤU HÌNH TRANG
 # =========================
 st.set_page_config(
-    page_title="Chuyên Gia PC - Chung 10A4",
+    page_title="Chatbot Giải Lỗi PC - Chung 10A4",
     page_icon="🖥️"
 )
 
@@ -22,21 +22,28 @@ except Exception:
     st.stop()
 
 # =========================
-# UI
+# GIAO DIỆN
 # =========================
 st.title("🖥️ Chatbot Giải Lỗi PC - Chung 10A4")
 
 st.markdown("### Sản phẩm STEM")
 
+with st.expander("ℹ️ Giới thiệu"):
+
+    st.write(
+        "AI hỗ trợ giải mã lỗi Windows, BSOD, CPU Intel, Mainboard, RAM và phần cứng máy tính."
+    )
+
 st.markdown("---")
 
 # =========================
-# CHAT HISTORY
+# LỊCH SỬ CHAT
 # =========================
 if "messages" not in st.session_state:
 
     st.session_state.messages = []
 
+# HIỂN THỊ CHAT CŨ
 for msg in st.session_state.messages:
 
     with st.chat_message(msg["role"]):
@@ -44,17 +51,18 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # =========================
-# CHAT INPUT
+# Ô NHẬP CHAT
 # =========================
 prompt = st.chat_input(
-    "Nhập lỗi Windows hoặc tên linh kiện..."
+    "Nhập mã lỗi hoặc tên linh kiện..."
 )
 
 # =========================
-# USER MESSAGE
+# XỬ LÝ CHAT
 # =========================
 if prompt:
 
+    # LƯU USER MESSAGE
     st.session_state.messages.append({
 
         "role": "user",
@@ -81,24 +89,28 @@ if prompt:
 
             data = {
 
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+                # MODEL FREE ỔN ĐỊNH
+                "model": "meta-llama/llama-3.3-8b-instruct:free",
 
                 "messages": [
 
                     {
                         "role": "system",
+
                         "content":
                         """
 Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4.
 
 Nhiệm vụ:
-- giải lỗi Windows
-- tư vấn CPU
+- giải mã lỗi Windows
+- giải lỗi màn hình xanh
+- tư vấn CPU Intel AMD
 - tư vấn mainboard
+- tư vấn RAM
 - chẩn đoán phần cứng
 
-Trả lời:
-- tiếng Việt
+Yêu cầu:
+- trả lời tiếng Việt
 - ngắn gọn
 - chia bước 1 2 3
 """
@@ -106,6 +118,7 @@ Trả lời:
 
                     {
                         "role": "user",
+
                         "content": prompt
                     }
 
@@ -125,10 +138,20 @@ Trả lời:
 
             result = response.json()
 
-            answer = result["choices"][0]["message"]["content"]
+            # =========================
+            # KIỂM TRA LỖI
+            # =========================
+            if "choices" in result:
+
+                answer = result["choices"][0]["message"]["content"]
+
+            else:
+
+                answer = f"❌ OpenRouter lỗi:\n\n{result}"
 
             st.markdown(answer)
 
+            # LƯU CHATBOT MESSAGE
             st.session_state.messages.append({
 
                 "role": "assistant",
