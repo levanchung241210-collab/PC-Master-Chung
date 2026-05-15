@@ -1,87 +1,142 @@
 import streamlit as st
-from google import genai
+import requests
 
+# =========================
+# PAGE CONFIG
+# =========================
 st.set_page_config(
-    page_title="Chatbot Giải Lỗi PC - Chung 10A4",
+    page_title="Chuyên Gia PC - Chung 10A4",
     page_icon="🖥️"
 )
 
+# =========================
+# API KEY
+# =========================
 try:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-    client = genai.Client(api_key=API_KEY)
-except KeyError:
-    st.error("❌ Chưa cấu hình GEMINI_API_KEY trong Secrets!")
-    st.stop()
-except Exception as e:
-    st.error(f"❌ Lỗi: {str(e)}")
+    API_KEY = st.secrets["OPENROUTER_API_KEY"]
+
+except Exception:
+
+    st.error("❌ Chưa thêm OPENROUTER_API_KEY vào Secrets!")
+
     st.stop()
 
-st.title("🖥️ Chatbot Giải Lỗi PC")
-st.markdown("**Sản phẩm STEM - Lê Văn Chung 10A4**")
+# =========================
+# UI
+# =========================
+st.title("🖥️ Chatbot Giải Lỗi PC - Chung 10A4")
+
+st.markdown("### Sản phẩm STEM")
+
 st.markdown("---")
 
-SYSTEM_PROMPT = """Bạn là chuyên gia sửa chữa và tư vấn PC chuyên nghiệp.
-Nhiệm vụ của bạn:
-- Giải thích các mã lỗi Windows (BSOD, Error Code...)
-- Chẩn đoán lỗi phần cứng (CPU, RAM, GPU, ổ cứng, nguồn...)
-- Tư vấn linh kiện PC (thông số, so sánh, tương thích)
-- Hướng dẫn sửa lỗi step-by-step
-
-Quy tắc trả lời:
-- Luôn dùng tiếng Việt
-- Chia thành các bước đánh số rõ ràng
-- Ngắn gọn, dễ hiểu cho học sinh"""
-
+# =========================
+# CHAT HISTORY
+# =========================
 if "messages" not in st.session_state:
+
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for msg in st.session_state.messages:
 
-if not st.session_state.messages:
-    st.markdown("**💡 Bạn có thể hỏi ví dụ:**")
-    cols = st.columns(2)
-    with cols[0]:
-        st.code("Lỗi 0x0000007B là gì?")
-        st.code("RAM 8GB có đủ không?")
-    with cols[1]:
-        st.code("PC bị màn hình xanh chết")
-        st.code("So sánh GTX 1650 vs RX 6500")
+    with st.chat_message(msg["role"]):
 
-prompt = st.chat_input("Nhập mã lỗi hoặc câu hỏi về PC...")
+        st.markdown(msg["content"])
 
+# =========================
+# CHAT INPUT
+# =========================
+prompt = st.chat_input(
+    "Nhập lỗi Windows hoặc tên linh kiện..."
+)
+
+# =========================
+# USER MESSAGE
+# =========================
 if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    st.session_state.messages.append({
+
+        "role": "user",
+
+        "content": prompt
+
+    })
+
     with st.chat_message("user"):
+
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🔍 Đang phân tích..."):
-            try:
-                response = client.models.generate_content(
-                    model="gemini-2.0-flash",
-                    contents=f"{SYSTEM_PROMPT}\n\nCâu hỏi: {prompt}"
-                )
-                answer = response.text
-                st.markdown(answer)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": answer
-                })
-            except Exception as e:
-                st.error(f"❌ Lỗi AI: {str(e)}")
 
-with st.sidebar:
-    st.markdown("### ℹ️ Hướng dẫn")
-    st.markdown("""
-- Nhập **mã lỗi** (VD: 0x00000050)
-- Mô tả **triệu chứng** PC
-- Hỏi về **linh kiện** bất kỳ
-""")
-    st.markdown("---")
-    if st.button("🗑️ Xóa lịch sử chat"):
-        st.session_state.messages = []
-        st.rerun()
-    st.markdown("---")
-    st.caption("Made by Lê Văn Chung 10A4 🎓")
+        try:
+
+            headers = {
+
+                "Authorization": f"Bearer {API_KEY}",
+
+                "Content-Type": "application/json"
+
+            }
+
+            data = {
+
+                "model": "deepseek/deepseek-chat-v3-0324:free",
+
+                "messages": [
+
+                    {
+                        "role": "system",
+                        "content":
+                        """
+Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4.
+
+Nhiệm vụ:
+- giải lỗi Windows
+- tư vấn CPU
+- tư vấn mainboard
+- chẩn đoán phần cứng
+
+Trả lời:
+- tiếng Việt
+- ngắn gọn
+- chia bước 1 2 3
+"""
+                    },
+
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+
+                ]
+
+            }
+
+            response = requests.post(
+
+                "https://openrouter.ai/api/v1/chat/completions",
+
+                headers=headers,
+
+                json=data
+
+            )
+
+            result = response.json()
+
+            answer = result["choices"][0]["message"]["content"]
+
+            st.markdown(answer)
+
+            st.session_state.messages.append({
+
+                "role": "assistant",
+
+                "content": answer
+
+            })
+
+        except Exception as e:
+
+            st.error(f"❌ Lỗi AI: {str(e)}")
