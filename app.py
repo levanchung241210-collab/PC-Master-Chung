@@ -5,36 +5,146 @@ import requests
 # PAGE CONFIG
 # =========================
 st.set_page_config(
-    page_title="Chatbot PC - Chung 10A4",
-    page_icon="🖥️"
+    page_title="AI PC Assistant - Chung 10A4",
+    page_icon="🤖",
+    layout="wide"
 )
+
+# =========================
+# CUSTOM CSS
+# =========================
+st.markdown("""
+<style>
+
+/* ===== BACKGROUND ===== */
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #0f172a,
+        #111827,
+        #1e293b
+    );
+    color: white;
+}
+
+/* ===== TITLE ===== */
+h1 {
+    color: #60a5fa !important;
+    text-align: center;
+    font-size: 45px !important;
+}
+
+/* ===== SUBTITLE ===== */
+h3 {
+    text-align: center;
+    color: #cbd5e1;
+}
+
+/* ===== CHAT USER ===== */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
+    background-color: #1d4ed8;
+    border-radius: 15px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+/* ===== CHAT AI ===== */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
+    background-color: #111827;
+    border-radius: 15px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #374151;
+}
+
+/* ===== INPUT ===== */
+.stChatInput input {
+    background-color: #111827 !important;
+    color: white !important;
+    border-radius: 12px !important;
+}
+
+/* ===== SIDEBAR ===== */
+section[data-testid="stSidebar"] {
+    background-color: #0f172a;
+}
+
+/* ===== BUTTON ===== */
+.stButton button {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 10px;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 10px;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # =========================
 # API KEY
 # =========================
 try:
+
     API_KEY = st.secrets["OPENROUTER_API_KEY"]
 
 except:
+
     st.error("❌ Chưa thêm OPENROUTER_API_KEY vào Secrets!")
+
     st.stop()
 
 # =========================
-# UI
+# SIDEBAR
 # =========================
-st.title("🖥️ Chatbot Giải Lỗi PC - Chung 10A4")
+with st.sidebar:
 
-st.markdown("### Sản phẩm STEM")
+    st.title("⚙️ AI System")
+
+    st.success("🟢 Online")
+
+    st.markdown("---")
+
+    st.markdown("## 🧠 Chức năng")
+
+    st.write("✔️ Giải lỗi Windows")
+    st.write("✔️ Giải mã BSOD")
+    st.write("✔️ Tư vấn CPU")
+    st.write("✔️ Tư vấn Mainboard")
+    st.write("✔️ Chẩn đoán phần cứng")
+    st.write("✔️ Tư vấn RAM/GPU")
+
+    st.markdown("---")
+
+    st.info("👨‍💻 STEM Project\n\nLê Văn Chung - 10A4")
+
+# =========================
+# MAIN TITLE
+# =========================
+st.title("🤖 AI PC Assistant")
+
+st.markdown("### Chatbot Chuyên Gia Máy Tính")
 
 st.markdown("---")
 
 # =========================
-# SESSION CHAT
+# CHAT HISTORY
 # =========================
 if "messages" not in st.session_state:
+
     st.session_state.messages = []
 
-# HIỂN THỊ CHAT CŨ
+# =========================
+# DISPLAY OLD CHAT
+# =========================
 for msg in st.session_state.messages:
 
     with st.chat_message(msg["role"]):
@@ -42,107 +152,128 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # =========================
-# INPUT
+# CHAT INPUT
 # =========================
 prompt = st.chat_input(
     "Nhập lỗi Windows hoặc tên linh kiện..."
 )
 
 # =========================
-# CHAT
+# HANDLE CHAT
 # =========================
 if prompt:
 
-    # Lưu user message
+    # SAVE USER MESSAGE
     st.session_state.messages.append({
+
         "role": "user",
+
         "content": prompt
+
     })
 
     with st.chat_message("user"):
+
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
 
         try:
 
-            headers = {
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json"
-            }
+            with st.spinner("🤖 AI đang phân tích lỗi..."):
 
-            # MODEL FREE ĐANG HOẠT ĐỘNG
-            payload = {
+                headers = {
 
-                "model": "openai/gpt-oss-20b:free",
+                    "Authorization": f"Bearer {API_KEY}",
 
-                "messages": [
+                    "Content-Type": "application/json"
 
-                    {
-                        "role": "system",
-                        "content":
-                        """
+                }
+
+                payload = {
+
+                    "model": "openai/gpt-oss-20b:free",
+
+                    "messages": [
+
+                        {
+                            "role": "system",
+
+                            "content":
+                            """
 Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4.
 
 Nhiệm vụ:
 - giải lỗi Windows
-- tư vấn CPU
-- tư vấn mainboard
+- giải mã BSOD
+- tư vấn CPU Intel AMD
+- tư vấn Mainboard
 - chẩn đoán phần cứng
+- tư vấn GPU RAM SSD
 
-Trả lời:
-- tiếng Việt
-- ngắn gọn
-- chia bước 1 2 3
+Yêu cầu:
+- trả lời tiếng Việt
+- chuyên nghiệp
+- dễ hiểu
+- chia bước 1 2 3 rõ ràng
 """
-                    },
+                        },
 
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                        {
+                            "role": "user",
 
-                ]
+                            "content": prompt
+                        }
 
-            }
+                    ]
 
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=60
-            )
+                }
 
-            result = response.json()
+                response = requests.post(
 
-            # DEBUG
-            print(result)
+                    "https://openrouter.ai/api/v1/chat/completions",
 
-            # =========================
-            # KIỂM TRA RESPONSE
-            # =========================
-            if response.status_code != 200:
+                    headers=headers,
 
-                error_message = result.get(
-                    "error",
-                    {}
-                ).get(
-                    "message",
-                    "Lỗi không xác định"
+                    json=payload,
+
+                    timeout=60
+
                 )
 
-                st.error(f"❌ OpenRouter lỗi: {error_message}")
+                result = response.json()
 
-            else:
+                # =========================
+                # SUCCESS
+                # =========================
+                if response.status_code == 200 and "choices" in result:
 
-                answer = result["choices"][0]["message"]["content"]
+                    answer = result["choices"][0]["message"]["content"]
 
-                st.markdown(answer)
+                    st.markdown(answer)
 
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": answer
-                })
+                    st.session_state.messages.append({
+
+                        "role": "assistant",
+
+                        "content": answer
+
+                    })
+
+                # =========================
+                # ERROR
+                # =========================
+                else:
+
+                    error_message = result.get(
+                        "error",
+                        {}
+                    ).get(
+                        "message",
+                        "Lỗi không xác định"
+                    )
+
+                    st.error(f"❌ OpenRouter lỗi: {error_message}")
 
         except Exception as e:
 
