@@ -344,14 +344,13 @@ html, body, .stApp {
 /* ══════════════════════════════════════
    CHAT MESSAGES (SỬA LỖI NERF CHỮ)
 ══════════════════════════════════════ */
-/* Ép toàn bộ chữ trong khung chat thành màu TRẮNG SÁNG + BÓNG CHỮ */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
     font-size: clamp(14px, 3.8vw, 15px) !important;
     line-height: 1.75 !important;
     color: #ffffff !important; 
     font-weight: 400 !important;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important; /* Đổ bóng đen siêu đậm để nổi chữ */
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important;
 }
 
 /* KHUNG NGƯỜI DÙNG (MÀU ĐỎ OMEN) */
@@ -376,7 +375,6 @@ html, body, .stApp {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* Các format đặc biệt trong chat */
 [data-testid="stChatMessage"] h3 {
     font-family: 'Rajdhani', sans-serif !important;
     font-size: clamp(15px, 4vw, 19px) !important;
@@ -390,7 +388,7 @@ html, body, .stApp {
     text-shadow: 0 2px 5px rgba(0,0,0,0.8) !important;
 }
 [data-testid="stChatMessage"] strong {
-    color: #ffb0b8 !important; /* Đỏ nhạt để nổi trên nền tối */
+    color: #ffb0b8 !important;
     font-weight: 700 !important;
 }
 [data-testid="stChatMessage"] code {
@@ -436,16 +434,15 @@ section[data-testid="stSidebar"] .stButton > button { background: transparent !i
 @media (max-width: 600px) {
     .block-container { padding: 0.7rem 0.5rem 4.5rem !important; }
     
-    /* HIỂN THỊ LẠI TÊN TÁC GIẢ TRÊN ĐIỆN THOẠI */
     .valo-author { 
         position: relative !important; 
         top: 0 !important; 
         justify-content: center !important; 
         margin-bottom: 12px !important; 
         font-size: 12px !important;
-        color: var(--valo-teal) !important; /* Làm nổi bật bằng màu Teal */
+        color: var(--valo-teal) !important;
     }
-    .valo-author::before { display: none; } /* Bỏ thanh ngang cho gọn */
+    .valo-author::before { display: none; }
 
     [data-testid="stChatMessage"] { padding: 12px 14px !important; margin: 5px 0 !important; }
     .stButton > button { min-height: 44px !important; padding: 10px 12px !important; font-size: 13px !important; }
@@ -536,10 +533,10 @@ st.markdown(f"""
 # ========================
 # SESSION STATE
 # ========================
-if "messages"     not in st.session_state: st.session_state.messages     = []
-if "greeted"      not in st.session_state: st.session_state.greeted      = False
-if "suggestions"  not in st.session_state: st.session_state.suggestions  = []
-if "pending_query"not in st.session_state: st.session_state.pending_query= None
+if "messages"      not in st.session_state: st.session_state.messages      = []
+if "greeted"       not in st.session_state: st.session_state.greeted       = False
+if "suggestions"   not in st.session_state: st.session_state.suggestions   = []
+if "pending_query" not in st.session_state: st.session_state.pending_query = None
 
 # ========================
 # GỢI Ý NGẪU NHIÊN
@@ -549,7 +546,7 @@ ALL_SUGGESTIONS = [
     ("▪  Màn hình đen không hiển thị",        "Máy lên nguồn nhưng màn hình đen, không lên gì"),
     ("◈  PC bíp liên tục khi bật",            "Máy tính bíp nhiều tiếng khi khởi động, lỗi gì?"),
     ("◉  Máy chạy chậm bất thường",           "Máy tính đột nhiên chạy rất chậm, khắc phục thế nào?"),
-    ("🌡  CPU overheat — quá nóng",            "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
+    ("🌡  CPU overheat — quá nóng",             "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
     ("◆  RAM có tương thích mainboard không",  "Làm sao biết RAM có tương thích với mainboard không?"),
     ("⚡  Cần bao nhiêu W nguồn điện",         "Cấu hình PC của tôi cần bao nhiêu W nguồn là đủ?"),
     ("🎮  GTX 1650 chơi được game gì",         "Card GTX 1650 chơi được những game nào mượt?"),
@@ -603,8 +600,7 @@ st.markdown(f"""
 
 # Chỉ hiển thị gợi ý khi chưa có đoạn chat nào để tiết kiệm diện tích sau khi chat
 if not st.session_state.messages:
-    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="small")
     for i, (label, query) in enumerate(st.session_state.suggestions):
@@ -645,12 +641,17 @@ def search_database(user_query):
     user_numbers = [re.sub(r'\D','',w) for w in q_clean.split() if re.search(r'\d{3,}',w)]
     user_numbers = [n for n in user_numbers if n]
     best_match, max_score, match_pool = None, 0, ""
+    
     for item in data_pc.get("linh_kien_pc", []):
         s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "linh_kien"
+        if s > max_score: 
+            max_score, best_match, match_pool = s, item, "linh_kien"
+            
     for item in data_pc.get("loi_he_thong", []):
         s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "loi"
+        if s > max_score: 
+            max_score, best_match, match_pool = s, item, "loi"
+            
     if max_score >= 2 and best_match:
         if match_pool == "loi":
             return (f"### ✕  {best_match['ten']}\n"
@@ -718,10 +719,12 @@ def ask_engine(user_query, chat_history):
     if   qtype == "error":    system, max_tok, temp = PROMPT_ERROR,    480, 0.3
     elif qtype == "hardware": system, max_tok, temp = PROMPT_HARDWARE, 780, 0.5
     else:                     system, max_tok, temp = PROMPT_GENERAL,  560, 0.4
+    
     messages = [{"role":"system","content":system}]
     for msg in chat_history[-6:]:
         messages.append({"role":msg["role"],"content":msg["content"]})
     messages.append({"role":"user","content":user_query})
+    
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=messages,
@@ -743,7 +746,7 @@ def handle_message(prompt):
                 answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
                 st.markdown(answer)
                 st.session_state.messages.append({"role":"assistant","content":answer})
-            except:
+            except Exception as e:
                 st.error("❌ Hệ thống gián đoạn. Vui lòng thử lại.")
 
 if st.session_state.pending_query:
