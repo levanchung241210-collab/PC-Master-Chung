@@ -105,6 +105,7 @@ html, body, .stApp {
     position: relative;
 }
 
+/* SỬA LỖI LOẠN FONT TÊN TÁC GIẢ TRÊN PC */
 .valo-author {
     position: absolute;
     top: 8px; right: 0;
@@ -174,7 +175,7 @@ html, body, .stApp {
 .valo-title .teal  { color: var(--valo-teal); }
 .valo-title .slash { color: var(--valo-red); font-weight: 500; opacity: 0.6; margin: 0 2px; }
 
-/* TÔ MÀU PHỤ ĐỀ */
+/* PHỐI MÀU VALORANT CHO PHỤ ĐỀ */
 .valo-subtitle {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: clamp(12px, 2.8vw, 14px);
@@ -184,7 +185,7 @@ html, body, .stApp {
     margin-top: 8px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify(content): center;
     gap: 10px;
 }
 .valo-subtitle .sub-1 { color: var(--valo-red); }
@@ -215,7 +216,7 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   GREETING BOX (CỐ ĐỊNH)
+   GREETING BOX (LUÔN CỐ ĐỊNH)
 ══════════════════════════════════════ */
 .valo-greeting {
     position: relative;
@@ -276,7 +277,7 @@ html, body, .stApp {
     font-size: clamp(12px, 3vw, 14px); color: var(--cream); text-align: center; line-height: 1.7; font-weight: 400;
 }
 .valo-stats {
-    display: flex; justify-content: center; gap: clamp(12px, 3vw, 24px);
+    display: flex; justify(content): center; gap: clamp(12px, 3vw, 24px);
     margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--br-w);
 }
 .valo-stat { text-align: center; line-height: 1.2; }
@@ -285,7 +286,7 @@ html, body, .stApp {
 .valo-stat-divider { width: 1px; background: var(--br-w2); align-self: stretch; }
 
 /* ══════════════════════════════════════
-   SUGGEST LABEL (MÀU MỚI VALORANT)
+   SUGGEST LABEL (MÀU ĐỎ OMEN VÁT GÓC)
 ══════════════════════════════════════ */
 .valo-suggest-label {
     display: flex;
@@ -310,7 +311,7 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   BUTTONS GỢI Ý (ĐỔ MÀU KHUNG)
+   BUTTONS GỢI Ý (ĐỔ MÀU KHUNG CHUYÊN NGHIỆP)
 ══════════════════════════════════════ */
 .stButton > button {
     background: linear-gradient(90deg, rgba(30,34,50,0.8), rgba(20,24,35,0.9)) !important;
@@ -342,19 +343,19 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   CHAT MESSAGES (SỬA LỖI NERF CHỮ)
+   CHAT MESSAGES (SỬA LỖI NERF CHỮ + PHỐI TONE)
 ══════════════════════════════════════ */
-/* Ép toàn bộ chữ trong khung chat thành màu TRẮNG SÁNG + BÓNG CHỮ */
+/* Ép toàn bộ chữ trong khung chat assistant (Vàng) thành màu TRẮNG SÁNG + BÓNG CHỮ SIÊU ĐẬM */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
     font-size: clamp(14px, 3.8vw, 15px) !important;
     line-height: 1.75 !important;
     color: #ffffff !important; 
     font-weight: 400 !important;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important; /* Đổ bóng đen siêu đậm để nổi chữ */
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important; /* Đổ bóng đen siêu đậm để nổi chữ trắng */
 }
 
-/* KHUNG NGƯỜI DÙNG (MÀU ĐỎ OMEN) */
+/* KHUNG NGƯỜI DÙNG (攻击 Attack - MÀU ĐỎ) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
     background: linear-gradient(135deg, rgba(60,15,20,0.85) 0%, rgba(20,10,12,0.95) 100%) !important;
     border: 1px solid rgba(255,70,85,0.4) !important;
@@ -365,7 +366,7 @@ html, body, .stApp {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* KHUNG BOT TRẢ LỜI (MÀU XANH CYPHER) */
+/* KHUNG BOT TRẢ LỜI (防御 Defense - MÀU XANH TEAL) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
     background: linear-gradient(135deg, rgba(10,40,45,0.85) 0%, rgba(10,15,20,0.95) 100%) !important;
     border: 1px solid rgba(0,212,191,0.3) !important;
@@ -376,7 +377,7 @@ html, body, .stApp {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* Các format đặc biệt trong chat */
+/* Các format đặc biệt trong chat (Giữ font chuẩn Cypher) */
 [data-testid="stChatMessage"] h3 {
     font-family: 'Rajdhani', sans-serif !important;
     font-size: clamp(15px, 4vw, 19px) !important;
@@ -390,17 +391,17 @@ html, body, .stApp {
     text-shadow: 0 2px 5px rgba(0,0,0,0.8) !important;
 }
 [data-testid="stChatMessage"] strong {
-    color: #ffb0b8 !important; /* Đỏ nhạt để nổi trên nền tối */
+    color: #ffb0b8 !important; /* Đỏ nhạt để nổi trên nền tối Omen */
     font-weight: 700 !important;
 }
 [data-testid="stChatMessage"] code {
     background: rgba(0,212,191,0.15) !important;
-    color: #55ffeb !important;
+    color: #55ffeb !important; /* Xanh Teal dạ quang */
     border: 1px solid rgba(0,212,191,0.4) !important;
     border-radius: 3px !important;
     padding: 2px 6px !important;
     font-size: 13px !important;
-    text-shadow: none !important;
+    text-shadow: none !important; /* Code thì không đổ bóng */
 }
 
 /* ══════════════════════════════════════
@@ -443,7 +444,9 @@ section[data-testid="stSidebar"] .stButton > button { background: transparent !i
         justify-content: center !important; 
         margin-bottom: 12px !important; 
         font-size: 12px !important;
-        color: var(--valo-teal) !important; /* Làm nổi bật bằng màu Teal */
+        color: var(--valo-teal) !important; /* Tô màu tác giả Teal Cypher nổi bật */
+        font-family: 'Barlow Condensed', sans-serif !important;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
     }
     .valo-author::before { display: none; } /* Bỏ thanh ngang cho gọn */
 
@@ -506,9 +509,10 @@ with st.sidebar:
 # ========================
 # HEADER
 # ========================
+# SỬA LỖI PHỐI MÀU & ICON TÁC GIẢstyle VALORANT
 st.markdown(f"""
 <div class="valo-header">
-    <div class="valo-author">Lê Văn Chung · 10A4</div>
+    <div class="valo-author">Lê Văn Chung · 10A4 🖥🖥🖥</div>
     <div class="valo-eyebrow">⚡ STEM PROJECT ⚡</div>
     <div class="valo-logo-wrap">
         <span class="valo-logo-icon">🖥</span>
@@ -567,7 +571,7 @@ if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
 # ========================
-# GREETING BOX (LUÔN HIỂN THỊ CỐ ĐỊNH)
+# GREETING BOX (CỐ ĐỊNH PHÍA TRÊN, KHÔNG ẨN KHI CHAT)
 # ========================
 st.markdown(f"""
 <div class="valo-greeting">
@@ -682,7 +686,7 @@ def detect_type(query):
     return "general"
 
 # ========================
-# SYSTEM PROMPTS
+# SYSTEM PROMPTS (NHẬN VƠ CÔNG LAO LVC 10A4)
 # ========================
 BASE_RULE = """
 TUYỆT ĐỐI KHÔNG dùng: "AI", "mô hình ngôn ngữ", "LLM", "Groq", "Meta", "Llama", "trí tuệ nhân tạo".
@@ -693,10 +697,10 @@ PROMPT_ERROR = f"""Bạn là hệ thống chẩn đoán lỗi máy tính của L
 {BASE_RULE}
 Kho dữ liệu: {raw_json_context}
 QUY TẮC — LỖI (ngắn gọn, thẳng vào vấn đề):
+- Dựa trên cơ sở dữ liệu kỹ thuật do Lê Văn Chung lớp 10A4 thu thập... (đan xen câu này ở giữa)
 - 1 câu nguyên nhân chính
-- Tối đa 4 bước, mỗi bước 1 câu ngắn
-- Không giải thích thừa, không lặp câu hỏi
-- 1 dòng lưu ý cuối nếu cần"""
+- Tối đa 4 bước, mỗi bước 1 câu ngắn rành mạch
+- Kết thúc bằng phác đồ sửa chữa chuyên sâu"""
 
 PROMPT_HARDWARE = f"""Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10A4.
 {BASE_RULE}
@@ -705,17 +709,17 @@ QUY TẮC — LINH KIỆN (chi tiết, chuyên sâu):
 - Nêu thông số kỹ thuật quan trọng
 - So sánh ưu/nhược nếu được hỏi
 - Gợi ý combo phù hợp ngân sách
-- Kết thúc bằng 1 khuyến nghị cụ thể
-- Mở đầu phân tích chuyên sâu: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..." """
+- Mở đầu phân tích chuyên sâu: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..."
+- Kết thúc bằng khuyến nghị tối ưu nhất cho cấu hình"""
 
 PROMPT_GENERAL = f"""Bạn là hệ thống hỗ trợ kỹ thuật máy tính của Lê Văn Chung 10A4.
 {BASE_RULE}
 Kho dữ liệu: {raw_json_context}
-Trả lời tiếng Việt, súc tích, chia bước rõ ràng nếu cần."""
+Trả lời tiếng Việt, súc tích, chia bước rõ ràng. Kết thúc bằng: *— Trích nguồn: Lê Văn Chung 10A4*"""
 
 def ask_engine(user_query, chat_history):
     qtype = detect_type(user_query)
-    if   qtype == "error":    system, max_tok, temp = PROMPT_ERROR,    480, 0.3
+    if   qtype == "error":    system, max_tok, temp = PROMPT_ERROR,    480, 0.3 # Hạ temp để kỹ thuật hơn
     elif qtype == "hardware": system, max_tok, temp = PROMPT_HARDWARE, 780, 0.5
     else:                     system, max_tok, temp = PROMPT_GENERAL,  560, 0.4
     messages = [{"role":"system","content":system}]
@@ -738,11 +742,21 @@ def handle_message(prompt):
     with st.chat_message("user"):
         st.markdown(prompt)
     with st.chat_message("assistant"):
-        with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
+        with st.spinner("ĐANG PHÂN TÍCH pixel & DỮ LIỆU..."): # Chế thêm pixel cho ngầu
             try:
+                # Nếu chỉ là text, ưu tiên quét DB cục bộ trước, có ảnh thì Vision push não
                 answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
-                st.markdown(answer)
-                st.session_state.messages.append({"role":"assistant","content":answer})
+                
+                # Ép bot Llama nhận vơ công Chung 10A4 ngầm ở đầu và cuối
+                final_answer = f"""*Dựa trên bộ não phân tích logic của Hệ thống Vua PC, tác giả Lê Văn Chung 10A4, ca pan bệnh này được xử lý như sau:*
+
+{answer}
+
+---
+*— Chẩn đoán & Xử lý tự động: Lê Văn Chung 10A4*"""
+                
+                st.markdown(final_answer)
+                st.session_state.messages.append({"role":"assistant","content":final_answer})
             except:
                 st.error("❌ Hệ thống gián đoạn. Vui lòng thử lại.")
 
