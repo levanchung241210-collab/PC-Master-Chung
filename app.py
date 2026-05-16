@@ -100,50 +100,54 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   HEADER & VALORANT FONTS
+   HEADER CHUẨN ĐỔI MÀU LVC NỔI BẬT
 ══════════════════════════════════════ */
 .valo-header {
     text-align: center;
-    padding: 10px 0 2px;
-    position: relative;
+    padding: 5px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* TÁC GIẢ LÊ VĂN CHUNG 10A4 — STYLE VALORANT */
+/* ĐÃ SỬA: Tên hiển thị rực rỡ, căn giữa tự nhiên, không bị đè chữ */
 .valo-author {
-    position: absolute;
-    top: 8px; right: 0;
     font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: 13px !important;
+    font-size: clamp(13px, 4vw, 16px) !important;
     font-weight: 800 !important;
     letter-spacing: 2px !important;
     text-transform: uppercase !important;
-    color: var(--dim) !important;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    line-height: 1;
-}
-.valo-author .dot { color: var(--valo-teal); font-size: 15px; }
-
-.valo-eyebrow {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(9px, 2vw, 11px);
-    font-weight: 700;
-    letter-spacing: 6px;
-    color: var(--valo-red);
-    text-transform: uppercase;
+    color: var(--valo-teal) !important; /* Đổi sang màu xanh Neon rực rỡ */
+    text-shadow: 0px 0px 8px rgba(0, 212, 191, 0.6) !important; /* Hiệu ứng sáng nổi bật */
     margin-bottom: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 6px;
+    line-height: 1.2;
+}
+.valo-author .dot { color: var(--white); }
+
+.valo-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(9px, 2.5vw, 11px);
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--valo-red);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 .valo-eyebrow::before,
 .valo-eyebrow::after {
     content: '';
     display: inline-block;
-    width: 32px; height: 1px;
-    opacity: 0.6;
+    width: 20px; height: 1px;
+    opacity: 0.5;
 }
 .valo-eyebrow::before { background: linear-gradient(90deg, transparent, var(--valo-red)); }
 .valo-eyebrow::after { background: linear-gradient(90deg, var(--valo-red), transparent); }
@@ -152,57 +156,54 @@ html, body, .stApp {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 12px;
     margin-bottom: 4px;
 }
 .valo-logo-icon {
-    font-size: clamp(28px, 6vw, 40px);
-    filter: drop-shadow(0 0 12px rgba(255, 70, 85, 0.6));
+    font-size: clamp(26px, 6vw, 36px);
+    filter: drop-shadow(0 0 10px rgba(255, 70, 85, 0.5));
 }
 .valo-title {
     font-family: 'Bebas Neue', sans-serif !important;
-    font-size: clamp(30px, 7.5vw, 62px) !important;
+    font-size: clamp(32px, 8vw, 56px) !important;
     font-weight: 400 !important;
-    letter-spacing: 3px !important;
+    letter-spacing: 2px !important;
     line-height: 1;
     color: var(--white);
     text-transform: uppercase;
     margin: 0;
-    text-shadow: 0 0 40px rgba(255, 70, 85, 0.15);
 }
 .valo-title .red   { color: var(--valo-red); }
-.valo-title . teal  { color: var(--valo-teal); }
-.valo-title . slash {
+.valo-title .slash {
     color: var(--valo-red);
-    font-weight: 500;
     opacity: 0.6;
     margin: 0 2px;
 }
 
-/* SỬA LỖI LOẠN FONT TIÊU ĐỀ — ÁP DỤNG Oswald SẮC CẠNH */
+/* TIÊU ĐỀ KHUNG GREETING CHUẨN OSWALD SẮC CẠNH */
 .valo-main-heading {
     font-family: 'Oswald', sans-serif !important;
-    font-size: clamp(20px, 4.5vw, 32px) !important;
+    font-size: clamp(18px, 4.5vw, 28px) !important;
     font-weight: 700 !important;
-    letter-spacing: 1.5px !important;
+    letter-spacing: 1px !important;
     text-transform: uppercase !important;
     color: var(--white) !important;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5) !important;
-    margin: 15px 0 !important;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.6) !important;
+    margin: 12px 0 !important;
 }
 
 .valo-subtitle {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(11px, 2.5vw, 13px);
+    font-size: clamp(11px, 2.8vw, 13px);
     font-weight: 600;
-    letter-spacing: 5px;
+    letter-spacing: 4px;
     color: var(--silver);
     text-transform: uppercase;
-    margin-top: 6px;
+    margin-top: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 }
 .valo-subtitle .sub-1 { color: var(--valo-red); }
 .valo-subtitle .sub-2 { color: var(--white); }
@@ -218,7 +219,7 @@ html, body, .stApp {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 12px 0 8px;
+    margin: 10px 0 6px;
 }
 .valo-divider::before,
 .valo-divider::after {
@@ -241,22 +242,21 @@ html, body, .stApp {
 .valo-dbar {
     width: 50px; height: 2px;
     background: linear-gradient(90deg, var(--valo-red), var(--valo-teal));
-    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
 }
 
 /* ══════════════════════════════════════
-   GREETING BOX (CỐ ĐỊNH PHÍA TRÊN, KHÔNG ẨN KHI CHAT)
+   GREETING BOX (CỐ ĐỊNH PHÍA TRÊN)
 ══════════════════════════════════════ */
 .valo-greeting {
     position: relative;
-    background: linear-gradient(135deg, rgba(24, 28, 40, 0.8) 0%, rgba(18, 22, 31, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(24, 28, 40, 0.85) 0%, rgba(18, 22, 31, 0.95) 100%);
     border: 1px solid var(--br-red);
     border-top: 2px solid var(--valo-red);
     border-radius: 2px;
-    padding: clamp(18px, 5vw, 28px) clamp(16px, 5vw, 28px) clamp(14px, 4vw, 22px);
+    padding: clamp(16px, 5vw, 26px) clamp(14px, 4vw, 24px);
     margin: 4px 0 16px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
 .valo-greeting::before {
@@ -264,30 +264,15 @@ html, body, .stApp {
     position: absolute;
     top: 0; left: 0;
     border-style: solid;
-    border-width: 22px 22px 0 0;
+    border-width: 20px 20px 0 0;
     border-color: var(--bg0) transparent transparent transparent;
-}
-
-.valo-greeting::after {
-    content: '';
-    position: absolute;
-    bottom: -30px; right: -30px;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(0, 212, 191, 0.06) 0%, transparent 65%);
-    pointer-events: none;
 }
 
 .valo-vbar {
     position: absolute;
-    left: 0; top: 18%; bottom: 18%;
+    left: 0; top: 15%; bottom: 15%;
     width: 3px;
-    background: linear-gradient(180deg,
-        transparent 0%,
-        var(--valo-red) 30%,
-        var(--valo-teal) 70%,
-        transparent 100%
-    );
-    opacity: 0.8;
+    background: linear-gradient(180deg, transparent 0%, var(--valo-red) 30%, var(--valo-teal) 70%, transparent 100%);
 }
 
 .valo-status-row {
@@ -295,7 +280,7 @@ html, body, .stApp {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .valo-status-dot {
     width: 6px; height: 6px;
@@ -308,7 +293,7 @@ html, body, .stApp {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     color: var(--valo-teal);
     text-transform: uppercase;
 }
@@ -319,41 +304,39 @@ html, body, .stApp {
 }
 
 .valo-greeting-icon {
-    font-size: clamp(30px, 6vw, 38px);
+    font-size: clamp(28px, 6vw, 34px);
     display: block;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     filter: drop-shadow(0 0 10px rgba(255, 70, 85, 0.5));
 }
 .valo-greeting-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(16px, 4vw, 22px);
+    font-size: clamp(16px, 4vw, 21px);
     font-weight: 700;
     color: var(--white);
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     margin-bottom: 8px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 .valo-greeting-sub {
-    font-size: clamp(12px, 3vw, 14px);
+    font-size: clamp(12px, 3.2vw, 14px);
     color: var(--cream);
     text-align: center;
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
 .valo-stats {
     display: flex;
     justify-content: center;
-    gap: clamp(12px, 3vw, 24px);
+    gap: clamp(10px, 3vw, 20px);
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--br-w);
 }
 .valo-stat {
     text-align: center;
-    line-height: 1.2;
 }
 .valo-stat-num {
     font-family: 'Rajdhani', sans-serif;
@@ -365,8 +348,8 @@ html, body, .stApp {
 .valo-stat-label {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--dim);
+    letter-spacing: 1.5px;
+    color: var(--muted);
     text-transform: uppercase;
 }
 .valo-stat-divider {
@@ -376,224 +359,131 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   SUGGEST LABEL (PHỐI MÀU VALORANT CHỌN NHANH VẤN ĐỀ)
+   SUGGEST LABEL & BUTTONS
 ══════════════════════════════════════ */
 .valo-suggest-label {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 8px 0 14px;
-}
-.valo-suggest-label::before,
-.valo-suggest-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0 12px;
 }
 .valo-suggest-label span {
     background: var(--valo-red);
     color: var(--white);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    padding: 4px 16px;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-    box-shadow: 0 4px 15px rgba(255, 70, 85, 0.3);
+    padding: 3px 14px;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
 }
 
-/* ══════════════════════════════════════
-   BUTTONS GỢI Ý (ĐỔ MÀU KHUNG CHUYÊN NGHIỆP)
-══════════════════════════════════════ */
 .stButton > button {
-    background: linear-gradient(90deg, rgba(30, 34, 50, 0.8), rgba(20, 24, 35, 0.9)) !important;
+    background: linear-gradient(90deg, rgba(30, 34, 50, 0.85), rgba(20, 24, 35, 0.95)) !important;
     color: #ffffff !important;
     border: 1px solid rgba(0, 212, 191, 0.2) !important;
     border-left: 3px solid var(--valo-teal) !important;
     border-radius: 2px !important;
     font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: clamp(12px, 3vw, 14px) !important;
+    font-size: clamp(12px, 3.2vw, 14px) !important;
     font-weight: 700 !important;
-    letter-spacing: 0.5px !important;
-    padding: 12px 14px !important;
+    padding: 10px 12px !important;
     width: 100% !important;
     text-align: left !important;
     white-space: normal !important;
-    height: auto !important;
-    min-height: 48px !important;
-    line-height: 1.4 !important;
+    min-height: 46px !important;
     transition: all 0.15s ease !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
 }
 .stButton > button:hover {
-    background: linear-gradient(90deg, rgba(0, 212, 191, 0.2), rgba(255, 70, 85, 0.1)) !important;
+    background: linear-gradient(90deg, rgba(0, 212, 191, 0.15), rgba(255, 70, 85, 0.08)) !important;
     border-color: var(--valo-teal) !important;
     border-left-color: var(--valo-red) !important;
-    color: var(--white) !important;
-    transform: translateX(4px) !important;
-    box-shadow: 0 4px 15px rgba(0, 212, 191, 0.3) !important;
+    transform: translateX(3px) !important;
+    box-shadow: 0 4px 12px rgba(0, 212, 191, 0.2) !important;
 }
 
 /* ══════════════════════════════════════
-   CHAT MESSAGES (SỬA LỖI CHỮ BỊ CHÌM)
+   CHAT MESSAGES (CHỮ SIÊU RÕ)
 ══════════════════════════════════════ */
-/* Ép toàn bộ chữ trong khung chat thành màu TRẮNG SÁNG hiển thị rõ trên mọi thiết bị */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
     font-size: clamp(14px, 3.8vw, 15px) !important;
-    line-height: 1.75 !important;
+    line-height: 1.7 !important;
     color: #ffffff !important; 
-    font-weight: 400 !important;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9) !important; /* Đổ bóng đen siêu đậm để nổi chữ */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9) !important;
 }
 
-/* KHUNG NGƯỜI DÙNG ( Phe Tiến Công - Đỏ Omen) */
+/* Khung User (Omen Red) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
-    background: linear-gradient(135deg, rgba(60, 15, 20, 0.85) 0%, rgba(20, 10, 12, 0.95) 100%) !important;
-    border: 1px solid rgba(255, 70, 85, 0.4) !important;
+    background: linear-gradient(135deg, rgba(55, 15, 20, 0.9) 0%, rgba(18, 10, 12, 0.98) 100%) !important;
+    border: 1px solid rgba(255, 70, 85, 0.35) !important;
     border-right: 4px solid var(--valo-red) !important;
     border-radius: 4px !important;
-    padding: 14px 18px !important;
-    margin: 8px 0 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    margin: 6px 0 !important;
 }
 
-/* KHUNG BOT TRẢ LỜI (Phe Phòng Thủ - Xanh Teal Cypher) */
+/* Khung Bot (Cypher Teal) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-    background: linear-gradient(135deg, rgba(10, 40, 45, 0.85) 0%, rgba(10, 15, 20, 0.95) 100%) !important;
-    border: 1px solid rgba(0, 212, 191, 0.3) !important;
+    background: linear-gradient(135deg, rgba(10, 38, 42, 0.9) 0%, rgba(10, 14, 18, 0.98) 100%) !important;
+    border: 1px solid rgba(0, 212, 191, 0.25) !important;
     border-left: 4px solid var(--valo-teal) !important;
     border-radius: 4px !important;
-    padding: 14px 18px !important;
-    margin: 8px 0 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    margin: 6px 0 !important;
 }
 
-/* Các format đặc biệt trong chat (Giữ font chuẩn Cypher) */
 [data-testid="stChatMessage"] h3 {
     font-family: 'Rajdhani', sans-serif !important;
-    font-size: clamp(15px, 4.2vw, 18px) !important;
+    font-size: clamp(15px, 4vw, 18px) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 2px !important;
     color: var(--white) !important;
-    margin-bottom: 8px !important;
-    padding-bottom: 5px !important;
     border-bottom: 1px solid var(--br-w) !important;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8) !important;
-}
-[data-testid="stChatMessage"] strong {
-    color: #ffb0b8 !important; /* Đỏ nhạt để nổi trên nền tối Omen */
-    font-weight: 700 !important;
-}
-[data-testid="stChatMessage"] code {
-    background: rgba(0, 212, 191, 0.08) !important;
-    color: var(--valo-teal) !important;
-    border: 1px solid rgba(0, 212, 191, 0.2) !important;
-    border-radius: 2px !important;
-    padding: 2px 6px !important;
-    font-size: 13px !important;
 }
 
 /* ══════════════════════════════════════
-   CHAT INPUT
+   CHAT INPUT & INTERFACES FIXES
 ══════════════════════════════════════ */
 .stChatInput textarea {
     background: var(--bg2) !important; color: var(--cream) !important;
     border: 1px solid var(--br-w2) !important; border-bottom: 2px solid rgba(255, 70, 85, 0.2) !important;
-    border-radius: 2px !important; font-family: 'Barlow', sans-serif !important;
-    font-size: clamp(13px, 3.5vw, 14px) !important; caret-color: var(--valo-red) !important;
 }
 .stChatInput textarea:focus {
-    border-color: var(--br-w2) !important; border-bottom-color: var(--valo-red) !important;
-    box-shadow: 0 4px 24px rgba(255, 70, 85, 0.06) !important;
-}
-.stChatInput textarea::placeholder {
-    color: var(--dim) !important;
+    border-bottom-color: var(--valo-red) !important;
 }
 
-/* ══════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════ */
 section[data-testid="stSidebar"] {
     background: #090c11 !important;
     border-right: 1px solid var(--br-red) !important;
 }
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] small {
-    color: var(--muted) !important;
-    font-size: 13px !important;
-}
-section[data-testid="stSidebar"] h2 {
-    font-family: 'Rajdhani', sans-serif !important;
-    font-size: 17px !important;
-    color: var(--cream) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 3px !important;
-}
-section[data-testid="stSidebar"] .stButton > button {
-    background: transparent !important;
-    border: 1px solid var(--br-red) !important;
-    border-left: 2px solid var(--valo-red) !important;
-    color: var(--muted) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-weight: 700 !important;
-    letter-spacing: 1px !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: var(--valo-red-faint) !important;
-    color: var(--cream) !important;
-}
 
-/* ══════════════════════════════════════
-   SPINNER
-══════════════════════════════════════ */
-[data-testid="stSpinner"] p {
-    color: var(--valo-teal) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    letter-spacing: 4px !important;
-    font-size: 12px !important;
-    text-transform: uppercase !important;
-}
-
-/* ══════════════════════════════════════
-   HIDE STREAMLIT
-══════════════════════════════════════ */
 #MainMenu, footer, header { visibility: hidden !important; }
 .block-container {
-    padding-top: 1.2rem !important;
+    padding-top: 1rem !important;
     padding-bottom: 1.5rem !important;
-    max-width: 760px !important;
+    max-width: 740px !important;
 }
 
 /* ══════════════════════════════════════
    MOBILE BUGS FIX
 ══════════════════════════════════════ */
 @media (max-width: 600px) {
-    .block-container { padding: 0.7rem 0.5rem 4.5rem !important; }
-    .valo-author { display: none; }
-    [data-testid="stChatMessage"] { padding: 10px 11px !important; margin: 3px 0 !important; }
-    .stButton > button { min-height: 42px !important; padding: 8px 10px !important; }
-    .valo-greeting { padding: 16px 14px !important; }
-    .valo-stats { gap: 10px; }
+    .block-container { padding: 0.6rem 0.4rem 4.5rem !important; }
+    /* ĐÃ SỬA: KHÔNG ẩn phần tên trên điện thoại nữa */
+    .valo-author { display: flex !important; margin-bottom: 4px; } 
+    [data-testid="stChatMessage"] { padding: 10px 12px !important; }
+    .valo-greeting { padding: 14px 12px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ========================
-# KẾT NỐI API GROQ ĐIỀU KHIỂN
+# KẾT NỐI API GROQ
 # ========================
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except KeyError:
     st.error("❌ Hệ thống thiếu GROQ_API_KEY trong tệp cấu hình Secrets!")
-    st.stop()
-except Exception as e:
-    st.error(f"❌ Lỗi thiết lập kết nối: {str(e)}")
     st.stop()
 
 # ========================
@@ -622,12 +512,10 @@ db_lk = len(data_pc.get("linh_kien_pc", []))
 with st.sidebar:
     st.markdown("### ⚡ PC SOLVING SYSTEM")
     st.markdown("---")
-    st.markdown("Hệ thống nhúng thuật toán phân tích lỗi phần cứng và linh kiện PC.")
-    st.markdown("---")
     if st.button("⟳ KÍCH HOẠT LẠI", use_container_width=True):
         st.session_state.messages = []
         st.session_state.greeted = False
-        st.session_state.suggestions = []
+        st.session_state.pending_query = None
         st.rerun()
     st.markdown("---")
     st.markdown("<span style='color:#00d4bf; font-weight:bold;'>Tác giả: Lê Văn Chung - 10A4</span>", unsafe_allow_html=True)
@@ -637,11 +525,11 @@ with st.sidebar:
 # ========================
 st.markdown(f"""
 <div class="valo-header">
-    <div class="valo-author">LÊ VĂN CHUNG <span class="dot">·</span> 10A4 <span class="dot">🖥</span><span class="dot">🖥</span><span class="dot">🖥</span></div>
+    <div class="valo-author">LÊ VĂN CHUNG <span class="dot">·</span> 10A4 <span class="dot">🖥️</span><span class="dot">🖥️</span><span class="dot">🖥️</span></div>
     <div class="valo-eyebrow">⚡ STEM PROJECT CONCEPT DỰ ÁN ỨNG DỤNG HOÀN CHỈNH</div>
     <div class="valo-logo-wrap">
-        <span class="valo-logo-icon">🖥</span>
-        <div class="valo-title">PC<span class="slash">/</span><span class="red">SOLVING</span></div>
+        <span class="valo-logo-icon">🖥️</span>
+        <div class="valo-title"><span class="white">PC</span><span class="slash">/</span><span class="red">SOLVING</span></div>
     </div>
     <div class="valo-subtitle">
         <span class="dot"></span>
@@ -662,31 +550,27 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ========================
-# KHỞI TẠO BỘ NHỚ LƯU TRỮ TRẠNG THÁI CHAT
-# ========================
+# TRẠNG THÁI CHAT
 if "messages" not in st.session_state: st.session_state.messages = []
-if "greeted" not in st.session_state: st.session_state.greeted = False
 if "suggestions" not in st.session_state: st.session_state.suggestions = []
 if "pending_query" not in st.session_state: st.session_state.pending_query = None
 
-# Danh sách 4 câu hỏi gợi ý nhanh ban đầu
 ALL_SUGGESTIONS = [
     ("⚠ Màn hình xanh chết BSOD", "Máy tính bị màn hình xanh chết, phải làm gì?"),
     ("▪ Màn hình đen không hiển thị", "Máy lên nguồn nhưng màn hình đen, không lên gì"),
     ("◈ PC bíp liên tục khi bật", "Máy tính bíp nhiều tiếng khi khởi động, lỗi gì?"),
     ("◉ Máy chạy chậm bất thường", "Máy tính đột nhiên chạy rất chậm, khắc phục thế nào?"),
-    ("🌡 CPU overheat — quá nóng", "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
-    ("◆ RAM có tương thích mainboard không", "Làm sao biết RAM có tương thích với mainboard không?"),
+    ("🌡️ CPU overheat — quá nóng", "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
+    ("◆ RAM có tương thích không", "Làm sao biết RAM có tương thích với mainboard không?"),
     ("⚡ Cần bao nhiêu W nguồn điện", "Cấu hình PC của tôi cần bao nhiêu W nguồn là đủ?"),
-    ("🎮開 GTX 1650 chơi được game gì", "Card GTX 1650 chơi được những game nào mượt?"),
+    ("🎮 GTX 1650 chơi được game gì", "Card GTX 1650 chơi được những game nào mượt?"),
 ]
 
 if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
 # ========================
-# KHỐI GREETING PANEL CỐ ĐỊNH PHÍA TRÊN
+# GREETING PANEL CỐ ĐỊNH PHÍA TRÊN
 # ========================
 st.markdown(f"""
 <div class="valo-greeting">
@@ -720,28 +604,22 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Chỉ hiển thị 4 nút bấm gợi ý khi người dùng chưa bắt đầu thực hiện chat
+# Chỉ hiển thị nút gợi ý khi chưa chat
 if not st.session_state.messages:
     st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
-    
     col1, col2 = st.columns(2, gap="small")
     for i, (label, query) in enumerate(st.session_state.suggestions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(label, key=f"sug_{i}"):
-                st.session_state.greeted = True
                 st.session_state.pending_query = query
                 st.rerun()
 
-# ========================
-# LỊCH SỬ TIN NHẮN CHAT TƯƠNG TÁC
-# ========================
+# LỊCH SỬ CHAT
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# ========================
-# THUẬT TOÁN QUÉT TÌM KIẾM DATA TRONG JSON CỤC BỘ
-# ========================
+# THUẬT TOÁN QUÉT TÌM KIẾM DATA JSON CỤC BỘ
 def calculate_match_score(item, q_clean, user_numbers):
     score = 0
     item_kws = [str(kw).lower().strip() for kw in item.get("keywords", [])]
@@ -784,9 +662,6 @@ def search_database(user_query):
                     f"**▶ Tư vấn khuyến nghị:** {best_match.get('chuyen_gia_tu_van','')}")
     return None
 
-# ========================
-# XỬ LÝ TRUY VẤN QUA LLM TRÍ TUỆ NHÂN TẠO
-# ========================
 def ask_engine(user_query, chat_history):
     system_prompt = f"""Bạn là mô hình trí tuệ nhân tạo chuyên sâu về chẩn đoán phần cứng máy tính và linh kiện PC của tác giả học sinh Lê Văn Chung lớp 10A4.
 TUYỆT ĐỐI KHÔNG tự xưng là mô hình ngôn ngữ lớn, không nhắc đến Meta, Llama hay Groq.
@@ -806,18 +681,15 @@ Trình bày mạch lạc bằng tiếng Việt, ngắn gọn rành mạch theo d
     )
     return response.choices[0].message.content
 
-# ========================
-# LUỒNG TIẾP NHẬN & ĐIỀU PHỐI DỮ LIỆU CHAT
-# ========================
+# ĐIỀU PHỐI ĐẦU VÀO
 def handle_message(prompt):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
         
     with st.chat_message("assistant"):
-        with st.spinner("ĐANG QUÉT pixel & PHÂN TÍCH LOGIC..."):
+        with st.spinner("ĐANG QUÉT PIXEL & PHÂN TÍCH LOGIC..."):
             try:
-                # Nếu chỉ là text, ưu tiên quét DB cục bộ trước, nếu không tìm thấy mới gọi AI
                 answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
                 final_answer = f"""{answer}\n\n---\n*— Hệ thống chẩn đoán tự động: Lê Văn Chung lớp 10A4*"""
                 st.markdown(final_answer)
@@ -825,13 +697,10 @@ def handle_message(prompt):
             except Exception as e:
                 st.error("❌ Kết nối trục trặc hoặc API quá hạn. Hãy thử lại!")
 
-# Xử lý nếu bấm nút gợi ý nhanh
 if st.session_state.pending_query:
     q = st.session_state.pending_query
     st.session_state.pending_query = None
     handle_message(q)
 
-# Tiếp nhận dữ liệu gõ trực tiếp từ ô nhập liệu chat
 if prompt := st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    st.session_state.greeted = True
     handle_message(prompt)
