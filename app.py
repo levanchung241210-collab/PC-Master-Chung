@@ -500,7 +500,6 @@ with st.sidebar:
     st.markdown("---")
     if st.button("⟳  PHIÊN MỚI", use_container_width=True):
         st.session_state.messages = []
-        st.session_state.greeted  = False
         st.session_state.suggestions = []
         st.rerun()
     st.markdown("---")
@@ -540,7 +539,6 @@ st.markdown(f"""
 # SESSION STATE
 # ========================
 if "messages"      not in st.session_state: st.session_state.messages     = []
-if "greeted"       not in st.session_state: st.session_state.greeted      = False
 if "suggestions"   not in st.session_state: st.session_state.suggestions  = []
 if "pending_query" not in st.session_state: st.session_state.pending_query= None
 
@@ -570,7 +568,7 @@ if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
 # ========================
-# GREETING BOX (LUÔN HIỂN THỊ CỐ ĐỊNH)
+# GREETING BOX
 # ========================
 st.markdown(f"""
 <div class="valo-greeting">
@@ -586,197 +584,3 @@ st.markdown(f"""
         Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.
     </div>
     <div class="valo-stats">
-        <div class="valo-stat">
-            <span class="valo-stat-num">{db_loi}</span>
-            <span class="valo-stat-label">Lỗi hệ thống</span>
-        </div>
-        <div class="valo-stat-divider"></div>
-        <div class="valo-stat">
-            <span class="valo-stat-num">{db_lk}</span>
-            <span class="valo-stat-label">Linh kiện PC</span>
-        </div>
-        <div class="valo-stat-divider"></div>
-        <div class="valo-stat">
-            <span class="valo-stat-num" style="color:var(--valo-teal)">24/7</span>
-            <span class="valo-stat-label">Hỗ trợ</span>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# FIX: Bỏ điều kiện ẩn gợi ý. Khung gợi ý giờ đây luôn hiển thị cố định ở đây để bấm liên tục không bị lỗi giao diện.
-st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
-            unsafe_allow_html=True)
-
-col1, col2 = st.columns(2, gap="small")
-for i, (label, query) in enumerate(st.session_state.suggestions):
-    with (col1 if i % 2 == 0 else col2):
-        if st.button(label, key=f"sug_{i}"):
-            st.session_state.greeted      = True
-            st.session_state.pending_query = query
-            st.rerun()
-
-# ========================
-# CHAT HISTORY
-# ========================
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# ========================
-# DATABASE SEARCH
-# ========================
-def calculate_match_score(item, q_clean, user_numbers):
-    score     = 0
-    item_kws  = [str(kw).lower().strip() for kw in item.get("keywords", [])]
-    user_words= q_clean.split()
-    for kw in item_kws:
-        if kw in user_words or (kw.isdigit() and kw in q_clean):
-            score += 1
-    if score == 0:
-        return 0
-    item_nums = [re.sub(r'\D','',kw) for kw in item_kws if re.search(r'\d{3,}',kw)]
-    item_nums = [n for n in item_nums if n]
-    if item_nums and user_numbers:
-        if not set(item_nums).intersection(set(user_numbers)):
-            return 0
-    return score
-
-def search_database(user_query):
-    q_clean      = re.sub(r'[-–_,.\?!\(\)]',' ', user_query.lower().strip())
-    user_numbers = [re.sub(r'\D','',w) for w in q_clean.split() if re.search(r'\d{3,}',w)]
-    user_numbers = [n for n in user_numbers if n]
-    best_match, max_score, match_pool = None, 0, ""
-    for item in data_pc.get("linh_kien_pc", []):
-        s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "linh_kien"
-    for item in data_pc.get("loi_he_thong", []):
-        s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "loi"
-    if max_score >= 2 and best_match:
-        if match_pool == "loi":
-            return (f"### ✕  {best_match['ten']}\n"
-                    f"*— Lê Văn Chung 10A4*\n\n"
-                    f"**⚠ Nguyên nhân:** {best_match['nguyen_nhan']}\n\n"
-                    f"**◈ Khắc phục:**\n{best_match['giai_phap']}")
-        else:
-            return (f"### ◆  {best_match['ten']}\n"
-                    f"*— Lê Văn Chung 10A4*\n\n"
-                    f"**⚙ Thông số:** {best_match.get('thong_so','')}\n\n"
-                    f"**◉ Socket:** `{best_match.get('socket','')}`\n\n"
-                    f"**▶ Tư vấn:** {best_match.get('chuyen_gia_tu_van','')}")
-    return None
-
-# ========================
-# PHÂN LOẠI CÂU HỎI
-# ========================
-def detect_type(query):
-    q  = query.lower()
-    hw = ["i3","i5","i7","i9","ryzen","gtx","rtx","rx","vga","card","cpu","ram","ssd",
-          "mainboard","main","nguồn","psu","tản nhiệt","socket","ddr","mua","so sánh",
-          "nên chọn","upgrade","nâng cấp","combo","build","cấu hình"]
-    err= ["lỗi","bsod","xanh","đen","bíp","crash","sập","đơ","treo","chậm","lag",
-          "không bật","không lên","restart","khởi động","update","0x","error","fix","sửa"]
-    for w in hw:
-        if w in q: return "hardware"
-    for w in err:
-        if w in q: return "error"
-    return "general"
-
-# ========================
-# SYSTEM PROMPTS
-# ========================
-BASE_RULE = """
-TUYỆT ĐỐI KHÔNG dùng: "AI", "mô hình ngôn ngữ", "LLM", "Groq", "Meta", "Llama", "trí tuệ nhân tạo".
-Không nhắc đến việc bạn là phần mềm học từ internet.
-"""
-
-PROMPT_ERROR = f"""Bạn là hệ thống chẩn đoán lỗi máy tính của Lê Văn Chung 10A4.
-{BASE_RULE}
-Kho dữ liệu: {raw_json_context}
-QUY TẮC — LỖI (ngắn gọn, thẳng vào vấn đề):
-- 1 câu nguyên nhân chính
-- Tối đa 4 bước, mỗi bước 1 câu ngắn
-- Không giải thích thừa, không lặp câu hỏi
-- 1 dòng lưu ý cuối nếu cần"""
-
-PROMPT_HARDWARE = f"""Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10A4.
-{BASE_RULE}
-Kho dữ liệu: {raw_json_context}
-QUY TẮC — LINH KIỆN (chi tiết, chuyên sâu):
-- Nêu thông số kỹ thuật quan trọng
-- So sánh ưu/nhược nếu được hỏi
-- Gợi ý combo phù hợp ngân sách
-- Kết thúc bằng 1 khuyến nghị cụ thể
-- Mở đầu phân tích chuyên sâu: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..." """
-
-PROMPT_GENERAL = f"""Bạn là hệ thống hỗ trợ kỹ thuật máy tính của Lê Văn Chung 10A4.
-{BASE_RULE}
-Kho dữ liệu: {raw_json_context}
-Trả lời tiếng Việt, súc tích, chia bước rõ ràng nếu cần."""
-
-def ask_engine(user_query, chat_history):
-    q = user_query.lower()
-    
-    # Từ khóa linh kiện, lỗi máy tính, đồ điện tử/điện thoại
-    valid_keywords = [
-        "i3","i5","i7","i9","ryzen","gtx","rtx","rx","vga","card","cpu","ram","ssd",
-        "mainboard","main","nguồn","psu","tản nhiệt","socket","ddr","build","cấu hình",
-        "lỗi","bsod","xanh","đen","bíp","crash","sập","đơ","treo","chậm","lag","update",
-        "linh kiện","điện tử","điện thoại","màn hình","pin","sạc","chip","vi xử lý",
-        "snapdragon","dimensity","exynos","apple a","qualcomm","helio",
-        "iphone","samsung","oppo","xiaomi","redmi","vivo","realme","asus"
-    ]
-    
-    # Từ khóa giao tiếp, chào hỏi cơ bản để tránh block nhầm khi bắt đầu hội thoại
-    chat_keywords = ["chào", "hello", "hi", "bạn ơi", "ad", "admin", "chung", "trợ giúp", "cứu"]
-    
-    # FIX LỖI BLOCK NHẦM: 
-    # Cho phép nếu chứa từ khóa linh kiện/lỗi HOẶC chứa từ khóa chào hỏi HOẶC người dùng miêu tả dài (độ dài chuỗi từ 6 từ trở lên)
-    is_valid = any(kw in q for kw in valid_keywords)
-    is_chat = any(kw in q for kw in chat_keywords)
-    is_descriptive = len(q.split()) >= 6
-    
-    if not (is_valid or is_chat or is_descriptive):
-        return '[Hệ thống]: Câu hỏi chưa đúng lĩnh vực chuyên môn (Linh kiện điện tử & Phần cứng máy tính).'
-
-    qtype = detect_type(user_query)
-    if   qtype == "error":   system, max_tok, temp = PROMPT_ERROR,    480, 0.3
-    elif qtype == "hardware": system, max_tok, temp = PROMPT_HARDWARE, 780, 0.5
-    else:                     system, max_tok, temp = PROMPT_GENERAL,  560, 0.4
-    messages = [{"role":"system","content":system}]
-    for msg in chat_history[-6:]:
-        messages.append({"role":msg["role"],"content":msg["content"]})
-    messages.append({"role":"user","content":user_query})
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=max_tok,
-        temperature=temp
-    )
-    return response.choices[0].message.content
-
-# ========================
-# XỬ LÝ TIN NHẮN
-# ========================
-def handle_message(prompt):
-    st.session_state.messages.append({"role":"user","content":prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    with st.chat_message("assistant"):
-        with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
-            try:
-                answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
-                st.markdown(answer)
-                st.session_state.messages.append({"role":"assistant","content":answer})
-            except:
-                st.error("❌ Hệ thống gián đoạn. Vui lòng thử lại.")
-
-if st.session_state.pending_query:
-    q = st.session_state.pending_query
-    st.session_state.pending_query = None
-    handle_message(q)
-
-if prompt := st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    st.session_state.greeted = True
-    handle_message(prompt)
