@@ -105,7 +105,6 @@ html, body, .stApp {
     position: relative;
 }
 
-/* FIX: Chữ Lê Văn Chung đổi sang màu xanh biển chói nổi bật, tỏa aura nhẹ trên PC */
 .valo-author {
     position: absolute;
     top: 8px; right: 0;
@@ -439,7 +438,6 @@ section[data-testid="stSidebar"] .stButton > button { background: transparent !i
 @media (max-width: 600px) {
     .block-container { padding: 0.7rem 0.5rem 4.5rem !important; }
     
-    /* HIỂN THỊ LẠI TÊN TÁC GIẢ TRÊN ĐIỆN THOẠI */
     .valo-author { 
         position: relative !important; 
         top: 0 !important; 
@@ -606,17 +604,17 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-if not st.session_state.messages:
-    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
-                unsafe_allow_html=True)
+# FIX: Bỏ điều kiện ẩn gợi ý. Khung gợi ý giờ đây luôn hiển thị cố định ở đây để bấm liên tục không bị lỗi giao diện.
+st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
+            unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2, gap="small")
-    for i, (label, query) in enumerate(st.session_state.suggestions):
-        with (col1 if i % 2 == 0 else col2):
-            if st.button(label, key=f"sug_{i}"):
-                st.session_state.greeted      = True
-                st.session_state.pending_query = query
-                st.rerun()
+col1, col2 = st.columns(2, gap="small")
+for i, (label, query) in enumerate(st.session_state.suggestions):
+    with (col1 if i % 2 == 0 else col2):
+        if st.button(label, key=f"sug_{i}"):
+            st.session_state.greeted      = True
+            st.session_state.pending_query = query
+            st.rerun()
 
 # ========================
 # CHAT HISTORY
@@ -720,18 +718,26 @@ Trả lời tiếng Việt, súc tích, chia bước rõ ràng nếu cần."""
 def ask_engine(user_query, chat_history):
     q = user_query.lower()
     
-    # Danh sách từ khóa hợp lệ liên quan đến linh kiện máy tính, điện tử, điện thoại
+    # Từ khóa linh kiện, lỗi máy tính, đồ điện tử/điện thoại
     valid_keywords = [
         "i3","i5","i7","i9","ryzen","gtx","rtx","rx","vga","card","cpu","ram","ssd",
         "mainboard","main","nguồn","psu","tản nhiệt","socket","ddr","build","cấu hình",
         "lỗi","bsod","xanh","đen","bíp","crash","sập","đơ","treo","chậm","lag","update",
         "linh kiện","điện tử","điện thoại","màn hình","pin","sạc","chip","vi xử lý",
         "snapdragon","dimensity","exynos","apple a","qualcomm","helio",
-        "iphone","samsung","oppo","xiaomi","redmi","vivo","realme","asus","vga"
+        "iphone","samsung","oppo","xiaomi","redmi","vivo","realme","asus"
     ]
     
-    # FIX: Kiểm tra nếu câu hỏi hoàn toàn lạc đề, không chứa bất kỳ từ khóa chuyên môn nào
-    if not any(kw in q for kw in valid_keywords):
+    # Từ khóa giao tiếp, chào hỏi cơ bản để tránh block nhầm khi bắt đầu hội thoại
+    chat_keywords = ["chào", "hello", "hi", "bạn ơi", "ad", "admin", "chung", "trợ giúp", "cứu"]
+    
+    # FIX LỖI BLOCK NHẦM: 
+    # Cho phép nếu chứa từ khóa linh kiện/lỗi HOẶC chứa từ khóa chào hỏi HOẶC người dùng miêu tả dài (độ dài chuỗi từ 6 từ trở lên)
+    is_valid = any(kw in q for kw in valid_keywords)
+    is_chat = any(kw in q for kw in chat_keywords)
+    is_descriptive = len(q.split()) >= 6
+    
+    if not (is_valid or is_chat or is_descriptive):
         return '[Hệ thống]: Câu hỏi chưa đúng lĩnh vực chuyên môn (Linh kiện điện tử & Phần cứng máy tính).'
 
     qtype = detect_type(user_query)
