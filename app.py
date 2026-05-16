@@ -50,7 +50,7 @@ st.markdown("""
 }
 
 /* ==============================
-   BASE - ĐÃ DESIGN LVC ART FULL MÀN
+   BASE - FIX BACKGROUND LVC STYLE VALORANT (PC & ĐIỆN THOẠI)
 ============================== */
 html, body, .stApp {
     background: var(--bg0) !important;
@@ -58,36 +58,38 @@ html, body, .stApp {
     font-family: 'Barlow', sans-serif !important;
 }
 
-/* Diagonal slash texture background & LVC Art */
+/* Ép chữ LVC góc cạnh chìm hẳn dưới nền bằng SVG Vector, bao mượt cả Mobile + PC */
 .stApp::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0; 
-    opacity: 0.15;
-    background:
-        linear-gradient(135deg, rgba(255,70,85,0.1) 0%, transparent 40%),
-        linear-gradient(45deg, rgba(0,212,191,0.08) 0%, transparent 40%),
+    opacity: 0.06; /* Độ mờ tinh tế phong cách Valorant UI, không đè chữ nội dung */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><text x="50%" y="55%" font-family="Oswald, Impact, sans-serif" font-size="28vw" font-weight="900" fill="none" stroke="%23ff4655" stroke-width="4" stroke-dasharray="15 10" text-anchor="middle" dominant-baseline="middle">LVC</text></svg>');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Thêm lớp vân sọc chéo phụ của Valorant để tăng độ gai góc */
+.stApp::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.08;
+    background: 
         repeating-linear-gradient(
             -52deg,
             transparent 0px, transparent 60px,
-            rgba(255,70,85,0.08) 60px, rgba(255,70,85,0.08) 61px
-        ),
-        repeating-linear-gradient(
-            38deg,
-            transparent 0px, transparent 110px,
-            rgba(0,212,191,0.04) 110px, rgba(0,212,191,0.04) 111px
-        ),
-        repeating-linear-gradient(
-            180deg,
-            transparent 0px, transparent 6px,
-            rgba(255,255,255,0.008) 6px, rgba(255,255,255,0.008) 7px
+            var(--valo-red) 60px, var(--valo-red) 61px
         );
 }
 
-.stApp::after {
-    content: '';
+/* Top bar accent đỏ phe tấn công (Khóa trên cùng) */
+.valo-top-line {
     position: fixed;
     top: 0; left: 0; right: 0;
     height: 3px;
@@ -109,6 +111,7 @@ html, body, .stApp {
     text-align: center;
     padding: 10px 0 2px;
     position: relative;
+    z-index: 10;
 }
 
 .valo-author {
@@ -229,7 +232,7 @@ html, body, .stApp {
 }
 
 /* ==============================
-   KHUNG LỚN HỆ THỐNG (GREETING BOX)
+   KHUNG LỚN HỆ THỐNG (CỐ ĐỊNH)
 ============================== */
 .valo-greeting {
     position: relative;
@@ -240,6 +243,7 @@ html, body, .stApp {
     padding: clamp(18px,5vw,28px) clamp(16px,5vw,28px) clamp(14px,4vw,22px);
     margin: 4px 0 6px;
     overflow: hidden;
+    z-index: 10;
 }
 
 .valo-greeting::before {
@@ -344,15 +348,16 @@ html, body, .stApp {
 }
 
 /* ==============================
-   ĐÃ SỬA: CHỮ "CHỌN VẤN ĐỀ" CÂN ĐỐI TRÊN PC
+   CHỮ "CHỌN VẤN ĐỀ" CÂN ĐỐI 100%
 ============================== */
 .valo-suggest-label {
     display: flex;
     align-items: center;
-    justify-content: center; /* Căn giữa nội dung hoàn hảo */
+    justify-content: center;
     gap: 15px;
     margin: 20px 0 12px;
     width: 100%;
+    z-index: 10;
 }
 .valo-suggest-label::before,
 .valo-suggest-label::after {
@@ -366,13 +371,13 @@ html, body, .stApp {
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 3px;
-    color: var(--silver); /* Làm sáng chữ cho dễ nhìn */
+    color: var(--silver);
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 /* ==============================
-   BUTTONS GỢI Ý
+   BUTTONS GỢI Ý CỐ ĐỊNH
 ============================== */
 .stButton > button {
     background: var(--bg2) !important;
@@ -392,6 +397,7 @@ html, body, .stApp {
     min-height: 46px !important;
     line-height: 1.4 !important;
     transition: all 0.12s ease !important;
+    z-index: 10;
 }
 .stButton > button:hover {
     background: linear-gradient(90deg, rgba(255,70,85,0.10), rgba(0,212,191,0.04)) !important;
@@ -411,6 +417,7 @@ html, body, .stApp {
     border-radius: 2px;
     padding: 12px 16px;
     margin: 5px 0;
+    z-index: 10;
 }
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
     background: var(--bg1);
@@ -419,6 +426,7 @@ html, body, .stApp {
     border-radius: 2px;
     padding: 12px 16px;
     margin: 5px 0;
+    z-index: 10;
 }
 
 [data-testid="stChatMessage"] p,
@@ -452,6 +460,7 @@ html, body, .stApp {
     .valo-author { display: none; }
 }
 </style>
+<div class="valo-top-line"></div>
 """, unsafe_allow_html=True)
 
 # ========================
@@ -543,7 +552,7 @@ if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
 # ==============================================================
-# ĐÃ SỬA: KHUNG LỚN HỆ THỐNG & NÚT GỢI Ý CỐ ĐỊNH PHÍA TRÊN (KHÔNG MẤT ĐI)
+# KHUNG LỚN HỆ THỐNG & NÚT GỢI Ý KHÓA CỐ ĐỊNH Ở TRÊN (KHÔNG MẤT ĐI)
 # ==============================================================
 st.markdown(f"""
 <div class="valo-greeting">
@@ -577,7 +586,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Hiển thị khu vực chọn nhanh vấn đề (luôn luôn hiển thị)
+# Hiển thị khu vực chọn nhanh vấn đề (Cân đối hoàn hảo, khóa vị trí)
 st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
 col1, col2 = st.columns(2, gap="small")
 for i, (label, query) in enumerate(st.session_state.suggestions):
@@ -585,7 +594,7 @@ for i, (label, query) in enumerate(st.session_state.suggestions):
         if st.button(label, key=f"sug_{i}"):
             st.session_state.pending_query = query
 
-# KHU VỰC LỊCH SỬ CHAT (ĐẨY XUỐNG DƯỚI CỐ ĐỊNH)
+# KHU VỰC LỊCH SỬ CHAT (NẰM DƯỚI)
 st.write("---")
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
@@ -608,72 +617,3 @@ def calculate_match_score(item, q_clean, user_numbers):
     return score
 
 def search_database(user_query):
-    q_clean = re.sub(r'[-–_,.\?!\(\)]',' ', user_query.lower().strip())
-    user_numbers = [re.sub(r'\D','',w) for w in q_clean.split() if re.search(r'\d{3,}',w)]
-    user_numbers = [n for n in user_numbers if n]
-    best_match, max_score, match_pool = None, 0, ""
-    
-    for item in data_pc.get("linh_kien_pc", []):
-        s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "linh_kien"
-    for item in data_pc.get("loi_he_thong", []):
-        s = calculate_match_score(item, q_clean, user_numbers)
-        if s > max_score: max_score, best_match, match_pool = s, item, "loi"
-    
-    if max_score >= 2 and best_match:
-        if match_pool == "loi":
-            return (f"### ✕ {best_match['ten']}\n"
-                    f"*Phân tích: Tra cứu Dữ liệu Kỹ thuật — Lê Văn Chung 10A4*\n\n"
-                    f"**⚠ Nguyên nhân:** {best_match['nguyen_nhan']}\n\n"
-                    f"**◈ Phác đồ sửa chữa:**\n{best_match['giai_phap']}")
-        else:
-            return (f"### ◆ {best_match['ten']}\n"
-                    f"*Phân tích: Tra cứu Dữ liệu Linh kiện — Lê Văn Chung 10A4*\n\n"
-                    f"**⚙ Thông số phần cứng:** {best_match.get('thong_so','')}\n\n"
-                    f"**◉ Chuẩn Socket:** `{best_match.get('socket','')}`\n\n"
-                    f"**▶ Tư vấn khuyến nghị:** {best_match.get('chuyen_gia_tu_van','')}")
-    return None
-
-def ask_engine(user_query, chat_history):
-    system_prompt = f"""Bạn là mô hình trí tuệ nhân tạo chuyên sâu về chẩn đoán phần cứng máy tính và linh kiện PC của tác giả học sinh Lê Văn Chung lớp 10A4.
-TUYỆT ĐỐI KHÔNG tự xưng là mô hình ngôn ngữ lớn, không nhắc đến Meta, Llama hay Groq.
-Khi giải đáp các câu hỏi kỹ thuật, hãy tận dụng tối đa kho tri thức gốc sau đây nếu có dữ liệu phù hợp: {raw_json_context}.
-Trình bày mạch lạc bằng tiếng Việt, ngắn gọn rành mạch theo dạng gạch đầu dòng kỹ thuật."""
-    
-    messages = [{"role": "system", "content": system_prompt}]
-    for msg in chat_history[-6:]:
-        messages.append({"role": msg["role"], "content": msg["content"]})
-    messages.append({"role": "user", "content": user_query})
-    
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=650,
-        temperature=0.4
-    )
-    return response.choices[0].message.content
-
-def handle_message(prompt):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-        
-    with st.chat_message("assistant"):
-        with st.spinner("ĐANG QUÉT PIXEL & PHÂN TÍCH LOGIC..."):
-            try:
-                answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
-                final_answer = f"""{answer}\n\n---\n*— Hệ thống chẩn đoán tự động: Lê Văn Chung lớp 10A4*"""
-                st.markdown(final_answer)
-                st.session_state.messages.append({"role": "assistant", "content": final_answer})
-            except Exception as e:
-                st.error("❌ Kết nối trục trặc hoặc API quá hạn. Hãy thử lại!")
-    st.rerun()
-
-# ĐIỀU PHỐI ĐẦU VÀO TỪ NÚT BẤM HOẶC Ô CHAT
-if st.session_state.pending_query:
-    q = st.session_state.pending_query
-    st.session_state.pending_query = None
-    handle_message(q)
-
-if prompt := st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    handle_message(prompt)
