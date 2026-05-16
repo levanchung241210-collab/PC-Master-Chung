@@ -13,236 +13,272 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
 
-/* ==============================
-   VALORANT CORE PALETTE
-============================== */
 :root {
-    --red:     #ff4655;
-    --red-dim: #c0303d;
-    --red-glow:#ff465540;
-    --dark:    #0f1116;
-    --dark2:   #14171e;
-    --dark3:   #1a1d27;
-    --panel:   #0d1117cc;
-    --border:  #ff465520;
-    --border2: #ffffff0d;
-    --text:    #ece8e1;
-    --muted:   #7b7a78;
-    --accent:  #fffbf5;
+    --red:        #ff4655;
+    --red-soft:   #ff465580;
+    --red-dim:    #c0303d;
+    --red-panel:  rgba(255,70,85,0.07);
+    --dark:       #10131a;
+    --dark2:      #161923;
+    --dark3:      #1c2030;
+    --cream:      #ece8e1;
+    --white:      #ffffff;
+    --muted:      #9a9891;
+    --muted2:     #5c5e68;
+    --border-r:   rgba(255,70,85,0.25);
+    --border-w:   rgba(255,255,255,0.07);
 }
 
-/* ==============================
-   BASE
-============================== */
+/* =====================
+   BASE RESET
+===================== */
 html, body, .stApp {
     background: var(--dark) !important;
-    color: var(--text) !important;
+    color: var(--cream) !important;
     font-family: 'Barlow', sans-serif !important;
 }
 
-/* Diagonal slash texture background */
+/* =====================
+   BACKGROUND — Valorant style
+   Subtle dark panel lines + faint red slash
+===================== */
 .stApp::before {
     content: '';
     position: fixed;
     inset: 0;
     background:
+        /* faint horizontal scanlines */
         repeating-linear-gradient(
-            -55deg,
-            transparent,
-            transparent 40px,
-            rgba(255,70,85,0.012) 40px,
-            rgba(255,70,85,0.012) 41px
+            180deg,
+            transparent 0px,
+            transparent 3px,
+            rgba(255,255,255,0.008) 3px,
+            rgba(255,255,255,0.008) 4px
+        ),
+        /* diagonal slash accent */
+        repeating-linear-gradient(
+            -50deg,
+            transparent 0px,
+            transparent 80px,
+            rgba(255,70,85,0.025) 80px,
+            rgba(255,70,85,0.025) 81px
         );
     pointer-events: none;
     z-index: 0;
 }
 
-/* Red corner accent top-left */
+/* Top red bar — signature Valorant element */
 .stApp::after {
     content: '';
     position: fixed;
-    top: 0; left: 0;
-    width: 220px; height: 3px;
-    background: linear-gradient(90deg, var(--red), transparent);
-    z-index: 999;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--red) 120px, transparent 400px);
+    z-index: 9999;
 }
 
-/* ==============================
+/* =====================
    HEADER
-============================== */
+===================== */
 .valo-header {
-    position: relative;
     text-align: center;
-    padding: 6px 0 2px;
-    margin-bottom: 2px;
+    padding: 8px 0 4px;
 }
 
 .valo-eyebrow {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: clamp(9px, 2vw, 11px);
-    font-weight: 600;
-    letter-spacing: 5px;
+    font-weight: 700;
+    letter-spacing: 6px;
     color: var(--red);
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 12px;
 }
 .valo-eyebrow::before,
 .valo-eyebrow::after {
     content: '';
     display: inline-block;
-    width: 24px; height: 1px;
+    width: 30px; height: 1px;
     background: var(--red);
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
+/* Big title — white + red highlight */
 .valo-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(28px, 7vw, 58px);
+    font-size: clamp(32px, 8vw, 64px);
     font-weight: 700;
-    letter-spacing: -1px;
-    line-height: 1;
-    color: var(--accent);
+    letter-spacing: 2px;
+    line-height: 0.95;
+    color: var(--white);
     text-transform: uppercase;
-    margin: 0;
+    margin: 0 0 6px;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.5);
 }
-.valo-title span {
+.valo-title .highlight {
     color: var(--red);
+    position: relative;
 }
 
+/* Subtitle — high contrast now */
 .valo-subtitle {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(10px, 2.5vw, 12px);
-    font-weight: 400;
+    font-size: clamp(11px, 2.5vw, 13px);
+    font-weight: 600;
     letter-spacing: 4px;
-    color: var(--muted);
+    color: #c4c0b9;           /* brighter than before */
     text-transform: uppercase;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
-/* Red slash divider */
+/* Divider */
 .valo-divider {
     display: flex;
     align-items: center;
-    gap: 0;
-    margin: 10px 0 8px;
-    height: 2px;
+    margin: 12px 0 10px;
 }
-.valo-divider::before {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border2);
-}
-.valo-divider-bar {
-    width: 60px; height: 2px;
-    background: var(--red);
-    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-}
+.valo-divider::before,
 .valo-divider::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border2);
+    background: var(--border-w);
+}
+.valo-divider-core {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+}
+.valo-divider-bar {
+    width: 40px; height: 2px;
+    background: var(--red);
+    clip-path: polygon(6px 0%, 100% 0%, calc(100%-6px) 100%, 0% 100%);
+}
+.valo-divider-dot {
+    width: 4px; height: 4px;
+    background: var(--red);
+    transform: rotate(45deg);
 }
 
-/* ==============================
+/* =====================
    GREETING BOX
-============================== */
+   Valorant card panel style
+===================== */
 .valo-greeting {
     position: relative;
-    background: var(--dark3);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--red);
-    border-radius: 4px;
-    padding: clamp(16px, 4vw, 24px) clamp(14px, 4vw, 22px);
-    margin: 6px 0 4px;
+    background: var(--dark2);
+    border: 1px solid var(--border-r);
+    border-top: 2px solid var(--red);
+    border-radius: 2px;
+    padding: clamp(18px, 5vw, 26px) clamp(16px, 5vw, 28px);
+    margin: 4px 0 6px;
     overflow: hidden;
 }
-/* Corner triangle decoration */
+
+/* Top-left corner cut — Valorant signature */
 .valo-greeting::before {
     content: '';
     position: absolute;
-    top: 0; right: 0;
+    top: -1px; left: -1px;
+    width: 0; height: 0;
     border-style: solid;
-    border-width: 0 28px 28px 0;
-    border-color: transparent var(--red-dim) transparent transparent;
-    opacity: 0.5;
+    border-width: 20px 20px 0 0;
+    border-color: var(--dark) transparent transparent transparent;
 }
+
+/* Bottom-right glow */
 .valo-greeting::after {
     content: '';
     position: absolute;
-    bottom: 0; left: 0;
-    border-style: solid;
-    border-width: 0 0 20px 20px;
-    border-color: transparent transparent var(--red-dim) transparent;
-    opacity: 0.2;
+    bottom: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(255,70,85,0.06) 0%, transparent 70%);
+    pointer-events: none;
 }
 
-.valo-agent-icon {
-    font-size: clamp(28px, 6vw, 36px);
-    margin-bottom: 8px;
+/* Red vertical accent bar inside */
+.valo-greeting-accent {
+    position: absolute;
+    left: 0; top: 20%;
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(180deg, transparent, var(--red), transparent);
+    opacity: 0.6;
+}
+
+.valo-greeting-icon {
+    font-size: clamp(26px, 5vw, 34px);
     display: block;
     text-align: center;
-}
-.valo-greeting-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(16px, 4vw, 22px);
-    font-weight: 700;
-    color: var(--accent);
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-}
-.valo-greeting-sub {
-    font-size: clamp(12px, 3vw, 13px);
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.6;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 8px rgba(255,70,85,0.4));
 }
 
-/* ==============================
-   SUGGEST LABEL
-============================== */
+.valo-greeting-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(15px, 4vw, 20px);
+    font-weight: 700;
+    color: var(--white);          /* pure white — readable anywhere */
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-shadow: 0 1px 10px rgba(0,0,0,0.6);
+}
+
+.valo-greeting-sub {
+    font-size: clamp(12px, 3vw, 13px);
+    color: #b8b5af;               /* much brighter than before */
+    text-align: center;
+    line-height: 1.7;
+    font-weight: 400;
+}
+
+/* =====================
+   SUGGEST LABEL — visible outdoors
+===================== */
 .valo-suggest-label {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 14px 0 8px;
+    margin: 16px 0 10px;
 }
 .valo-suggest-label::before,
 .valo-suggest-label::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border2);
+    background: rgba(255,255,255,0.08);
 }
 .valo-suggest-label span {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
+    font-weight: 700;
     letter-spacing: 3px;
-    color: #3a3d46;
+    color: #6b6e7a;               /* slightly brighter */
     text-transform: uppercase;
     white-space: nowrap;
 }
 
-/* ==============================
-   BUTTONS
-============================== */
+/* =====================
+   BUTTONS — Valorant agent select style
+===================== */
 .stButton > button {
-    background: var(--dark3) !important;
-    color: #ccc8c3 !important;
-    border: 1px solid #ffffff12 !important;
-    border-radius: 3px !important;
+    background: var(--dark2) !important;
+    color: #d4d0cb !important;    /* bright enough outdoors */
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-left: 2px solid rgba(255,70,85,0.3) !important;
+    border-radius: 2px !important;
     font-family: 'Barlow Condensed', sans-serif !important;
     font-size: clamp(11px, 3vw, 13px) !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     letter-spacing: 0.5px !important;
     padding: 10px 14px !important;
     width: 100% !important;
@@ -251,142 +287,162 @@ html, body, .stApp {
     height: auto !important;
     min-height: 46px !important;
     line-height: 1.4 !important;
-    transition: all 0.15s ease !important;
+    transition: all 0.12s ease !important;
     position: relative !important;
-    border-left: 2px solid #ffffff08 !important;
+    overflow: hidden !important;
+}
+.stButton > button::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0px;
+    background: var(--red);
+    transition: width 0.12s ease;
+    opacity: 0.08;
 }
 .stButton > button:hover {
-    background: rgba(255,70,85,0.08) !important;
-    border-color: #ffffff1a !important;
+    background: rgba(255,70,85,0.1) !important;
     border-left-color: var(--red) !important;
-    color: var(--accent) !important;
-    transform: translateX(2px) !important;
+    border-color: rgba(255,70,85,0.2) !important;
+    color: var(--white) !important;
+    transform: translateX(3px) !important;
 }
 .stButton > button:active {
-    background: rgba(255,70,85,0.15) !important;
     transform: translateX(1px) !important;
+    background: rgba(255,70,85,0.18) !important;
 }
 
-/* ==============================
+/* =====================
    CHAT MESSAGES
-============================== */
+===================== */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
-    background: rgba(255,70,85,0.06);
-    border: 1px solid rgba(255,70,85,0.12);
+    background: rgba(255,70,85,0.05);
+    border: 1px solid rgba(255,70,85,0.15);
     border-right: 2px solid var(--red);
-    border-radius: 3px 3px 3px 3px;
+    border-radius: 2px;
     padding: 12px 16px;
     margin: 5px 0;
 }
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-    background: var(--dark3);
-    border: 1px solid var(--border2);
+    background: var(--dark2);
+    border: 1px solid var(--border-w);
     border-left: 2px solid var(--red);
-    border-radius: 3px;
+    border-radius: 2px;
     padding: 12px 16px;
     margin: 5px 0;
 }
 
-/* Chat text */
+/* Chat text — bright enough to read outdoors on phone */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
-    font-size: clamp(13px, 3.5vw, 14px) !important;
-    line-height: 1.7 !important;
-    color: #d4d0cb !important;
+    font-size: clamp(13px, 3.5vw, 14.5px) !important;
+    line-height: 1.75 !important;
+    color: #ddd9d3 !important;    /* brighter */
 }
 [data-testid="stChatMessage"] h3 {
     font-family: 'Rajdhani', sans-serif !important;
-    font-size: clamp(14px, 4vw, 17px) !important;
+    font-size: clamp(15px, 4vw, 18px) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    color: var(--accent) !important;
-    margin-bottom: 6px !important;
+    letter-spacing: 1.5px !important;
+    color: var(--white) !important;
+    margin-bottom: 8px !important;
+    text-shadow: 0 1px 12px rgba(255,70,85,0.2) !important;
 }
 [data-testid="stChatMessage"] strong {
-    color: #ff8590 !important;
+    color: #ff8a95 !important;    /* softer red, readable */
     font-weight: 600 !important;
 }
+[data-testid="stChatMessage"] em {
+    color: #8a8885 !important;
+    font-style: normal !important;
+    font-size: 11px !important;
+}
 [data-testid="stChatMessage"] code {
-    background: rgba(255,70,85,0.1) !important;
-    color: #ff8590 !important;
-    border: 1px solid rgba(255,70,85,0.2) !important;
+    background: rgba(255,70,85,0.12) !important;
+    color: #ffb3ba !important;
+    border: 1px solid rgba(255,70,85,0.25) !important;
     border-radius: 2px !important;
-    padding: 1px 5px !important;
+    padding: 1px 6px !important;
     font-size: 12px !important;
+    font-family: 'Barlow Condensed', monospace !important;
 }
 
-/* ==============================
+/* =====================
    CHAT INPUT
-============================== */
+===================== */
 .stChatInput textarea {
-    background: var(--dark3) !important;
-    color: var(--text) !important;
-    border: 1px solid #ffffff14 !important;
-    border-bottom: 2px solid #ffffff1a !important;
-    border-radius: 3px !important;
+    background: var(--dark2) !important;
+    color: var(--cream) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-bottom: 2px solid rgba(255,255,255,0.12) !important;
+    border-radius: 2px !important;
     font-family: 'Barlow', sans-serif !important;
     font-size: clamp(13px, 3.5vw, 14px) !important;
     caret-color: var(--red) !important;
 }
 .stChatInput textarea:focus {
-    border-color: #ffffff1a !important;
+    border-color: rgba(255,255,255,0.12) !important;
     border-bottom-color: var(--red) !important;
-    box-shadow: 0 4px 20px rgba(255,70,85,0.08) !important;
-    outline: none !important;
+    box-shadow: 0 4px 24px rgba(255,70,85,0.06) !important;
 }
 .stChatInput textarea::placeholder {
-    color: #3a3d46 !important;
+    color: #454852 !important;    /* slightly brighter placeholder */
+    font-style: italic !important;
 }
 
-/* ==============================
+/* =====================
    SIDEBAR
-============================== */
+===================== */
 section[data-testid="stSidebar"] {
-    background: #0a0c11 !important;
-    border-right: 1px solid #ff465515 !important;
+    background: #0c0f16 !important;
+    border-right: 1px solid rgba(255,70,85,0.12) !important;
 }
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] small {
-    color: #5a5d66 !important;
+section[data-testid="stSidebar"] small,
+section[data-testid="stSidebar"] li {
+    color: #6a6d78 !important;
     font-size: 13px !important;
-    font-family: 'Barlow', sans-serif !important;
 }
 section[data-testid="stSidebar"] h2 {
     font-family: 'Rajdhani', sans-serif !important;
-    color: var(--text) !important;
+    font-size: 18px !important;
+    color: #c4c0b9 !important;
     text-transform: uppercase !important;
-    letter-spacing: 2px !important;
+    letter-spacing: 3px !important;
 }
-
-/* Sidebar new session button */
 section[data-testid="stSidebar"] .stButton > button {
     background: transparent !important;
-    border: 1px solid #ff465525 !important;
+    border: 1px solid rgba(255,70,85,0.2) !important;
     border-left: 2px solid var(--red) !important;
-    color: #7a7d86 !important;
+    color: #8a8d98 !important;
     border-radius: 2px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(255,70,85,0.06) !important;
-    color: var(--text) !important;
+    background: rgba(255,70,85,0.07) !important;
+    color: var(--cream) !important;
+    transform: none !important;
 }
 
-/* ==============================
+/* =====================
    SPINNER
-============================== */
+===================== */
 [data-testid="stSpinner"] p {
-    color: var(--muted) !important;
+    color: #6a6d78 !important;
     font-family: 'Barlow Condensed', sans-serif !important;
-    letter-spacing: 2px !important;
-    font-size: 12px !important;
+    letter-spacing: 3px !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
 }
 
-/* ==============================
-   HIDE STREAMLIT UI
-============================== */
+/* =====================
+   HIDE STREAMLIT DEFAULT
+===================== */
 #MainMenu, footer, header { visibility: hidden !important; }
 .block-container {
     padding-top: 1.2rem !important;
@@ -394,14 +450,28 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     max-width: 760px !important;
 }
 
-/* ==============================
-   MOBILE
-============================== */
+/* =====================
+   MOBILE OPTIMIZATION
+===================== */
 @media (max-width: 600px) {
-    .block-container { padding: 0.8rem 0.5rem 4.5rem !important; }
-    [data-testid="stChatMessage"] { padding: 10px 11px !important; margin: 3px 0 !important; }
-    .stButton > button { min-height: 42px !important; padding: 8px 11px !important; }
-    .valo-greeting { padding: 14px 12px; }
+    .block-container {
+        padding: 0.7rem 0.5rem 4.5rem !important;
+    }
+    .valo-title {
+        letter-spacing: 0px;
+        line-height: 1;
+    }
+    [data-testid="stChatMessage"] {
+        padding: 10px 11px !important;
+        margin: 3px 0 !important;
+    }
+    .stButton > button {
+        min-height: 42px !important;
+        padding: 8px 10px !important;
+    }
+    .valo-greeting {
+        padding: 16px 14px !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -440,7 +510,7 @@ raw_json_context = load_raw_json()
 # SIDEBAR
 # ========================
 with st.sidebar:
-    st.markdown("## ⚡ PC Solving System")
+    st.markdown("## ⚡ PC Solving")
     st.markdown("---")
     st.markdown("Hệ thống chẩn đoán lỗi và tư vấn linh kiện máy tính chuyên sâu.")
     st.markdown("---")
@@ -458,10 +528,16 @@ with st.sidebar:
 st.markdown("""
 <div class="valo-header">
     <div class="valo-eyebrow">⚡ STEM PROJECT ⚡</div>
-    <div class="valo-title">PC <span>SOLVING</span> SYSTEM</div>
-    <div class="valo-subtitle">Chẩn đoán · Phân tích · Xử lý tự động</div>
+    <div class="valo-title">PC <span class="highlight">SOLVING</span> SYSTEM</div>
+    <div class="valo-subtitle">Chẩn đoán &nbsp;·&nbsp; Phân tích &nbsp;·&nbsp; Xử lý tự động</div>
 </div>
-<div class="valo-divider"><div class="valo-divider-bar"></div></div>
+<div class="valo-divider">
+    <div class="valo-divider-core">
+        <div class="valo-divider-dot"></div>
+        <div class="valo-divider-bar"></div>
+        <div class="valo-divider-dot"></div>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # ========================
@@ -480,22 +556,22 @@ if "pending_query" not in st.session_state:
 # GỢI Ý NGẪU NHIÊN
 # ========================
 ALL_SUGGESTIONS = [
-    ("⚠  Màn hình xanh chết BSOD",         "Máy tính bị màn hình xanh chết, phải làm gì?"),
-    ("▪  Màn hình đen không hiển thị",       "Máy lên nguồn nhưng màn hình đen, không lên gì"),
-    ("◈  PC bíp liên tục khi bật",           "Máy tính bíp nhiều tiếng khi khởi động, lỗi gì?"),
-    ("◉  Máy chạy chậm bất thường",          "Máy tính đột nhiên chạy rất chậm, khắc phục thế nào?"),
-    ("🌡  CPU overheat quá nóng",             "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
-    ("◆  RAM có tương thích mainboard không", "Làm sao biết RAM có tương thích với mainboard không?"),
-    ("⚡  Cần bao nhiêu W nguồn điện",        "Cấu hình PC của tôi cần bao nhiêu W nguồn là đủ?"),
-    ("🎮  GTX 1650 chơi được game gì",        "Card GTX 1650 chơi được những game nào mượt?"),
-    ("✕  Lỗi 0xc0000005 khi mở game",        "Bị lỗi 0xc0000005 khi mở game, sửa thế nào?"),
-    ("◈  Ổ cứng bị bad sector",              "Ổ cứng bị bad sector, còn cứu được dữ liệu không?"),
-    ("▶  So sánh Intel i5 vs Ryzen 5",       "So sánh Intel i5 và AMD Ryzen 5, nên mua loại nào?"),
-    ("◉  PC không nhận VGA rời",             "Máy không nhận card đồ họa rời, chỉ dùng được onboard"),
-    ("✕  Windows Update lỗi 0x80070002",     "Windows Update báo lỗi 0x80070002, không update được"),
-    ("⚠  Máy tự khởi động lại đột ngột",     "PC tự dưng khởi động lại giữa chừng, nguyên nhân là gì?"),
-    ("▪  Bấm nguồn máy không bật",           "Nhấn nút nguồn nhưng máy tính không bật được gì cả"),
-    ("◆  Tản nhiệt CPU nên mua loại nào",    "Tản nhiệt CPU loại nào tốt cho cấu hình tầm trung?"),
+    ("⚠  Màn hình xanh chết BSOD",          "Máy tính bị màn hình xanh chết, phải làm gì?"),
+    ("▪  Màn hình đen không hiển thị",        "Máy lên nguồn nhưng màn hình đen, không lên gì"),
+    ("◈  PC bíp liên tục khi bật",            "Máy tính bíp nhiều tiếng khi khởi động, lỗi gì?"),
+    ("◉  Máy chạy chậm bất thường",           "Máy tính đột nhiên chạy rất chậm, khắc phục thế nào?"),
+    ("🌡  CPU overheat quá nóng",              "CPU bị overheat, nhiệt độ lên đến 95 độ C"),
+    ("◆  RAM có tương thích mainboard không",  "Làm sao biết RAM có tương thích với mainboard không?"),
+    ("⚡  Cần bao nhiêu W nguồn điện",         "Cấu hình PC của tôi cần bao nhiêu W nguồn là đủ?"),
+    ("🎮  GTX 1650 chơi được game gì",         "Card GTX 1650 chơi được những game nào mượt?"),
+    ("✕  Lỗi 0xc0000005 khi mở game",         "Bị lỗi 0xc0000005 khi mở game, sửa thế nào?"),
+    ("◈  Ổ cứng bị bad sector",               "Ổ cứng bị bad sector, còn cứu được dữ liệu không?"),
+    ("▶  So sánh Intel i5 vs Ryzen 5",        "So sánh Intel i5 và AMD Ryzen 5, nên mua loại nào?"),
+    ("◉  PC không nhận VGA rời",              "Máy không nhận card đồ họa rời, chỉ dùng được onboard"),
+    ("✕  Windows Update lỗi 0x80070002",      "Windows Update báo lỗi 0x80070002, không update được"),
+    ("⚠  Máy tự khởi động lại đột ngột",      "PC tự dưng khởi động lại giữa chừng, nguyên nhân gì?"),
+    ("▪  Bấm nguồn máy không bật",            "Nhấn nút nguồn nhưng máy tính không bật được gì cả"),
+    ("◆  Tản nhiệt CPU nên mua loại nào",     "Tản nhiệt CPU loại nào tốt cho cấu hình tầm trung?"),
 ]
 
 # ========================
@@ -507,17 +583,20 @@ if not st.session_state.greeted and not st.session_state.messages:
 
     st.markdown("""
     <div class="valo-greeting">
-        <span class="valo-agent-icon">💻</span>
+        <div class="valo-greeting-accent"></div>
+        <span class="valo-greeting-icon">⚡</span>
         <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
         <div class="valo-greeting-sub">
-            Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi.<br>
+            Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi hệ thống.<br>
             Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>
+    <div class="valo-suggest-label">
+        <span>— CHỌN NHANH VẤN ĐỀ —</span>
+    </div>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="small")
@@ -601,35 +680,35 @@ def detect_type(query):
 # SYSTEM PROMPTS
 # ========================
 BASE_RULE = """
-TUYỆT ĐỐI KHÔNG dùng: "AI", "mô hình ngôn ngữ", "LLM", "Groq", "Meta", "Llama", "trí tuệ nhân tạo".
-Không nhắc đến việc bạn là phần mềm học từ internet.
+TUYỆT ĐỐI KHÔNG dùng các từ: "AI", "mô hình ngôn ngữ", "LLM", "Groq", "Meta", "Llama", "trí tuệ nhân tạo".
+Không nhắc đến việc bạn là phần mềm học từ dữ liệu internet.
 """
 
 PROMPT_ERROR = f"""Bạn là hệ thống chẩn đoán lỗi máy tính của Lê Văn Chung 10A4.
 {BASE_RULE}
-Kho dữ liệu: {raw_json_context}
+Kho dữ liệu tham chiếu: {raw_json_context}
 
-QUY TẮC — LỖI HỆ THỐNG (ngắn gọn, đúng việc):
+QUY TẮC — LỖI HỆ THỐNG (ngắn gọn, thẳng vào vấn đề):
 - 1 câu nguyên nhân chính
-- Tối đa 4 bước xử lý, mỗi bước ngắn gọn
-- Không giải thích thừa, không lặp lại câu hỏi
-- Nếu có lưu ý thì 1 dòng cuối là đủ"""
+- Tối đa 4 bước xử lý, mỗi bước 1 câu ngắn
+- Không giải thích dài dòng, không lặp lại câu hỏi
+- 1 dòng lưu ý cuối nếu thật sự cần"""
 
 PROMPT_HARDWARE = f"""Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10A4.
 {BASE_RULE}
-Kho dữ liệu: {raw_json_context}
+Kho dữ liệu tham chiếu: {raw_json_context}
 
 QUY TẮC — TƯ VẤN LINH KIỆN (chi tiết, có chiều sâu):
 - Nêu thông số kỹ thuật quan trọng
-- So sánh ưu/nhược nếu được hỏi
+- So sánh ưu/nhược điểm nếu được hỏi
 - Gợi ý combo phù hợp ngân sách
 - Kết thúc bằng 1 khuyến nghị cụ thể
-- Khi phân tích chuyên sâu, dùng câu mở đầu: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..." """
+- Khi phân tích chuyên sâu mở đầu bằng: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..." """
 
 PROMPT_GENERAL = f"""Bạn là hệ thống hỗ trợ kỹ thuật máy tính của Lê Văn Chung 10A4.
 {BASE_RULE}
-Kho dữ liệu: {raw_json_context}
-Trả lời tiếng Việt, súc tích, chia bước nếu cần."""
+Kho dữ liệu tham chiếu: {raw_json_context}
+Trả lời tiếng Việt, súc tích, chia bước rõ ràng nếu cần."""
 
 def ask_engine(user_query, chat_history):
     qtype = detect_type(user_query)
