@@ -2,23 +2,41 @@ import streamlit as st
 import json
 import re
 import os
+from groq import Groq
 
-# CONFIG GIAO DIỆN CYBERPUNK CHUẨN STEM LỚP 10A4
-st.set_page_config(page_title="Vua PC Chatbot - Lê Văn Chung 10A4", page_icon="🖥️", layout="wide")
+st.set_page_config(
+    page_title="Vua PC Chatbot - Lê Văn Chung 10A4",
+    page_icon="🖥️",
+    layout="wide"
+)
 
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
 .stApp { background: linear-gradient(135deg, #020617, #0b1329, #1c1a27); color: #f8fafc; }
-.neon-title { text-align: center; font-size: 42px !important; font-weight: 900 !important; color: #ffffff; text-shadow: 0 0 10px #3b82f6, 0 0 30px #1d4ed8; }
-.neon-subtitle { text-align: center; color: #38bdf8; font-size: 18px !important; font-weight: 500; }
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) { background: linear-gradient(135deg, #1d4ed8, #1e40af); border-radius: 16px; border-left: 5px solid #60a5fa; }
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) { background: rgba(15, 23, 42, 0.8); border-radius: 16px; border: 1px solid #334155; border-left: 5px solid #3b82f6; }
-.stChatInput input { background-color: #0f172a !important; color: #ffffff !important; border: 2px solid #3b82f6 !important; }
-section[data-testid="stSidebar"] { background-color: #020617; border-right: 1px solid #1e293b; }
+.neon-title { text-align:center; font-family:'Orbitron',monospace; font-size:36px!important; font-weight:900!important; color:#fff; text-shadow:0 0 10px #3b82f6,0 0 30px #1d4ed8,0 0 60px #1e40af; margin-bottom:4px; }
+.neon-subtitle { text-align:center; font-family:'Share Tech Mono',monospace; color:#38bdf8; font-size:13px!important; letter-spacing:2px; margin-bottom:10px; }
+.badge-db { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:bold; background:#1e3a5f; color:#60a5fa; border:1px solid #3b82f6; }
+.badge-ai { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:bold; background:#1a2e1a; color:#4ade80; border:1px solid #22c55e; }
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) { background:linear-gradient(135deg,#1d4ed8,#1e40af); border-radius:16px; border-left:5px solid #60a5fa; padding:12px; }
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) { background:rgba(15,23,42,0.85); border-radius:16px; border:1px solid #334155; border-left:5px solid #3b82f6; padding:12px; }
+.stChatInput textarea { background-color:#0f172a!important; color:#fff!important; border:2px solid #3b82f6!important; }
+section[data-testid="stSidebar"] { background-color:#020617; border-right:1px solid #1e293b; }
 </style>
 """, unsafe_allow_html=True)
 
-# LOAD DATABASE JSON
+# GROQ CLIENT
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except KeyError:
+    st.error("❌ Chưa cấu hình GROQ_API_KEY trong Secrets!")
+    st.info("Vào Settings → Secrets → thêm: GROQ_API_KEY = 'gsk_...'")
+    st.stop()
+except Exception as e:
+    st.error(f"❌ Lỗi kết nối AI: {str(e)}")
+    st.stop()
+
+# LOAD DATABASE
 def load_database():
     if os.path.exists("database_pc.json"):
         with open("database_pc.json", "r", encoding="utf-8") as f:
@@ -27,119 +45,141 @@ def load_database():
 
 data_pc = load_database()
 
-# SIDEBAR CONTROL PANEL
+# SIDEBAR
 with st.sidebar:
-    st.markdown("<h2 style='color: #3b82f6; text-align: center;'>🖥️ Vua PC Lab v11.0</h2>", unsafe_allow_html=True)
-    st.success("⚡ ENGINE: ĐÓNG BĂNG LOGIC")
+    st.markdown("<h2 style='color:#3b82f6;text-align:center;font-family:Orbitron,monospace;'>🖥️ VUA PC LAB</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;color:#64748b;font-size:12px;'>v12.0 · GROQ POWERED</p>", unsafe_allow_html=True)
     st.markdown("---")
-    st.write("📊 **Trạng thái hệ thống:**")
-    st.info("✔️ Cơ chế chặn bắt chữ đơn lẻ (Anti-Single Keyword)")
-    st.info("✔️ Yêu cầu tối thiểu 2 điểm trùng khớp")
-    st.info("✔️ Không chỉnh sửa dữ liệu JSON gốc")
+    db_loi = len(data_pc.get("loi_he_thong", []))
+    db_lk = len(data_pc.get("linh_kien_pc", []))
+    st.markdown("**📊 Database:**")
+    st.success(f"✅ {db_loi} lỗi hệ thống")
+    st.success(f"✅ {db_lk} linh kiện PC")
     st.markdown("---")
-    st.warning("🤖 Phiên bản: Bản vá lỗi tối hậu")
-    st.info("👨‍💻 Tác giả:\n\n**Lê Văn Chung - Lớp 10A4**")
+    st.markdown("**⚡ Chế độ:**")
+    st.info("1️⃣ Tìm trong Database JSON\n\n2️⃣ Không có → Groq AI trả lời")
+    st.markdown("---")
+    if st.button("🗑️ Xóa lịch sử chat", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+    st.markdown("---")
+    st.markdown("<p style='text-align:center;color:#475569;font-size:11px;'>Made by Lê Văn Chung 10A4 🎓</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="neon-title">👑 VUA PC - BẢN KHÓA LOGIC TỐI HẬU V11.0</div>', unsafe_allow_html=True)
-st.markdown('<div class="neon-subtitle">BỘ LÕI HOÀN THIỆN XỬ LÝ KHÔNG ĐỤNG DATA CỦA: LÊ VĂN CHUNG - LỚP 10A4</div>', unsafe_allow_html=True)
+# HEADER
+st.markdown('<div class="neon-title">👑 VUA PC CHATBOT</div>', unsafe_allow_html=True)
+st.markdown('<div class="neon-subtitle">CHẨN ĐOÁN LỖI & TƯ VẤN LINH KIỆN · LÊ VĂN CHUNG 10A4</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]): st.markdown(msg["content"])
-
-# ==========================================
-# THUẬT TOÁN TÍNH ĐIỂM CHUẨN XÁC CAO (V11.0)
-# ==========================================
+# THUẬT TOÁN TÌM DATABASE
 def calculate_match_score(item, q_clean, user_numbers):
     score = 0
     item_kws = [str(kw).lower().strip() for kw in item.get("keywords", [])]
-    
-    # Chỉ đếm từ khóa nếu nó đứng tách biệt hoặc khớp chính xác để tránh dính chữ bậy
     user_words = q_clean.split()
     for kw in item_kws:
         if kw in user_words or (kw.isdigit() and kw in q_clean):
             score += 1
-            
     if score == 0:
         return 0
-
-    # KIỂM TRA XUNG ĐỘT MÃ SỐ (Chặn đứng i5-14400 ăn theo i5-6500)
     item_numbers = [re.sub(r'\D', '', kw) for kw in item_kws if re.search(r'\d{3,}', kw)]
     item_numbers = [n for n in item_numbers if n]
-    
     if item_numbers and user_numbers:
         if not set(item_numbers).intersection(set(user_numbers)):
-            return 0 # Mã số không khớp -> Hủy kết quả lập tức
-            
+            return 0
     return score
 
-def engine_vua_pc(user_query):
-    # Tiền xử lý xóa ký tự đặc biệt, giữ lại khoảng trắng
-    q_clean = user_query.lower().strip()
-    q_clean = re.sub(r'[-–_,.\?!\(\)]', ' ', q_clean)
-    
-    # Xử lý lời chào nhanh
-    if any(w in q_clean.split() for w in ["hi", "hello", "chào", "alo"]):
-        return "👋 **Xin chào! Tôi là Vua PC v11.0.** Hệ thống đã được cấu hình lại bộ lọc từ khóa. Bạn cần chẩn đoán lỗi hay kiểm tra thông số thiết bị nào?"
-
-    # Trích xuất toàn bộ số từ câu hỏi để check xung đột
+def search_database(user_query):
+    q_clean = re.sub(r'[-–_,.\?!\(\)]', ' ', user_query.lower().strip())
     user_numbers = [re.sub(r'\D', '', w) for w in q_clean.split() if re.search(r'\d{3,}', w)]
     user_numbers = [n for n in user_numbers if n]
+    best_match, max_score, match_pool = None, 0, ""
 
-    best_match = None
-    max_score = 0
-    match_pool = ""
-
-    # Quét kho linh kiện
     for item in data_pc.get("linh_kien_pc", []):
-        final_score = calculate_match_score(item, q_clean, user_numbers)
-        if final_score > max_score:
-            max_score = final_score
-            best_match = item
-            match_pool = "linh_kien"
+        s = calculate_match_score(item, q_clean, user_numbers)
+        if s > max_score:
+            max_score, best_match, match_pool = s, item, "linh_kien"
 
-    # Quét kho lỗi
     for item in data_pc.get("loi_he_thong", []):
-        final_score = calculate_match_score(item, q_clean, user_numbers)
-        if final_score > max_score:
-            max_score = final_score
-            best_match = item
-            match_pool = "loi"
+        s = calculate_match_score(item, q_clean, user_numbers)
+        if s > max_score:
+            max_score, best_match, match_pool = s, item, "loi"
 
-    # ĐIỀU KIỆN ĐẦU RA NGHIÊM NGẶT (CHỐNG BẮT CHỮ CHUNG CHUNG)
-    # Nếu khớp linh kiện phần cứng, yêu cầu phải trùng từ 2 từ khóa trở lên (Ví dụ: phải có cả 'i5' và '6500')
     if max_score >= 2 and best_match:
         if match_pool == "loi":
-            return f"### 🎯 Phân tích phát hiện lỗi: {best_match['ten']}\n⚠️ **Phân loại:** `{best_match['loai']}`\n\n❌ **Nguyên nhân cốt lõi:** {best_match['nguyen_nhan']}\n\n🛠️ **Phác đồ khắc phục:**\n{best_match['giai_phap']}"
+            return (f'<span class="badge-db">📁 TỪ DATABASE</span>\n\n'
+                    f"### 🎯 {best_match['ten']}\n"
+                    f"⚠️ **Phân loại:** `{best_match.get('loai','')}`\n\n"
+                    f"❌ **Nguyên nhân:** {best_match['nguyen_nhan']}\n\n"
+                    f"🛠️ **Cách khắc phục:**\n{best_match['giai_phap']}")
         else:
-            return f"### 📦 Thông tin linh kiện: {best_match['ten']}\n⚙️ **Thông số kỹ thuật:** {best_match.get('thong_so', 'Chưa có thông số')}\n\n💡 **Tư vấn từ Chung 10A4:** *{best_match.get('chuyen_gia_tu_van', '')}*"
+            return (f'<span class="badge-db">📁 TỪ DATABASE</span>\n\n'
+                    f"### 📦 {best_match['ten']}\n"
+                    f"⚙️ **Thông số:** {best_match.get('thong_so','')}\n\n"
+                    f"🔌 **Socket:** `{best_match.get('socket','')}`\n\n"
+                    f"⚡ **Nguồn:** {best_match.get('nguon_khuyen_nghi','')}\n\n"
+                    f"💡 **Tư vấn:** *{best_match.get('chuyen_gia_tu_van','')}*")
+    return None
 
-    # TẦNG TỪ CHỐI VÀ PHÂN LUỒNG THÔNG MINH KHI KHÔNG ĐỦ ĐIỂM SÀN
-    hardware_keywords = ["i3", "i5", "i7", "i9", "ryzen", "gtx", "rtx", "rx", "h110", "b660", "h610", "main", "chip", "cpu", "vga", "card"]
-    error_keywords = ["xanh", "sập", "đen", "lỗi", "bsod", "dump", "treo", "đơ", "bíp"]
+# GROQ AI
+SYSTEM_PROMPT = """Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4 - kỹ sư phần cứng chuyên nghiệp.
 
-    if any(kw in q_clean.split() for kw in hardware_keywords):
-        # Nếu gõ cụ thể mã chip mới (ví dụ i5 12400f) mà không có trong JSON thì thông báo chưa nạp
-        if user_numbers:
-            return f"🤖 **Vua PC v11.0 phản hồi:** Hệ thống nhận diện mã phần cứng liên quan đến dòng số `{user_numbers[0]}`.\n\n⚠️ Thiết bị này hiện **chưa được nạp** vào danh mục `linh_kien_pc` trong file `database_pc.json`."
-        # Nếu chỉ gõ vu vơ câu có chữ i5 như "Sao biết mỗi i5 vậy" -> Trả về câu hướng dẫn chứ không nhận vơ linh kiện
-        return "🤖 **Vua PC v11.0 phản hồi:** Bạn đang nhắc đến từ khóa phần cứng chung chung. Để xem chi tiết, vui lòng nhập đầy đủ mã (Ví dụ: `i5 6500`)."
-        
-    if any(kw in q_clean.split() for kw in error_keywords):
-        return "🤖 **Vua PC v11.0 phản hồi:** Hệ thống nhận diện câu hỏi liên quan đến báo lỗi, nhưng thông tin chưa đủ chi tiết để đối chiếu với file JSON."
+Nhiệm vụ:
+- Chẩn đoán lỗi Windows, BSOD, mã lỗi số hiệu
+- Phân tích lỗi phần cứng: CPU, RAM, GPU, ổ cứng, nguồn, mainboard
+- Tư vấn linh kiện PC, thông số kỹ thuật, độ tương thích
+- Hướng dẫn sửa chữa từng bước
 
-    return "🤖 **Vua PC v11.0 phản hồi:** Câu hỏi của bạn nằm ngoài phạm vi phân tích. Hãy nhập mã linh kiện cụ thể (VD: i5 6500) hoặc lỗi hệ thống để kiểm tra chính xác."
+Quy tắc:
+- Luôn dùng tiếng Việt
+- Chia bước rõ ràng: Bước 1, Bước 2...
+- Giải thích nguyên nhân TRƯỚC khi đưa cách fix
+- Ngắn gọn, dễ hiểu cho học sinh THPT
+- Kết thúc bằng 1 lời khuyên phòng tránh"""
 
-# THỰC THI NHẬP LIỆU CHAT
-if prompt := st.chat_input("Mô tả lỗi máy tính hoặc linh kiện bạn cần chẩn đoán tại đây..."):
+def ask_groq(user_query, chat_history):
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for msg in chat_history[-6:]:
+        messages.append({"role": msg["role"], "content": msg["content"]})
+    messages.append({"role": "user", "content": user_query})
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=messages,
+        max_tokens=1024,
+        temperature=0.7
+    )
+    return f'<span class="badge-ai">🤖 GROQ AI</span>\n\n{response.choices[0].message.content}'
+
+# HIỂN THỊ LỊCH SỬ
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"], unsafe_allow_html=True)
+
+if not st.session_state.messages:
+    st.markdown("**💡 Thử hỏi:**")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.code("Lỗi màn hình xanh BSOD")
+        st.code("i5-12400F mạnh không?")
+    with c2:
+        st.code("Mã lỗi 0x0000007E")
+        st.code("RAM 8GB có đủ chơi game?")
+    with c3:
+        st.code("PC bíp 3 tiếng khi bật")
+        st.code("GTX 1660 Super vs RX 6600")
+
+# XỬ LÝ INPUT
+if prompt := st.chat_input("Nhập mã lỗi, tên linh kiện hoặc mô tả triệu chứng..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"): st.markdown(prompt)
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("💾 Bộ lõi V11.0 đang kiểm tra điều kiện điểm sàn..."):
-            answer = engine_vua_pc(prompt)
-            st.markdown(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
+        with st.spinner("⚡ Đang phân tích..."):
+            try:
+                answer = search_database(prompt) or ask_groq(prompt, st.session_state.messages)
+                st.markdown(answer, unsafe_allow_html=True)
+                st.session_state.messages.append({"role": "assistant", "content": answer})
+            except Exception as e:
+                st.error(f"❌ Lỗi: {str(e)}")
