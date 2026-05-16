@@ -288,7 +288,7 @@ html, body, .stApp {
 .valo-stat-divider { width: 1px; background: var(--br-w2); align-self: stretch; }
 
 /* ══════════════════════════════════════
-   SUGGEST LABEL
+   SUGGEST LABEL (MÀU MỚI VALORANT)
 ══════════════════════════════════════ */
 .valo-suggest-label {
     display: flex;
@@ -313,7 +313,7 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   BUTTONS GỢI Ý
+   BUTTONS GỢI Ý (ĐỔ MÀU KHUNG)
 ══════════════════════════════════════ */
 .stButton > button {
     background: linear-gradient(90deg, rgba(30,34,50,0.8), rgba(20,24,35,0.9)) !important;
@@ -345,7 +345,7 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   CHAT MESSAGES
+   CHAT MESSAGES (SỬA LỖI NERF CHỮ)
 ══════════════════════════════════════ */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
@@ -356,7 +356,7 @@ html, body, .stApp {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important;
 }
 
-/* KHUNG NGƯỜI DÙNG */
+/* KHUNG NGƯỜI DÙNG (MÀU ĐỎ OMEN) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
     background: linear-gradient(135deg, rgba(60,15,20,0.85) 0%, rgba(20,10,12,0.95) 100%) !important;
     border: 1px solid rgba(255,70,85,0.4) !important;
@@ -367,7 +367,7 @@ html, body, .stApp {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
 }
 
-/* KHUNG BOT TRẢ LỜI */
+/* KHUNG BOT TRẢ LỜI (MÀU XANH CYPHER) */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
     background: linear-gradient(135deg, rgba(10,40,45,0.85) 0%, rgba(10,15,20,0.95) 100%) !important;
     border: 1px solid rgba(0,212,191,0.3) !important;
@@ -500,6 +500,7 @@ with st.sidebar:
     st.markdown("---")
     if st.button("⟳  PHIÊN MỚI", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.greeted  = False
         st.session_state.suggestions = []
         st.rerun()
     st.markdown("---")
@@ -539,6 +540,7 @@ st.markdown(f"""
 # SESSION STATE
 # ========================
 if "messages"      not in st.session_state: st.session_state.messages     = []
+if "greeted"       not in st.session_state: st.session_state.greeted      = False
 if "suggestions"   not in st.session_state: st.session_state.suggestions  = []
 if "pending_query" not in st.session_state: st.session_state.pending_query= None
 
@@ -568,7 +570,7 @@ if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
 # ========================
-# GREETING BOX
+# GREETING BOX (LUÔN HIỂN THỊ CỐ ĐỊNH)
 # ========================
 st.markdown(f"""
 <div class="valo-greeting">
@@ -602,13 +604,15 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
+# FIX: Bỏ điều kiện ẩn gợi ý. Khung gợi ý giờ đây luôn hiển thị cố định ở đây để bấm liên tục không bị lỗi giao diện.
+st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
+            unsafe_allow_html=True)
 
 col1, col2 = st.columns(2, gap="small")
 for i, (label, query) in enumerate(st.session_state.suggestions):
     with (col1 if i % 2 == 0 else col2):
-        # FIX LỖI KEY BẰNG CÁCH DÙNG HASH NỘI DUNG CÂU HỎI CHỨ KHÔNG DÙNG CHỈ SỐ VÒNG LẶP
-        if st.button(label, key=f"sug_{hash(query)}"):
+        if st.button(label, key=f"sug_{i}"):
+            st.session_state.greeted      = True
             st.session_state.pending_query = query
             st.rerun()
 
@@ -696,4 +700,83 @@ QUY TẮC — LỖI (ngắn gọn, thẳng vào vấn đề):
 - Không giải thích thừa, không lặp câu hỏi
 - 1 dòng lưu ý cuối nếu cần"""
 
-PROMPT_HARDWARE = f"""Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10
+PROMPT_HARDWARE = f"""Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10A4.
+{BASE_RULE}
+Kho dữ liệu: {raw_json_context}
+QUY TẮC — LINH KIỆN (chi tiết, chuyên sâu):
+- Nêu thông số kỹ thuật quan trọng
+- So sánh ưu/nhược nếu được hỏi
+- Gợi ý combo phù hợp ngân sách
+- Kết thúc bằng 1 khuyến nghị cụ thể
+- Mở đầu phân tích chuyên sâu: "Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4..." """
+
+PROMPT_GENERAL = f"""Bạn là hệ thống hỗ trợ kỹ thuật máy tính của Lê Văn Chung 10A4.
+{BASE_RULE}
+Kho dữ liệu: {raw_json_context}
+Trả lời tiếng Việt, súc tích, chia bước rõ ràng nếu cần."""
+
+def ask_engine(user_query, chat_history):
+    q = user_query.lower()
+    
+    # Từ khóa linh kiện, lỗi máy tính, đồ điện tử/điện thoại
+    valid_keywords = [
+        "i3","i5","i7","i9","ryzen","gtx","rtx","rx","vga","card","cpu","ram","ssd",
+        "mainboard","main","nguồn","psu","tản nhiệt","socket","ddr","build","cấu hình",
+        "lỗi","bsod","xanh","đen","bíp","crash","sập","đơ","treo","chậm","lag","update",
+        "linh kiện","điện tử","điện thoại","màn hình","pin","sạc","chip","vi xử lý",
+        "snapdragon","dimensity","exynos","apple a","qualcomm","helio",
+        "iphone","samsung","oppo","xiaomi","redmi","vivo","realme","asus"
+    ]
+    
+    # Từ khóa giao tiếp, chào hỏi cơ bản để tránh block nhầm khi bắt đầu hội thoại
+    chat_keywords = ["chào", "hello", "hi", "bạn ơi", "ad", "admin", "chung", "trợ giúp", "cứu"]
+    
+    # FIX LỖI BLOCK NHẦM: 
+    # Cho phép nếu chứa từ khóa linh kiện/lỗi HOẶC chứa từ khóa chào hỏi HOẶC người dùng miêu tả dài (độ dài chuỗi từ 6 từ trở lên)
+    is_valid = any(kw in q for kw in valid_keywords)
+    is_chat = any(kw in q for kw in chat_keywords)
+    is_descriptive = len(q.split()) >= 6
+    
+    if not (is_valid or is_chat or is_descriptive):
+        return '[Hệ thống]: Câu hỏi chưa đúng lĩnh vực chuyên môn (Linh kiện điện tử & Phần cứng máy tính).'
+
+    qtype = detect_type(user_query)
+    if   qtype == "error":   system, max_tok, temp = PROMPT_ERROR,    480, 0.3
+    elif qtype == "hardware": system, max_tok, temp = PROMPT_HARDWARE, 780, 0.5
+    else:                     system, max_tok, temp = PROMPT_GENERAL,  560, 0.4
+    messages = [{"role":"system","content":system}]
+    for msg in chat_history[-6:]:
+        messages.append({"role":msg["role"],"content":msg["content"]})
+    messages.append({"role":"user","content":user_query})
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=messages,
+        max_tokens=max_tok,
+        temperature=temp
+    )
+    return response.choices[0].message.content
+
+# ========================
+# XỬ LÝ TIN NHẮN
+# ========================
+def handle_message(prompt):
+    st.session_state.messages.append({"role":"user","content":prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    with st.chat_message("assistant"):
+        with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
+            try:
+                answer = search_database(prompt) or ask_engine(prompt, st.session_state.messages)
+                st.markdown(answer)
+                st.session_state.messages.append({"role":"assistant","content":answer})
+            except:
+                st.error("❌ Hệ thống gián đoạn. Vui lòng thử lại.")
+
+if st.session_state.pending_query:
+    q = st.session_state.pending_query
+    st.session_state.pending_query = None
+    handle_message(q)
+
+if prompt := st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
+    st.session_state.greeted = True
+    handle_message(prompt)
