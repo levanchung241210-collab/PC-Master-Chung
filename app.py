@@ -65,7 +65,7 @@ html, body, .stApp {
     inset: 0;
     pointer-events: none;
     z-index: 0; 
-    opacity: 0.06; /* Độ mờ tinh tế phong cách Valorant UI, không đè chữ nội dung */
+    opacity: 0.06;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><text x="50%" y="55%" font-family="Oswald, Impact, sans-serif" font-size="28vw" font-weight="900" fill="none" stroke="%23ff4655" stroke-width="4" stroke-dasharray="15 10" text-anchor="middle" dominant-baseline="middle">LVC</text></svg>');
     background-position: center center;
     background-repeat: no-repeat;
@@ -600,7 +600,9 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# THUẬT TOÁN TRA CỨU
+# ==============================================================
+# THUẬT TOÁN TRA CỨU LOGIC CỤC BỘ (FIX LỖI THỤT DÒNG - INDENTATION)
+# ==============================================================
 def calculate_match_score(item, q_clean, user_numbers):
     score = 0
     item_kws = [str(kw).lower().strip() for kw in item.get("keywords", [])]
@@ -608,12 +610,8 @@ def calculate_match_score(item, q_clean, user_numbers):
     for kw in item_kws:
         if kw in user_words or (kw.isdigit() and kw in q_clean):
             score += 1
-    if score == 0: return 0
+    if score == 0: 
+        return 0
     item_nums = [re.sub(r'\D','',kw) for kw in item_kws if re.search(r'\d{3,}',kw)]
     item_nums = [n for n in item_nums if n]
-    if item_nums and user_numbers:
-        if not set(item_nums).intersection(set(user_numbers)):
-            return 0
-    return score
-
-def search_database(user_query):
+    if item_nums
