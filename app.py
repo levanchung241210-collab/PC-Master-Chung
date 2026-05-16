@@ -1,271 +1,191 @@
 import streamlit as st
-import requests
+import database_pc as db  # Nạp file dữ liệu database_pc.py
+import re
 
-# =========================
-# PAGE CONFIG
-# =========================
+# ==========================================
+# CẤU HÌNH GIAO DIỆN DARK THEME NEON HÚT MẮT
+# ==========================================
 st.set_page_config(
-    page_title="PC Assistant - Chung 10A4",
+    page_title="Chatbot PC - Lê Văn Chung 10A4",
     page_icon="🖥️",
     layout="wide"
 )
 
-# =========================
-# CSS
-# =========================
 st.markdown("""
 <style>
-
-/* ===== BACKGROUND ===== */
+/* ===== NỀN KHÔNG GIAN TỐI ===== */
 .stApp {
-    background: linear-gradient(
-        135deg,
-        #0f172a,
-        #111827,
-        #1e293b
-    );
-    color: white;
+    background: linear-gradient(135deg, #020617, #0f172a, #1e1b4b);
+    color: #f8fafc;
 }
 
-/* ===== TITLE ===== */
-h1 {
-    color: #93c5fd !important;
+/* ===== HIỆU ỨNG CHỮ NEON HÚT MẮT ===== */
+.neon-title {
     text-align: center;
     font-size: 42px !important;
-    font-weight: 700 !important;
+    font-weight: 900 !important;
+    color: #ffffff;
+    text-shadow: 
+        0 0 5px #3b82f6,
+        0 0 10px #3b82f6,
+        0 0 20px #2563eb,
+        0 0 40px #1d4ed8;
+    margin-bottom: 5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ===== SUBTITLE ===== */
-h3 {
+.neon-subtitle {
     text-align: center;
-    color: #cbd5e1;
+    color: #38bdf8;
+    font-size: 18px !important;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
-/* ===== CHAT USER ===== */
+/* ===== KHUNG CHAT USER VÀ BOT CHUYÊN NGHIỆP ===== */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
-    background-color: #1d4ed8;
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
     border-radius: 16px;
-    padding: 12px;
+    padding: 15px;
     margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    border-left: 5px solid #60a5fa;
 }
 
-/* ===== CHAT BOT ===== */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-    background-color: #111827;
+    background: rgba(15, 23, 42, 0.8);
     border-radius: 16px;
-    padding: 12px;
+    padding: 15px;
     margin-bottom: 12px;
     border: 1px solid #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-left: 5px solid #3b82f6;
 }
 
-/* ===== INPUT ===== */
+/* ===== KHUNG NHẬP LIỆU ĐÈN LED TỰ PHÁT SÁNG ===== */
 .stChatInput input {
-    background-color: #111827 !important;
-    color: white !important;
-    border-radius: 14px !important;
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5) !important;
+    font-size: 16px;
 }
 
-/* ===== SIDEBAR ===== */
+.stChatInput input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.8) !important;
+}
+
+/* ===== CẤU HÌNH THANH BÊN SIDEBAR ===== */
 section[data-testid="stSidebar"] {
-    background-color: #0f172a;
+    background-color: #020617;
+    border-right: 1px solid #1e293b;
 }
 
-/* ===== SCROLLBAR ===== */
+/* ===== THANH CUỘN CÔNG NGHỆ ===== */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
-
 ::-webkit-scrollbar-thumb {
-    background: #3b82f6;
+    background: linear-gradient(180deg, #3b82f6, #38bdf8);
     border-radius: 10px;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# API KEY
-# =========================
-try:
-
-    API_KEY = st.secrets["OPENROUTER_API_KEY"]
-
-except:
-
-    st.error("❌ Chưa thêm OPENROUTER_API_KEY vào Secrets!")
-
-    st.stop()
-
-# =========================
-# SIDEBAR
-# =========================
+# --- THANH BÊN SIDEBAR ---
 with st.sidebar:
-
-    st.title("🖥️ PC Assistant")
-
-    st.success("🟢 Online")
-
+    st.markdown("<h2 style='color: #3b82f6; text-align: center;'>🖥️ Control Panel</h2>", unsafe_allow_html=True)
+    st.success("⚡ HỆ THỐNG: SIÊU TỐC ĐỘ (OFFLINE)")
     st.markdown("---")
-
-    st.markdown("### 🔧 Hỗ trợ")
-
-    st.write("✔️ Lỗi Windows")
-    st.write("✔️ Màn hình xanh")
-    st.write("✔️ CPU & Mainboard")
-    st.write("✔️ RAM & GPU")
-    st.write("✔️ Chẩn đoán phần cứng")
-
+    st.write("📊 **Dữ liệu nạp sẵn:**")
+    st.info(f"✔️ {len(db.LOI_HE_THONG)} Mã lỗi hệ thống nâng cao")
+    st.info(f"✔️ {len(db.BEEP_CODES)} Mã âm thanh phần cứng BIOS")
+    st.info(f"✔️ {len(db.LINH_KIEN_PC)} Danh mục thông số linh kiện")
     st.markdown("---")
+    st.warning("🤖 **Phiên bản:** Chatbot K-Matching v2.5")
+    st.markdown("---")
+    st.info("👨‍💻 **Tác giả dự án STEM:**\n\n**Lê Văn Chung - Lớp 10A4**")
 
-    st.info(
-        "👨‍💻 Sản phẩm STEM\n\nLê Văn Chung - 10A4"
-    )
-
-# =========================
-# TITLE
-# =========================
-st.title("🖥️ Chatbot PC Assistant")
-
-st.markdown(
-    "### Hỗ trợ giải lỗi và tư vấn linh kiện máy tính"
-)
-
+# --- TIÊU ĐỀ ĐƯỢC THIẾT KẾ THEO YÊU CẦU ---
+st.markdown('<div class="neon-title">🤖 CHATBOT CHUYÊN GIA PC</div>', unsafe_allow_html=True)
+st.markdown('<div class="neon-subtitle">PHÁT TRIỂN BỞI: LÊ VĂN CHUNG - LỚP 10A4</div>', unsafe_allow_html=True)
 st.markdown("---")
 
-# =========================
-# CHAT HISTORY
-# =========================
+# --- KHỞI TẠO LỊCH SỬ CHAT ---
 if "messages" not in st.session_state:
-
     st.session_state.messages = []
 
-# =========================
-# SHOW OLD CHAT
-# =========================
 for msg in st.session_state.messages:
-
     with st.chat_message(msg["role"]):
-
         st.markdown(msg["content"])
 
-# =========================
-# INPUT
-# =========================
-prompt = st.chat_input(
-    "Nhập lỗi Windows hoặc tên linh kiện..."
-)
+# --- THUẬT TOÁN TÌM KIẾM CHUẨN HÓA LOGIC ---
+def engine_chuyen_gia(user_query):
+    q_raw = user_query.lower().strip()
+    q_clean = re.sub(re.compile(r'[^\w\s\-]'), '', q_raw) 
+    q_no_space = q_clean.replace(" ", "")
+    
+    ket_qua = []
 
-# =========================
-# HANDLE CHAT
-# =========================
-if prompt:
+    # 1. Khớp kho mã lỗi hệ thống
+    for key, info in db.LOI_HE_THONG.items():
+        key_clean = key.lower().replace(" ", "").replace("_", "")
+        if key in q_clean or key_clean in q_no_space or q_clean in info["ten"].lower():
+            res = f"### 🎯 Phát hiện lỗi: {info['ten']} (`{info['loai']}`)\n"
+            res += f"❌ **Nguyên nhân chính:** {info['nguyen_nhan']}\n\n"
+            res += "🛠️ *Phác đồ sửa chữa chuyên sâu từng bước:*\n"
+            for step in info["giai_phap"]:
+                res += f"{step}\n"
+            ket_qua.append(res)
+            break 
 
-    st.session_state.messages.append({
+    # 2. Khớp tiếng kêu bíp BIOS
+    if any(keyword in q_clean for keyword in ["tít", "bíp", "tit", "bip", "kêu"]):
+        for key, info in db.BEEP_CODES.items():
+            key_match = key.lower().replace(" ", "")
+            if key_match in q_no_space or q_no_space in key_match:
+                res = f"### 🔊 Giải mã âm thanh BIOS: {key.upper()}\n"
+                res += f"🚨 **Tình trạng phần cứng:** {info['tinh_trang']}\n"
+                if "xu_ly" in info:
+                    res += f"🔧 **Hướng xử lý:** {info['xu_ly']}\n"
+                ket_qua.append(res)
+                break
 
-        "role": "user",
+    # 3. Khớp thông số linh kiện phần cứng
+    for key, info in db.LINH_KIEN_PC.items():
+        key_clean = key.lower().replace(" ", "").replace("-", "")
+        if key_clean in q_no_space:
+            res = f"### 📦 Linh kiện: {info['ten']}\n"
+            res += f"⚙️ **Thông số cốt lõi:** {info['thong_so']}\n"
+            if "socket" in info:
+                res += f"🔌 **Chuẩn chân cắm (Socket):** `{info['socket']}`\n"
+            if "main_tuong_thich" in info:
+                res += f"📋 **Dòng Bo mạch chủ tương thích:** {', '.join(info['main_tuong_thich'])}\n"
+            res += f"⚡ **Yêu cầu bộ nguồn (PSU):** {info['nguon_khuyen_nghi']}\n\n"
+            res += f"💡 **Tư vấn từ Chuyên gia:** *{info['chuyen_gia_tu_van']}*"
+            ket_qua.append(res)
+            break
 
-        "content": prompt
+    if ket_qua:
+        return "\n\n---\n\n".join(ket_qua)
+    
+    return ("🤖 **Chatbot phản hồi:** Tôi đã ghi nhận mô tả này. Tuy nhiên, mã hiệu/linh kiện này "
+            "nằm ngoài danh sách được nạp sẵn trong cơ sở dữ liệu cục bộ.\n\n"
+            "💡 *Mẹo cho bạn: Hãy thử nhập các từ khóa như: i5-6500, memory_management, gtx 1650, tít dài liên tục.*")
 
-    })
-
+# --- XỬ LÝ NHẬP LIỆU ---
+if prompt := st.chat_input("Nhập mã lỗi Windows, tiếng kêu máy tính hoặc tên linh kiện..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-
-        try:
-
-            with st.spinner("🔍 Đang phân tích..."):
-
-                headers = {
-
-                    "Authorization": f"Bearer {API_KEY}",
-
-                    "Content-Type": "application/json"
-
-                }
-
-                payload = {
-
-                    "model": "openai/gpt-oss-20b:free",
-
-                    "messages": [
-
-                        {
-                            "role": "system",
-
-                            "content":
-                            """
-Bạn là chuyên gia PC của Lê Văn Chung lớp 10A4.
-
-Nhiệm vụ:
-- giải lỗi Windows
-- giải mã màn hình xanh
-- tư vấn CPU Intel AMD
-- tư vấn Mainboard
-- chẩn đoán phần cứng
-- tư vấn GPU RAM SSD
-
-Yêu cầu:
-- trả lời tiếng Việt
-- chuyên nghiệp
-- dễ hiểu
-- chia bước 1 2 3 rõ ràng
-"""
-                        },
-
-                        {
-                            "role": "user",
-
-                            "content": prompt
-                        }
-
-                    ]
-
-                }
-
-                response = requests.post(
-
-                    "https://openrouter.ai/api/v1/chat/completions",
-
-                    headers=headers,
-
-                    json=payload,
-
-                    timeout=60
-
-                )
-
-                result = response.json()
-
-                # SUCCESS
-                if response.status_code == 200 and "choices" in result:
-
-                    answer = result["choices"][0]["message"]["content"]
-
-                    st.markdown(answer)
-
-                    st.session_state.messages.append({
-
-                        "role": "assistant",
-
-                        "content": answer
-
-                    })
-
-                else:
-
-                    error_message = result.get(
-                        "error",
-                        {}
-                    ).get(
-                        "message",
-                        "Lỗi không xác định"
-                    )
-
-                    st.error(f"❌ OpenRouter lỗi: {error_message}")
-
-        except Exception as e:
-
-            st.error(f"❌ Lỗi hệ thống: {str(e)}")
+        with st.spinner("💾 Đang truy xuất ma trận dữ liệu cục bộ..."):
+            answer = engine_chuyen_gia(prompt)
+            st.markdown(answer)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+p
