@@ -13,43 +13,36 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
 
 /* ══════════════════════════════════════
    VALORANT COLOR SYSTEM
 ══════════════════════════════════════ */
 :root {
-    /* Core reds */
     --valo-red:       #ff4655;
     --valo-red-dim:   #c0303d;
     --valo-red-glow:  rgba(255,70,85,0.18);
     --valo-red-faint: rgba(255,70,85,0.06);
 
-    /* Teal / cyan accent — Viper, Cypher */
     --valo-teal:      #00d4bf;
     --valo-teal-dim:  rgba(0,212,191,0.12);
     --valo-teal-glow: rgba(0,212,191,0.08);
 
-    /* Gold — Sheriff, kills */
     --valo-gold:      #c8aa6e;
-    --valo-gold-dim:  rgba(200,170,110,0.12);
 
-    /* Background layers */
     --bg0: #0b0e14;
     --bg1: #12161f;
     --bg2: #181c28;
     --bg3: #1e2232;
 
-    /* Typography */
     --cream:  #ece8e1;
     --white:  #ffffff;
     --silver: #b5b2ad;
     --muted:  #7a7875;
     --dim:    #454851;
 
-    /* Borders */
     --br-red:  rgba(255,70,85,0.22);
-    --br-teal: rgba(0,212,191,0.18);
+    --br-teal: rgba(0,212,191,0.3);
     --br-w:    rgba(255,255,255,0.06);
     --br-w2:   rgba(255,255,255,0.10);
 }
@@ -63,7 +56,6 @@ html, body, .stApp {
     font-family: 'Barlow', sans-serif !important;
 }
 
-/* Noise texture overlay */
 .stApp::before {
     content: '';
     position: fixed;
@@ -88,7 +80,6 @@ html, body, .stApp {
         );
 }
 
-/* Signature top bar: red → teal gradient */
 .stApp::after {
     content: '';
     position: fixed;
@@ -114,12 +105,11 @@ html, body, .stApp {
     position: relative;
 }
 
-/* Author tag — top right corner */
 .valo-author {
     position: absolute;
     top: 8px; right: 0;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -149,22 +139,15 @@ html, body, .stApp {
     justify-content: center;
     gap: 12px;
 }
-.valo-eyebrow::before {
+.valo-eyebrow::before, .valo-eyebrow::after {
     content: '';
     display: inline-block;
     width: 32px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--valo-red));
     opacity: 0.6;
 }
-.valo-eyebrow::after {
-    content: '';
-    display: inline-block;
-    width: 32px; height: 1px;
-    background: linear-gradient(90deg, var(--valo-red), transparent);
-    opacity: 0.6;
-}
+.valo-eyebrow::before { background: linear-gradient(90deg, transparent, var(--valo-red)); }
+.valo-eyebrow::after { background: linear-gradient(90deg, var(--valo-red), transparent); }
 
-/* LOGO ICON */
 .valo-logo-wrap {
     display: flex;
     align-items: center;
@@ -175,7 +158,6 @@ html, body, .stApp {
 .valo-logo-icon {
     font-size: clamp(28px, 6vw, 40px);
     filter: drop-shadow(0 0 12px rgba(255,70,85,0.6));
-    line-height: 1;
 }
 .valo-title {
     font-family: 'Rajdhani', sans-serif;
@@ -190,57 +172,40 @@ html, body, .stApp {
 }
 .valo-title .red   { color: var(--valo-red); }
 .valo-title .teal  { color: var(--valo-teal); }
-.valo-title .slash {
-    color: var(--valo-red);
-    font-weight: 500;
-    opacity: 0.6;
-    margin: 0 2px;
-}
+.valo-title .slash { color: var(--valo-red); font-weight: 500; opacity: 0.6; margin: 0 2px; }
 
-/* Subtitle — visible outdoors */
+/* TÔ MÀU PHỤ ĐỀ */
 .valo-subtitle {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(11px, 2.5vw, 13px);
-    font-weight: 600;
-    letter-spacing: 5px;
-    color: var(--silver);
+    font-size: clamp(12px, 2.8vw, 14px);
+    font-weight: 700;
+    letter-spacing: 4px;
     text-transform: uppercase;
-    margin-top: 6px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
 }
+.valo-subtitle .sub-1 { color: var(--valo-red); }
+.valo-subtitle .sub-2 { color: var(--white); }
+.valo-subtitle .sub-3 { color: var(--valo-teal); }
 .valo-subtitle .dot {
     display: inline-block;
-    width: 3px; height: 3px;
-    background: var(--valo-teal);
+    width: 4px; height: 4px;
+    background: var(--dim);
     transform: rotate(45deg);
 }
 
-/* Divider */
 .valo-divider {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 12px 0 8px;
 }
-.valo-divider::before,
-.valo-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--br-w);
-}
-.valo-divider-inner {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.valo-diam {
-    width: 5px; height: 5px;
-    transform: rotate(45deg);
-}
+.valo-divider::before, .valo-divider::after { content: ''; flex: 1; height: 1px; background: var(--br-w); }
+.valo-divider-inner { display: flex; align-items: center; gap: 5px; }
+.valo-diam { width: 5px; height: 5px; transform: rotate(45deg); }
 .valo-diam.r { background: var(--valo-red); }
 .valo-diam.t { background: var(--valo-teal); width: 4px; height: 4px; opacity: 0.7; }
 .valo-dbar {
@@ -250,20 +215,19 @@ html, body, .stApp {
 }
 
 /* ══════════════════════════════════════
-   GREETING BOX
+   GREETING BOX (CỐ ĐỊNH)
 ══════════════════════════════════════ */
 .valo-greeting {
     position: relative;
-    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg1) 100%);
+    background: linear-gradient(135deg, rgba(24,28,40,0.8) 0%, rgba(18,22,31,0.9) 100%);
     border: 1px solid var(--br-red);
     border-top: 2px solid var(--valo-red);
     border-radius: 2px;
     padding: clamp(18px,5vw,28px) clamp(16px,5vw,28px) clamp(14px,4vw,22px);
-    margin: 4px 0 6px;
+    margin: 4px 0 16px;
     overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
 }
-
-/* Corner slash cut — top-left */
 .valo-greeting::before {
     content: '';
     position: absolute;
@@ -272,206 +236,150 @@ html, body, .stApp {
     border-width: 22px 22px 0 0;
     border-color: var(--bg0) transparent transparent transparent;
 }
-
-/* Teal glow — bottom right */
 .valo-greeting::after {
     content: '';
     position: absolute;
     bottom: -30px; right: -30px;
     width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(0,212,191,0.05) 0%, transparent 65%);
+    background: radial-gradient(circle, rgba(0,212,191,0.06) 0%, transparent 65%);
     pointer-events: none;
 }
-
-/* Vertical red bar left */
 .valo-vbar {
     position: absolute;
     left: 0; top: 18%; bottom: 18%;
     width: 3px;
-    background: linear-gradient(180deg,
-        transparent 0%,
-        var(--valo-red) 30%,
-        var(--valo-teal) 70%,
-        transparent 100%
-    );
-    opacity: 0.55;
+    background: linear-gradient(180deg, transparent 0%, var(--valo-red) 30%, var(--valo-teal) 70%, transparent 100%);
+    opacity: 0.8;
 }
-
-/* Status dot */
 .valo-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px;
 }
 .valo-status-dot {
-    width: 6px; height: 6px;
-    background: var(--valo-teal);
-    border-radius: 50%;
-    box-shadow: 0 0 6px var(--valo-teal);
-    animation: pulse 2s infinite;
+    width: 6px; height: 6px; background: var(--valo-teal); border-radius: 50%;
+    box-shadow: 0 0 6px var(--valo-teal); animation: pulse 2s infinite;
 }
 .valo-status-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--valo-teal);
-    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; color: var(--valo-teal); text-transform: uppercase;
 }
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--valo-teal); }
-    50%       { opacity: 0.5; box-shadow: 0 0 2px var(--valo-teal); }
-}
-
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .valo-greeting-icon {
-    font-size: clamp(30px, 6vw, 38px);
-    display: block;
-    text-align: center;
-    margin-bottom: 8px;
+    font-size: clamp(30px, 6vw, 38px); display: block; text-align: center; margin-bottom: 8px;
     filter: drop-shadow(0 0 10px rgba(255,70,85,0.5));
 }
 .valo-greeting-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(15px, 4vw, 21px);
-    font-weight: 700;
-    color: var(--white);
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    font-family: 'Rajdhani', sans-serif; font-size: clamp(16px, 4vw, 22px); font-weight: 700;
+    color: var(--white); text-align: center; text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 .valo-greeting-sub {
-    font-size: clamp(12px, 3vw, 13.5px);
-    color: var(--silver);
-    text-align: center;
-    line-height: 1.7;
+    font-size: clamp(12px, 3vw, 14px); color: var(--cream); text-align: center; line-height: 1.7; font-weight: 400;
 }
-
-/* Stat bar */
 .valo-stats {
-    display: flex;
-    justify-content: center;
-    gap: clamp(12px, 3vw, 24px);
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--br-w);
+    display: flex; justify-content: center; gap: clamp(12px, 3vw, 24px);
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--br-w);
 }
-.valo-stat {
-    text-align: center;
-    line-height: 1.2;
-}
-.valo-stat-num {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(16px, 4vw, 22px);
-    font-weight: 700;
-    color: var(--valo-red);
-    display: block;
-}
-.valo-stat-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--dim);
-    text-transform: uppercase;
-}
-.valo-stat-divider {
-    width: 1px;
-    background: var(--br-w2);
-    align-self: stretch;
-}
+.valo-stat { text-align: center; line-height: 1.2; }
+.valo-stat-num { font-family: 'Rajdhani', sans-serif; font-size: clamp(16px, 4vw, 22px); font-weight: 700; color: var(--valo-red); display: block; }
+.valo-stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
+.valo-stat-divider { width: 1px; background: var(--br-w2); align-self: stretch; }
 
 /* ══════════════════════════════════════
-   SUGGEST LABEL
+   SUGGEST LABEL (MÀU MỚI VALORANT)
 ══════════════════════════════════════ */
 .valo-suggest-label {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 16px 0 10px;
+    margin: 8px 0 14px;
 }
-.valo-suggest-label::before,
-.valo-suggest-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--br-w);
+.valo-suggest-label::before, .valo-suggest-label::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
 }
 .valo-suggest-label span {
+    background: var(--valo-red);
+    color: var(--white);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 3px;
-    color: #555860;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    white-space: nowrap;
+    padding: 4px 16px;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    box-shadow: 0 4px 15px rgba(255,70,85,0.3);
 }
 
 /* ══════════════════════════════════════
-   BUTTONS
+   BUTTONS GỢI Ý (ĐỔ MÀU KHUNG)
 ══════════════════════════════════════ */
 .stButton > button {
-    background: var(--bg2) !important;
-    color: #c8c4be !important;
-    border: 1px solid var(--br-w2) !important;
-    border-left: 2px solid rgba(255,70,85,0.25) !important;
+    background: linear-gradient(90deg, rgba(30,34,50,0.8), rgba(20,24,35,0.9)) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(0,212,191,0.2) !important;
+    border-left: 3px solid var(--valo-teal) !important;
     border-radius: 2px !important;
     font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: clamp(11px, 3vw, 13px) !important;
+    font-size: clamp(12px, 3vw, 14px) !important;
     font-weight: 700 !important;
     letter-spacing: 0.5px !important;
-    padding: 10px 14px !important;
+    padding: 12px 14px !important;
     width: 100% !important;
     text-align: left !important;
     white-space: normal !important;
     height: auto !important;
-    min-height: 46px !important;
+    min-height: 48px !important;
     line-height: 1.4 !important;
-    transition: all 0.12s ease !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
 }
 .stButton > button:hover {
-    background: linear-gradient(90deg, rgba(255,70,85,0.10), rgba(0,212,191,0.04)) !important;
+    background: linear-gradient(90deg, rgba(0,212,191,0.2), rgba(255,70,85,0.1)) !important;
+    border-color: var(--valo-teal) !important;
     border-left-color: var(--valo-red) !important;
-    border-color: var(--br-red) !important;
     color: var(--white) !important;
-    transform: translateX(3px) !important;
-}
-.stButton > button:active {
-    transform: translateX(1px) !important;
+    transform: translateX(4px) !important;
+    box-shadow: 0 4px 15px rgba(0,212,191,0.3) !important;
 }
 
 /* ══════════════════════════════════════
-   CHAT MESSAGES
+   CHAT MESSAGES (SỬA LỖI NERF CHỮ)
 ══════════════════════════════════════ */
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
-    background: linear-gradient(90deg, rgba(255,70,85,0.06), transparent);
-    border: 1px solid rgba(255,70,85,0.14);
-    border-right: 2px solid var(--valo-red);
-    border-radius: 2px;
-    padding: 12px 16px;
-    margin: 5px 0;
-}
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-    background: linear-gradient(90deg, rgba(0,212,191,0.04), var(--bg1));
-    border: 1px solid var(--br-w);
-    border-left: 2px solid var(--valo-teal);
-    border-radius: 2px;
-    padding: 12px 16px;
-    margin: 5px 0;
-}
-
+/* Ép toàn bộ chữ trong khung chat thành màu TRẮNG SÁNG + BÓNG CHỮ */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li {
-    font-size: clamp(13px, 3.5vw, 14.5px) !important;
+    font-size: clamp(14px, 3.8vw, 15px) !important;
     line-height: 1.75 !important;
-    color: #ddd9d3 !important;
+    color: #ffffff !important; 
+    font-weight: 400 !important;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important; /* Đổ bóng đen siêu đậm để nổi chữ */
 }
+
+/* KHUNG NGƯỜI DÙNG (MÀU ĐỎ OMEN) */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
+    background: linear-gradient(135deg, rgba(60,15,20,0.85) 0%, rgba(20,10,12,0.95) 100%) !important;
+    border: 1px solid rgba(255,70,85,0.4) !important;
+    border-right: 4px solid var(--valo-red) !important;
+    border-radius: 4px !important;
+    padding: 14px 18px !important;
+    margin: 8px 0 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+}
+
+/* KHUNG BOT TRẢ LỜI (MÀU XANH CYPHER) */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
+    background: linear-gradient(135deg, rgba(10,40,45,0.85) 0%, rgba(10,15,20,0.95) 100%) !important;
+    border: 1px solid rgba(0,212,191,0.3) !important;
+    border-left: 4px solid var(--valo-teal) !important;
+    border-radius: 4px !important;
+    padding: 14px 18px !important;
+    margin: 8px 0 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+}
+
+/* Các format đặc biệt trong chat */
 [data-testid="stChatMessage"] h3 {
     font-family: 'Rajdhani', sans-serif !important;
-    font-size: clamp(14px, 4vw, 18px) !important;
+    font-size: clamp(15px, 4vw, 19px) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
@@ -479,114 +387,69 @@ html, body, .stApp {
     margin-bottom: 8px !important;
     padding-bottom: 5px !important;
     border-bottom: 1px solid var(--br-w) !important;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8) !important;
 }
 [data-testid="stChatMessage"] strong {
-    color: #ffb0b8 !important;
-    font-weight: 600 !important;
-}
-[data-testid="stChatMessage"] em {
-    color: var(--valo-teal) !important;
-    font-style: normal !important;
-    font-size: 11px !important;
-    opacity: 0.7 !important;
+    color: #ffb0b8 !important; /* Đỏ nhạt để nổi trên nền tối */
+    font-weight: 700 !important;
 }
 [data-testid="stChatMessage"] code {
-    background: rgba(0,212,191,0.08) !important;
-    color: var(--valo-teal) !important;
-    border: 1px solid rgba(0,212,191,0.2) !important;
-    border-radius: 2px !important;
-    padding: 1px 6px !important;
-    font-size: 12px !important;
+    background: rgba(0,212,191,0.15) !important;
+    color: #55ffeb !important;
+    border: 1px solid rgba(0,212,191,0.4) !important;
+    border-radius: 3px !important;
+    padding: 2px 6px !important;
+    font-size: 13px !important;
+    text-shadow: none !important;
 }
 
 /* ══════════════════════════════════════
    CHAT INPUT
 ══════════════════════════════════════ */
 .stChatInput textarea {
-    background: var(--bg2) !important;
-    color: var(--cream) !important;
-    border: 1px solid var(--br-w2) !important;
-    border-bottom: 2px solid rgba(255,70,85,0.2) !important;
-    border-radius: 2px !important;
-    font-family: 'Barlow', sans-serif !important;
-    font-size: clamp(13px, 3.5vw, 14px) !important;
-    caret-color: var(--valo-red) !important;
+    background: var(--bg2) !important; color: var(--cream) !important;
+    border: 1px solid var(--br-w2) !important; border-bottom: 2px solid rgba(255,70,85,0.2) !important;
+    border-radius: 2px !important; font-family: 'Barlow', sans-serif !important;
+    font-size: clamp(14px, 3.5vw, 15px) !important; caret-color: var(--valo-red) !important;
 }
 .stChatInput textarea:focus {
-    border-color: var(--br-w2) !important;
-    border-bottom-color: var(--valo-red) !important;
-    box-shadow: 0 4px 24px rgba(255,70,85,0.06) !important;
-}
-.stChatInput textarea::placeholder {
-    color: var(--dim) !important;
+    border-color: var(--br-w2) !important; border-bottom-color: var(--valo-red) !important;
+    box-shadow: 0 4px 24px rgba(255,70,85,0.1) !important;
 }
 
 /* ══════════════════════════════════════
-   SIDEBAR
+   SIDEBAR & SPINNER
 ══════════════════════════════════════ */
-section[data-testid="stSidebar"] {
-    background: #090c11 !important;
-    border-right: 1px solid var(--br-red) !important;
-}
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] small {
-    color: var(--muted) !important;
-    font-size: 13px !important;
-}
-section[data-testid="stSidebar"] h2 {
-    font-family: 'Rajdhani', sans-serif !important;
-    font-size: 17px !important;
-    color: var(--cream) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 3px !important;
-}
-section[data-testid="stSidebar"] .stButton > button {
-    background: transparent !important;
-    border: 1px solid var(--br-red) !important;
-    border-left: 2px solid var(--valo-red) !important;
-    color: var(--muted) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-weight: 700 !important;
-    letter-spacing: 1px !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: var(--valo-red-faint) !important;
-    color: var(--cream) !important;
-    transform: none !important;
-}
+section[data-testid="stSidebar"] { background: #090c11 !important; border-right: 1px solid var(--br-red) !important; }
+section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] div, section[data-testid="stSidebar"] small { color: var(--muted) !important; font-size: 13px !important; }
+section[data-testid="stSidebar"] h2 { font-family: 'Rajdhani', sans-serif !important; font-size: 17px !important; color: var(--cream) !important; text-transform: uppercase !important; letter-spacing: 3px !important; }
+section[data-testid="stSidebar"] .stButton > button { background: transparent !important; border: 1px solid var(--br-red) !important; border-left: 2px solid var(--valo-red) !important; color: var(--cream) !important; font-family: 'Barlow Condensed', sans-serif !important; font-weight: 700 !important; letter-spacing: 1px !important; box-shadow: none !important; }
 
-/* ══════════════════════════════════════
-   SPINNER
-══════════════════════════════════════ */
-[data-testid="stSpinner"] p {
-    color: var(--valo-teal) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    letter-spacing: 4px !important;
-    font-size: 11px !important;
-    text-transform: uppercase !important;
-}
+[data-testid="stSpinner"] p { color: var(--valo-teal) !important; font-family: 'Barlow Condensed', sans-serif !important; letter-spacing: 4px !important; font-size: 12px !important; text-transform: uppercase !important; }
 
-/* ══════════════════════════════════════
-   HIDE STREAMLIT
-══════════════════════════════════════ */
 #MainMenu, footer, header { visibility: hidden !important; }
-.block-container {
-    padding-top: 1.2rem !important;
-    padding-bottom: 1.5rem !important;
-    max-width: 760px !important;
-}
+.block-container { padding-top: 1.2rem !important; padding-bottom: 1.5rem !important; max-width: 760px !important; }
 
 /* ══════════════════════════════════════
-   MOBILE
+   MOBILE BUGS FIX
 ══════════════════════════════════════ */
 @media (max-width: 600px) {
     .block-container { padding: 0.7rem 0.5rem 4.5rem !important; }
-    .valo-author { display: none; }
-    [data-testid="stChatMessage"] { padding: 10px 11px !important; margin: 3px 0 !important; }
-    .stButton > button { min-height: 42px !important; padding: 8px 10px !important; }
-    .valo-greeting { padding: 16px 14px !important; }
+    
+    /* HIỂN THỊ LẠI TÊN TÁC GIẢ TRÊN ĐIỆN THOẠI */
+    .valo-author { 
+        position: relative !important; 
+        top: 0 !important; 
+        justify-content: center !important; 
+        margin-bottom: 12px !important; 
+        font-size: 12px !important;
+        color: var(--valo-teal) !important; /* Làm nổi bật bằng màu Teal */
+    }
+    .valo-author::before { display: none; } /* Bỏ thanh ngang cho gọn */
+
+    [data-testid="stChatMessage"] { padding: 12px 14px !important; margin: 5px 0 !important; }
+    .stButton > button { min-height: 44px !important; padding: 10px 12px !important; font-size: 13px !important; }
+    .valo-greeting { padding: 18px 14px !important; margin-bottom: 10px !important; }
     .valo-stats { gap: 10px; }
 }
 </style>
@@ -653,11 +516,11 @@ st.markdown(f"""
     </div>
     <div class="valo-subtitle">
         <span class="dot"></span>
-        Chẩn đoán
+        <span class="sub-1">CHẨN ĐOÁN</span>
         <span class="dot"></span>
-        Phân tích
+        <span class="sub-2">PHÂN TÍCH</span>
         <span class="dot"></span>
-        Xử lý tự động
+        <span class="sub-3">XỬ LÝ TỰ ĐỘNG</span>
         <span class="dot"></span>
     </div>
 </div>
@@ -700,46 +563,47 @@ ALL_SUGGESTIONS = [
     ("◆  Tản nhiệt CPU nên mua loại nào",     "Tản nhiệt CPU loại nào tốt cho cấu hình tầm trung?"),
 ]
 
-# ========================
-# GREETING BOX
-# ========================
-if not st.session_state.greeted and not st.session_state.messages:
-    if not st.session_state.suggestions:
-        st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
+if not st.session_state.suggestions:
+    st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
-    st.markdown(f"""
-    <div class="valo-greeting">
-        <div class="valo-vbar"></div>
-        <div class="valo-status-row">
-            <div class="valo-status-dot"></div>
-            <div class="valo-status-text">Hệ thống sẵn sàng</div>
+# ========================
+# GREETING BOX (LUÔN HIỂN THỊ CỐ ĐỊNH)
+# ========================
+st.markdown(f"""
+<div class="valo-greeting">
+    <div class="valo-vbar"></div>
+    <div class="valo-status-row">
+        <div class="valo-status-dot"></div>
+        <div class="valo-status-text">Hệ thống sẵn sàng</div>
+    </div>
+    <span class="valo-greeting-icon">⚡</span>
+    <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
+    <div class="valo-greeting-sub">
+        Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi hệ thống.<br>
+        Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.
+    </div>
+    <div class="valo-stats">
+        <div class="valo-stat">
+            <span class="valo-stat-num">{db_loi}</span>
+            <span class="valo-stat-label">Lỗi hệ thống</span>
         </div>
-        <span class="valo-greeting-icon">⚡</span>
-        <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
-        <div class="valo-greeting-sub">
-            Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi hệ thống.<br>
-            Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.
+        <div class="valo-stat-divider"></div>
+        <div class="valo-stat">
+            <span class="valo-stat-num">{db_lk}</span>
+            <span class="valo-stat-label">Linh kiện PC</span>
         </div>
-        <div class="valo-stats">
-            <div class="valo-stat">
-                <span class="valo-stat-num">{db_loi}</span>
-                <span class="valo-stat-label">Lỗi hệ thống</span>
-            </div>
-            <div class="valo-stat-divider"></div>
-            <div class="valo-stat">
-                <span class="valo-stat-num">{db_lk}</span>
-                <span class="valo-stat-label">Linh kiện PC</span>
-            </div>
-            <div class="valo-stat-divider"></div>
-            <div class="valo-stat">
-                <span class="valo-stat-num" style="color:var(--valo-teal)">24/7</span>
-                <span class="valo-stat-label">Hỗ trợ</span>
-            </div>
+        <div class="valo-stat-divider"></div>
+        <div class="valo-stat">
+            <span class="valo-stat-num" style="color:var(--valo-teal)">24/7</span>
+            <span class="valo-stat-label">Hỗ trợ</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown('<div class="valo-suggest-label"><span>— Chọn nhanh vấn đề —</span></div>',
+# Chỉ hiển thị gợi ý khi chưa có đoạn chat nào để tiết kiệm diện tích sau khi chat
+if not st.session_state.messages:
+    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>',
                 unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="small")
