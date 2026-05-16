@@ -53,36 +53,32 @@ st.markdown("""
    BASE - ĐÃ DESIGN LVC ART FULL MÀN
 ============================== */
 html, body, .stApp {
-    background: var(--bg0) !important; /* Đen nền tối */
+    background: var(--bg0) !important;
     color: var(--cream) !important;
     font-family: 'Barlow', sans-serif !important;
 }
 
-/* Diagonal slash texture background & LVC Art (Fix lỗi đen thui) */
+/* Diagonal slash texture background & LVC Art */
 .stApp::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0; /* Art nằm dưới bố cục */
-    opacity: 0.15; /* Làm mờ art để không đụng vô chữ */
+    z-index: 0; 
+    opacity: 0.15;
     background:
-        /* LỚP TẠO CHỮ "LVC" IN HOA, SẮC CẠNH PHONG CÁCH LOGO VALORANT DỰA TRÊN Glitch Glitch MỜ GÓC TRÊN TRÁI MỜ GÓC TRÊN TRÁI MỜ MỜ */
         linear-gradient(135deg, rgba(255,70,85,0.1) 0%, transparent 40%),
         linear-gradient(45deg, rgba(0,212,191,0.08) 0%, transparent 40%),
-        /* Lớp slash chéo gân guốc đỏ Valorant Red ( rõ nét, gân guốc) */
         repeating-linear-gradient(
             -52deg,
             transparent 0px, transparent 60px,
             rgba(255,70,85,0.08) 60px, rgba(255,70,85,0.08) 61px
         ),
-        /* Lớp slash chéo teal Cypher ( mờ mờ, mờ ảo) */
         repeating-linear-gradient(
             38deg,
             transparent 0px, transparent 110px,
             rgba(0,212,191,0.04) 110px, rgba(0,212,191,0.04) 111px
         ),
-        /* Lớp lưới ngang Omen mờ glitch */
         repeating-linear-gradient(
             180deg,
             transparent 0px, transparent 6px,
@@ -90,7 +86,6 @@ html, body, .stApp {
         );
 }
 
-/* Top bar accent đỏ phe tấn công */
 .stApp::after {
     content: '';
     position: fixed;
@@ -108,7 +103,7 @@ html, body, .stApp {
 }
 
 /* ==============================
-   HEADER
+   HEADER BỐ CỤC CHUẨN
 ============================== */
 .valo-header {
     text-align: center;
@@ -116,7 +111,6 @@ html, body, .stApp {
     position: relative;
 }
 
-/* Author tag — top right corner */
 .valo-author {
     position: absolute;
     top: 8px; right: 0;
@@ -154,7 +148,6 @@ html, body, .stApp {
     opacity: 0.6;
 }
 
-/* LOGO ICON */
 .valo-logo-wrap {
     display: flex;
     align-items: center;
@@ -167,7 +160,7 @@ html, body, .stApp {
     filter: drop-shadow(0 0 12px rgba(255,70,85,0.6));
 }
 .valo-title {
-    font-family: 'Oswald', sans-serif !important; /* Đổi font sắc cạnh Valorant */
+    font-family: 'Oswald', sans-serif !important;
     font-size: clamp(30px, 7.5vw, 62px) !important;
     font-weight: 700 !important;
     letter-spacing: 1px !important;
@@ -178,14 +171,13 @@ html, body, .stApp {
     text-shadow: 0 0 40px rgba(255,70,85,0.15);
 }
 .valo-title .red   { color: var(--valo-red); }
-.valo-title . slash {
+.valo-title .slash {
     color: var(--valo-red);
     font-weight: 500;
     opacity: 0.6;
     margin: 0 2px;
 }
 
-/* Subtitle */
 .valo-subtitle {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: clamp(11px, 2.5vw, 13px);
@@ -206,7 +198,6 @@ html, body, .stApp {
     transform: rotate(45deg);
 }
 
-/* Divider */
 .valo-divider {
     display: flex;
     align-items: center;
@@ -238,7 +229,7 @@ html, body, .stApp {
 }
 
 /* ==============================
-   GREETING BOX
+   KHUNG LỚN HỆ THỐNG (GREETING BOX)
 ============================== */
 .valo-greeting {
     position: relative;
@@ -251,7 +242,6 @@ html, body, .stApp {
     overflow: hidden;
 }
 
-/* Corner slash cut — top-left */
 .valo-greeting::before {
     content: '';
     position: absolute;
@@ -261,21 +251,14 @@ html, body, .stApp {
     border-color: var(--bg0) transparent transparent transparent;
 }
 
-/* Vertical red bar left */
 .valo-vbar {
     position: absolute;
     left: 0; top: 18%; bottom: 18%;
     width: 3px;
-    background: linear-gradient(180deg,
-        transparent 0%,
-        var(--valo-red) 30%,
-        var(--valo-teal) 70%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg, transparent 0%, var(--valo-red) 30%, var(--valo-teal) 70%, transparent 100%);
     opacity: 0.55;
 }
 
-/* Status dot */
 .valo-status-row {
     display: flex;
     align-items: center;
@@ -328,7 +311,6 @@ html, body, .stApp {
     line-height: 1.7;
 }
 
-/* Stat bar */
 .valo-stats {
     display: flex;
     justify-content: center;
@@ -362,33 +344,35 @@ html, body, .stApp {
 }
 
 /* ==============================
-   SUGGEST LABEL
+   ĐÃ SỬA: CHỮ "CHỌN VẤN ĐỀ" CÂN ĐỐI TRÊN PC
 ============================== */
 .valo-suggest-label {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 16px 0 10px;
+    justify-content: center; /* Căn giữa nội dung hoàn hảo */
+    gap: 15px;
+    margin: 20px 0 12px;
+    width: 100%;
 }
 .valo-suggest-label::before,
 .valo-suggest-label::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--br-w);
+    background: rgba(255, 255, 255, 0.15);
 }
 .valo-suggest-label span {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 3px;
-    color: #555860;
+    color: var(--silver); /* Làm sáng chữ cho dễ nhìn */
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 /* ==============================
-   BUTTONS
+   BUTTONS GỢI Ý
 ============================== */
 .stButton > button {
     background: var(--bg2) !important;
@@ -415,9 +399,6 @@ html, body, .stApp {
     border-color: var(--br-red) !important;
     color: var(--white) !important;
     transform: translateX(3px) !important;
-}
-.stButton > button:active {
-    transform: translateX(1px) !important;
 }
 
 /* ==============================
@@ -446,29 +427,6 @@ html, body, .stApp {
     line-height: 1.75 !important;
     color: #ddd9d3 !important;
 }
-[data-testid="stChatMessage"] h3 {
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-size: clamp(14px, 4vw, 18px) !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-    color: var(--white) !important;
-    margin-bottom: 8px !important;
-    padding-bottom: 5px !important;
-    border-bottom: 1px solid var(--br-w) !important;
-}
-[data-testid="stChatMessage"] strong {
-    color: #ffb0b8 !important;
-    font-weight: 600 !important;
-}
-[data-testid="stChatMessage"] code {
-    background: rgba(255,70,85,0.08) !important;
-    color: var(--valo-teal) !important;
-    border: 1px solid rgba(0,212,191,0.2) !important;
-    border-radius: 2px !important;
-    padding: 1px 6px !important;
-    font-size: 12px !important;
-}
 
 /* ==============================
    CHAT INPUT
@@ -479,69 +437,9 @@ html, body, .stApp {
     border: 1px solid var(--br-w2) !important;
     border-bottom: 2px solid rgba(255,70,85,0.2) !important;
     border-radius: 2px !important;
-    font-family: 'Barlow', sans-serif !important;
-    font-size: clamp(13px, 3.5vw, 14px) !important;
-    caret-color: var(--valo-red) !important;
-}
-.stChatInput textarea:focus {
-    border-color: var(--br-w2) !important;
-    border-bottom-color: var(--valo-red) !important;
-    box-shadow: 0 4px 24px rgba(255,70,85,0.06) !important;
-}
-.stChatInput textarea::placeholder {
-    color: var(--dim) !important;
 }
 
-/* ==============================
-   SIDEBAR
-============================== */
-section[data-testid="stSidebar"] {
-    background: #090c11 !important;
-    border-right: 1px solid var(--br-red) !important;
-}
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] small {
-    color: var(--muted) !important;
-    font-size: 13px !important;
-}
-section[data-testid="stSidebar"] h2 {
-    font-family: 'Oswald', sans-serif !important;
-    font-size: 17px !important;
-    color: var(--cream) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 3px !important;
-}
-section[data-testid="stSidebar"] .stButton > button {
-    background: transparent !important;
-    border: 1px solid var(--br-red) !important;
-    border-left: 2px solid var(--valo-red) !important;
-    color: var(--muted) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    font-weight: 700 !important;
-    letter-spacing: 1px !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: var(--valo-red-faint) !important;
-    color: var(--cream) !important;
-    transform: none !important;
-}
-
-/* ==============================
-   SPINNER
-============================== */
-[data-testid="stSpinner"] p {
-    color: var(--valo-teal) !important;
-    font-family: 'Barlow Condensed', sans-serif !important;
-    letter-spacing: 4px !important;
-    font-size: 11px !important;
-    text-transform: uppercase !important;
-}
-
-/* ==============================
-   HIDE STREAMLIT
-============================== */
+/* HIDE STREAMLIT BRANDING */
 #MainMenu, footer, header { visibility: hidden !important; }
 .block-container {
     padding-top: 1.2rem !important;
@@ -549,16 +447,9 @@ section[data-testid="stSidebar"] .stButton > button:hover {
     max-width: 760px !important;
 }
 
-/* ==============================
-   MOBILE
-============================== */
 @media (max-width: 600px) {
     .block-container { padding: 0.7rem 0.5rem 4.5rem !important; }
     .valo-author { display: none; }
-    [data-testid="stChatMessage"] { padding: 10px 11px !important; margin: 3px 0 !important; }
-    .stButton > button { min-height: 42px !important; padding: 8px 10px !important; }
-    .valo-greeting { padding: 16px 14px !important; }
-    .valo-stats { gap: 10px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -570,9 +461,6 @@ try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except KeyError:
     st.error("❌ Chưa cấu hình GROQ_API_KEY trong Secrets!")
-    st.stop()
-except Exception as e:
-    st.error(f"❌ Lỗi kết nối: {str(e)}")
     st.stop()
 
 # ========================
@@ -595,32 +483,25 @@ raw_json_context = load_raw_json()
 db_loi = len(data_pc.get("loi_he_thong", []))
 db_lk = len(data_pc.get("linh_kien_pc", []))
 
-# ========================
 # SIDEBAR
-# ========================
 with st.sidebar:
     st.markdown("## ⚡ PC SOLVING SYSTEM")
     st.markdown("---")
-    st.markdown("Hệ thống chẩn đoán lỗi và tư vấn linh kiện máy tính chuyên sâu.")
-    st.markdown("---")
     if st.button("⟳ KÍCH HOẠT LẠI", use_container_width=True):
         st.session_state.messages = []
-        st.session_state.greeted = False
-        st.session_state.suggestions = []
+        st.session_state.pending_query = None
         st.rerun()
     st.markdown("---")
     st.markdown("<span style='color:#00d4bf; font-weight:bold;'>Tác giả: Lê Văn Chung - 10A4🎓</span>", unsafe_allow_html=True)
 
-# ========================
-# HEADER
-# ========================
+# HEADER CỐ ĐỊNH
 st.markdown(f"""
 <div class="valo-header">
     <div class="valo-author">LÊ VĂN CHUNG · 10A4 🖥️🖥️🖥️</div>
     <div class="valo-eyebrow">⚡ STEM PROJECT CONCEPT DỰ ÁN ỨNG DỤNG HOÀN CHỈNH</div>
     <div class="valo-logo-wrap">
         <span class="valo-logo-icon">🖥</span>
-        <div class="valo-title"><span class="white">PC</span><span class=" slash">/</span><span class="red">SOLVING</span></div>
+        <div class="valo-title"><span class="white">PC</span><span class="slash">/</span><span class="red">SOLVING</span></div>
     </div>
     <div class="valo-subtitle">
         <span class="dot"></span>
@@ -646,7 +527,7 @@ if "messages" not in st.session_state: st.session_state.messages = []
 if "suggestions" not in st.session_state: st.session_state.suggestions = []
 if "pending_query" not in st.session_state: st.session_state.pending_query = None
 
-# 4 câu hỏi gợi ý nhanh ban đầu
+# Danh sách gợi ý cố định
 ALL_SUGGESTIONS = [
     ("⚠ Màn hình xanh chết BSOD", "Máy tính bị màn hình xanh chết, phải làm gì?"),
     ("▪ Màn hình đen không hiển thị", "Máy lên nguồn nhưng màn hình đen, không lên gì"),
@@ -661,9 +542,9 @@ ALL_SUGGESTIONS = [
 if not st.session_state.suggestions:
     st.session_state.suggestions = random.sample(ALL_SUGGESTIONS, 4)
 
-# ========================
-# GREETING PANEL CỐ ĐỊNH PHÍA TRÊN
-# ========================
+# ==============================================================
+# ĐÃ SỬA: KHUNG LỚN HỆ THỐNG & NÚT GỢI Ý CỐ ĐỊNH PHÍA TRÊN (KHÔNG MẤT ĐI)
+# ==============================================================
 st.markdown(f"""
 <div class="valo-greeting">
     <div class="valo-vbar"></div>
@@ -696,22 +577,21 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Chỉ hiển thị nút gợi ý khi chưa chat
-if not st.session_state.messages:
-    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2, gap="small")
-    for i, (label, query) in enumerate(st.session_state.suggestions):
-        with (col1 if i % 2 == 0 else col2):
-            if st.button(label, key=f"sug_{i}"):
-                st.session_state.pending_query = query
-                st.rerun()
+# Hiển thị khu vực chọn nhanh vấn đề (luôn luôn hiển thị)
+st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
+col1, col2 = st.columns(2, gap="small")
+for i, (label, query) in enumerate(st.session_state.suggestions):
+    with (col1 if i % 2 == 0 else col2):
+        if st.button(label, key=f"sug_{i}"):
+            st.session_state.pending_query = query
 
-# LỊCH SỬ CHAT
+# KHU VỰC LỊCH SỬ CHAT (ĐẨY XUỐNG DƯỚI CỐ ĐỊNH)
+st.write("---")
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# THUẬT TOÁN QUÉT TÌM KIẾM DATA JSON CỤC BỘ
+# THUẬT TOÁN TRA CỨU
 def calculate_match_score(item, q_clean, user_numbers):
     score = 0
     item_kws = [str(kw).lower().strip() for kw in item.get("keywords", [])]
@@ -773,7 +653,6 @@ Trình bày mạch lạc bằng tiếng Việt, ngắn gọn rành mạch theo d
     )
     return response.choices[0].message.content
 
-# ĐIỀU PHỐI ĐẦU VÀO
 def handle_message(prompt):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -788,7 +667,9 @@ def handle_message(prompt):
                 st.session_state.messages.append({"role": "assistant", "content": final_answer})
             except Exception as e:
                 st.error("❌ Kết nối trục trặc hoặc API quá hạn. Hãy thử lại!")
+    st.rerun()
 
+# ĐIỀU PHỐI ĐẦU VÀO TỪ NÚT BẤM HOẶC Ô CHAT
 if st.session_state.pending_query:
     q = st.session_state.pending_query
     st.session_state.pending_query = None
