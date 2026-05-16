@@ -1,27 +1,35 @@
+import streamlit as st
+import json
+import re
+import os
+import random
+from groq import Groq
+
+# =========================
+# PAGE CONFIG
+# =========================
+st.set_page_config(
+    page_title="PC Solving System — Lê Văn Chung 10A4",
+    page_icon="⚡",
+    layout="centered"
+)
+
+# =========================
+# VALORANT UI
+# =========================
 st.markdown("""
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow:wght@300;400;500;600&display=swap');
 
-/* =========================
-   VALORANT THEME V2
-========================= */
-
 :root{
     --red:#ff4655;
-    --red-soft:#ff5f6d;
     --bg:#0b0e13;
-    --bg2:#11141b;
     --panel:#171c25;
-    --panel2:#1c2230;
     --text:#f3f4f6;
-    --muted:#b6bcc8;
-    --line:#ffffff12;
 }
 
-/* =========================
-   BASE
-========================= */
+/* BASE */
 
 html, body, .stApp{
     background:
@@ -31,7 +39,8 @@ html, body, .stApp{
     font-family:'Barlow',sans-serif;
 }
 
-/* giảm texture để chữ nổi hơn */
+/* Background */
+
 .stApp::before{
     content:"";
     position:fixed;
@@ -47,79 +56,44 @@ html, body, .stApp{
     z-index:0;
 }
 
-/* =========================
-   HEADER
-========================= */
+/* HEADER */
 
 .valo-header{
     text-align:center;
-    padding-top:10px;
-    margin-bottom:10px;
-}
-
-.valo-eyebrow{
-    color:var(--red);
-    letter-spacing:4px;
-    font-size:11px;
-    font-weight:600;
-    margin-bottom:8px;
-    text-transform:uppercase;
+    margin-top:10px;
 }
 
 .valo-title{
     font-family:'Rajdhani',sans-serif;
-    font-size:62px;
-    line-height:0.95;
+    font-size:60px;
     font-weight:700;
     color:white;
-    letter-spacing:-1px;
+    line-height:0.95;
 
     text-shadow:
-    0 0 18px rgba(255,70,85,0.15);
+    0 0 18px rgba(255,70,85,0.18);
 }
 
 .valo-title span{
     color:var(--red);
 }
 
-.valo-subtitle{
-    margin-top:10px;
-
-    color:#d4dae3;
-
+.valo-sub{
+    margin-top:8px;
+    color:#cbd5e1;
     letter-spacing:3px;
-    text-transform:uppercase;
-
     font-size:12px;
-    font-weight:500;
+    text-transform:uppercase;
 }
 
-/* =========================
-   DIVIDER
-========================= */
+/* GREETING */
 
-.valo-divider{
-    width:100%;
-    height:1px;
-    background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,70,85,0.6),
-    transparent
-    );
-
-    margin:18px 0 22px 0;
-}
-
-/* =========================
-   GREETING
-========================= */
-
-.valo-greeting{
-    background:linear-gradient(
+.valo-box{
+    background:
+    linear-gradient(
     145deg,
-    rgba(23,28,37,0.95),
-    rgba(18,22,30,0.98)
+    rgba(23,28,37,0.96),
+    rgba(16,20,28,0.98)
     );
 
     border:1px solid rgba(255,70,85,0.15);
@@ -128,44 +102,31 @@ html, body, .stApp{
 
     border-radius:14px;
 
-    padding:28px;
+    padding:26px;
+
+    margin-top:20px;
 
     box-shadow:
-    0 0 25px rgba(255,70,85,0.06);
-
-    margin-bottom:14px;
+    0 0 24px rgba(255,70,85,0.05);
 }
 
-.valo-agent-icon{
-    font-size:42px;
-    display:block;
-    text-align:center;
-    margin-bottom:10px;
-}
-
-.valo-greeting-title{
-    text-align:center;
+.valo-box h3{
     font-family:'Rajdhani',sans-serif;
-    font-size:25px;
-    font-weight:700;
-    color:white;
+    font-size:26px;
     margin-bottom:8px;
 }
 
-.valo-greeting-sub{
-    text-align:center;
-    color:#c5ccd8;
+.valo-box p{
+    color:#c7cfda;
     line-height:1.8;
-    font-size:14px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* BUTTON */
 
 .stButton > button{
 
-    background:linear-gradient(
+    background:
+    linear-gradient(
     145deg,
     #1b2230,
     #151a23
@@ -183,9 +144,9 @@ html, body, .stApp{
 
     transition:0.18s ease !important;
 
-    font-weight:500 !important;
-
     min-height:58px !important;
+
+    font-weight:500 !important;
 }
 
 .stButton > button:hover{
@@ -194,21 +155,9 @@ html, body, .stApp{
 
     transform:translateY(-2px);
 
-    background:linear-gradient(
-    145deg,
-    #232c3d,
-    #1a1f2b
-    ) !important;
-
     box-shadow:
-    0 0 18px rgba(255,70,85,0.12);
-
-    color:white !important;
+    0 0 18px rgba(255,70,85,0.12) !important;
 }
-
-/* =========================
-   CHAT
-========================= */
 
 /* USER */
 
@@ -261,28 +210,12 @@ html, body, .stApp{
 
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li{
-
     color:#eef2f7 !important;
-
     line-height:1.85 !important;
-
     font-size:15px !important;
 }
 
-[data-testid="stChatMessage"] strong{
-    color:#ff7b87 !important;
-}
-
-[data-testid="stChatMessage"] code{
-    background:rgba(255,70,85,0.12);
-    color:#ff8d97;
-    padding:2px 6px;
-    border-radius:6px;
-}
-
-/* =========================
-   INPUT
-========================= */
+/* INPUT */
 
 .stChatInput textarea{
 
@@ -294,22 +227,10 @@ html, body, .stApp{
 
     border-radius:12px !important;
 
-    padding:12px !important;
-
     font-size:15px !important;
 }
 
-.stChatInput textarea:focus{
-
-    border-color:rgba(255,70,85,0.5) !important;
-
-    box-shadow:
-    0 0 18px rgba(255,70,85,0.15) !important;
-}
-
-/* =========================
-   SIDEBAR
-========================= */
+/* SIDEBAR */
 
 section[data-testid="stSidebar"]{
     background:#0a0d12 !important;
@@ -320,22 +241,7 @@ section[data-testid="stSidebar"] *{
     color:#d0d6e0 !important;
 }
 
-/* =========================
-   SCROLLBAR
-========================= */
-
-::-webkit-scrollbar{
-    width:8px;
-}
-
-::-webkit-scrollbar-thumb{
-    background:rgba(255,70,85,0.35);
-    border-radius:10px;
-}
-
-/* =========================
-   HIDE STREAMLIT
-========================= */
+/* HIDE */
 
 #MainMenu,
 footer,
@@ -348,24 +254,162 @@ header{
     padding-top:1rem !important;
 }
 
-/* =========================
-   MOBILE
-========================= */
-
-@media(max-width:768px){
-
-    .valo-title{
-        font-size:42px;
-    }
-
-    .valo-greeting{
-        padding:20px;
-    }
-
-    [data-testid="stChatMessage"]{
-        padding:14px !important;
-    }
-}
-
 </style>
 """, unsafe_allow_html=True)
+
+# =========================
+# GROQ CLIENT
+# =========================
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("❌ Chưa thêm GROQ_API_KEY vào Secrets")
+    st.stop()
+
+# =========================
+# DATABASE
+# =========================
+def load_database():
+    if os.path.exists("database_pc.json"):
+        with open("database_pc.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"loi_he_thong": [], "linh_kien_pc": []}
+
+data_pc = load_database()
+
+# =========================
+# SESSION
+# =========================
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# =========================
+# SIDEBAR
+# =========================
+with st.sidebar:
+
+    st.markdown("## ⚡ PC SOLVING SYSTEM")
+    st.markdown("---")
+    st.markdown("Hệ thống hỗ trợ xử lý lỗi và tư vấn linh kiện PC.")
+
+    if st.button("⟳ PHIÊN MỚI", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+
+    st.markdown("---")
+    st.markdown("Lê Văn Chung — 10A4")
+
+# =========================
+# HEADER
+# =========================
+st.markdown("""
+<div class="valo-header">
+    <div class="valo-title">
+        PC <span>SOLVING</span>
+    </div>
+
+    <div class="valo-sub">
+        Diagnostic • Hardware • Performance
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# =========================
+# GREETING
+# =========================
+if len(st.session_state.messages) == 0:
+
+    st.markdown("""
+    <div class="valo-box">
+
+    <h3>💻 Hệ thống hỗ trợ kỹ thuật PC</h3>
+
+    <p>
+    Nhập mã lỗi Windows, mô tả hiện tượng hoặc linh kiện cần tư vấn.
+    Hệ thống sẽ tự động phân tích và đưa ra giải pháp phù hợp.
+    </p>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+# =========================
+# SHOW CHAT
+# =========================
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# =========================
+# ASK MODEL
+# =========================
+def ask_bot(prompt):
+
+    system_prompt = """
+Bạn là chuyên gia phần cứng máy tính của Lê Văn Chung lớp 10A4.
+
+Nhiệm vụ:
+- Chẩn đoán lỗi PC
+- Giải thích lỗi Windows
+- Tư vấn CPU GPU RAM Mainboard PSU
+- Hướng dẫn sửa lỗi theo từng bước
+
+QUY TẮC:
+- Không nói mình là AI
+- Trả lời chuyên nghiệp
+- Chia bước rõ ràng
+- Không lan man
+"""
+
+    response = client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt
+            },
+
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+
+        temperature=0.4,
+        max_tokens=700
+    )
+
+    return response.choices[0].message.content
+
+# =========================
+# CHAT INPUT
+# =========================
+if prompt := st.chat_input("Nhập lỗi PC hoặc linh kiện cần tư vấn..."):
+
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt
+    })
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+
+        with st.spinner("ĐANG PHÂN TÍCH HỆ THỐNG..."):
+
+            try:
+
+                answer = ask_bot(prompt)
+
+                st.markdown(answer)
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": answer
+                })
+
+            except Exception as e:
+
+                st.error(f"❌ Lỗi hệ thống: {str(e)}")
