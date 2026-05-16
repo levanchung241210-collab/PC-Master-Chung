@@ -1,167 +1,365 @@
-import streamlit as st
-import json
-import re
-import os
-import random
-from groq import Groq
-
-# =========================
-# PAGE CONFIG
-# =========================
-st.set_page_config(
-    page_title="PC Solving System — Lê Văn Chung 10A4",
-    page_icon="⚡",
-    layout="centered"
-)
-
-# =========================
-# VALORANT UI
-# =========================
+```python
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow:wght@300;400;500;600&display=swap');
-
-:root{
-    --red:#ff4655;
-    --bg:#0b0e13;
-    --panel:#171c25;
-    --text:#f3f4f6;
+/* ==============================
+   VALORANT CORE PALETTE
+============================== */
+:root {
+    --red:     #ff4655;
+    --red-dim: #c0303d;
+    --red-glow:#ff465540;
+    --dark:    #0b0f15;
+    --dark2:   #121720;
+    --dark3:   #181d27;
+    --panel:   #0d1117cc;
+    --border:  #ff465520;
+    --border2: #ffffff10;
+    --text:    #f3f6fb;
+    --muted:   #9ba3af;
+    --accent:  #ffffff;
 }
 
-/* BASE */
-
-html, body, .stApp{
+/* ==============================
+   BASE
+============================== */
+html, body, .stApp {
     background:
-        radial-gradient(circle at top right, rgba(255,70,85,0.08), transparent 25%),
-        linear-gradient(180deg,#0a0c11 0%, #0f131a 100%);
-    color:var(--text);
-    font-family:'Barlow',sans-serif;
+    radial-gradient(circle at top right,
+    rgba(255,70,85,0.10),
+    transparent 30%),
+
+    linear-gradient(
+    180deg,
+    #0a0d12 0%,
+    #10141c 100%
+    ) !important;
+
+    color: var(--text) !important;
+    font-family: 'Barlow', sans-serif !important;
 }
 
-/* Background */
+/* Texture background nhẹ hơn */
+.stApp::before {
+    content: '';
+    position: fixed;
+    inset: 0;
 
-.stApp::before{
-    content:"";
-    position:fixed;
-    inset:0;
     background:
-    repeating-linear-gradient(
-        -55deg,
-        transparent,
-        transparent 55px,
-        rgba(255,70,85,0.015) 56px
+        repeating-linear-gradient(
+            -55deg,
+            transparent,
+            transparent 65px,
+            rgba(255,70,85,0.008) 66px
+        );
+
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Top glow */
+.stApp::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 2px;
+
+    background:
+    linear-gradient(
+    90deg,
+    transparent,
+    var(--red),
+    transparent
     );
-    pointer-events:none;
-    z-index:0;
+
+    box-shadow:
+    0 0 20px rgba(255,70,85,0.4);
+
+    z-index: 999;
 }
 
-/* HEADER */
-
-.valo-header{
-    text-align:center;
-    margin-top:10px;
+/* ==============================
+   HEADER
+============================== */
+.valo-header {
+    position: relative;
+    text-align: center;
+    padding: 10px 0 4px;
+    margin-bottom: 4px;
 }
 
-.valo-title{
-    font-family:'Rajdhani',sans-serif;
-    font-size:60px;
-    font-weight:700;
-    color:white;
-    line-height:0.95;
+.valo-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.valo-eyebrow::before,
+.valo-eyebrow::after {
+    content:'';
+    width:28px;
+    height:1px;
+    background:var(--red);
+    opacity:0.7;
+}
+
+.valo-title {
+
+    font-family: 'Rajdhani', sans-serif;
+
+    font-size: clamp(34px, 7vw, 64px);
+
+    font-weight: 700;
+
+    letter-spacing: -1px;
+
+    line-height: 1;
+
+    color: var(--accent);
+
+    text-transform: uppercase;
+
+    margin: 0;
 
     text-shadow:
-    0 0 18px rgba(255,70,85,0.18);
+    0 0 20px rgba(255,70,85,0.10);
 }
 
-.valo-title span{
-    color:var(--red);
+.valo-title span {
+    color: var(--red);
 }
 
-.valo-sub{
-    margin-top:8px;
-    color:#cbd5e1;
-    letter-spacing:3px;
-    font-size:12px;
-    text-transform:uppercase;
+.valo-subtitle {
+
+    font-family: 'Barlow Condensed', sans-serif;
+
+    font-size: clamp(11px, 2.5vw, 13px);
+
+    font-weight: 600;
+
+    letter-spacing: 4px;
+
+    color: #d9dee7;
+
+    text-transform: uppercase;
+
+    margin-top: 8px;
+
+    text-shadow:
+    0 0 10px rgba(255,255,255,0.05),
+    0 0 16px rgba(255,70,85,0.08);
 }
 
-/* GREETING */
+/* Divider */
+.valo-divider {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 14px 0 12px;
+    height: 2px;
+}
 
-.valo-box{
+.valo-divider::before,
+.valo-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+}
+
+.valo-divider-bar {
+    width: 70px;
+    height: 2px;
+
+    background: var(--red);
+
+    box-shadow:
+    0 0 14px rgba(255,70,85,0.4);
+
+    clip-path:
+    polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+
+/* ==============================
+   GREETING BOX
+============================== */
+.valo-greeting {
+
+    position: relative;
+
     background:
     linear-gradient(
     145deg,
-    rgba(23,28,37,0.96),
+    rgba(26,31,41,0.96),
     rgba(16,20,28,0.98)
     );
 
-    border:1px solid rgba(255,70,85,0.15);
+    border: 1px solid rgba(255,255,255,0.05);
 
-    border-left:4px solid var(--red);
+    border-left: 3px solid var(--red);
 
-    border-radius:14px;
+    border-radius: 14px;
 
-    padding:26px;
+    padding: clamp(18px, 4vw, 26px);
 
-    margin-top:20px;
+    margin: 8px 0 4px;
+
+    overflow: hidden;
 
     box-shadow:
-    0 0 24px rgba(255,70,85,0.05);
+    0 0 24px rgba(255,70,85,0.06);
 }
 
-.valo-box h3{
-    font-family:'Rajdhani',sans-serif;
-    font-size:26px;
-    margin-bottom:8px;
+.valo-greeting::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width:120px;
+    height:120px;
+
+    background:
+    linear-gradient(
+    135deg,
+    rgba(255,70,85,0.18),
+    transparent
+    );
+
+    clip-path:
+    polygon(100% 0,0 0,100% 100%);
 }
 
-.valo-box p{
-    color:#c7cfda;
-    line-height:1.8;
+.valo-agent-icon {
+    font-size: clamp(30px, 6vw, 40px);
+    margin-bottom: 10px;
+    display: block;
+    text-align: center;
 }
 
-/* BUTTON */
+.valo-greeting-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
 
-.stButton > button{
+.valo-greeting-sub {
+    font-size: clamp(13px, 3vw, 14px);
+    color: #d2d8e2;
+    text-align: center;
+    line-height: 1.8;
+}
+
+/* ==============================
+   SUGGEST LABEL
+============================== */
+.valo-suggest-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 10px;
+}
+
+.valo-suggest-label::before,
+.valo-suggest-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+}
+
+.valo-suggest-label span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #6f7885;
+    text-transform: uppercase;
+}
+
+/* ==============================
+   BUTTONS
+============================== */
+.stButton > button {
 
     background:
     linear-gradient(
     145deg,
     #1b2230,
-    #151a23
+    #141a24
     ) !important;
 
-    color:#dce1ea !important;
+    color: #eef2f8 !important;
 
-    border:1px solid rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
 
-    border-left:3px solid transparent !important;
+    border-left: 2px solid transparent !important;
 
-    border-radius:10px !important;
+    border-radius: 12px !important;
 
-    padding:14px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
 
-    transition:0.18s ease !important;
+    font-size: clamp(12px, 3vw, 14px) !important;
 
-    min-height:58px !important;
+    font-weight: 600 !important;
 
-    font-weight:500 !important;
+    letter-spacing: 0.5px !important;
+
+    padding: 12px 15px !important;
+
+    width: 100% !important;
+
+    text-align: left !important;
+
+    white-space: normal !important;
+
+    min-height: 52px !important;
+
+    line-height: 1.5 !important;
+
+    transition: all 0.18s ease !important;
 }
 
-.stButton > button:hover{
+.stButton > button:hover {
 
-    border-left:3px solid var(--red) !important;
+    background:
+    linear-gradient(
+    145deg,
+    #232d3f,
+    #1a2230
+    ) !important;
 
-    transform:translateY(-2px);
+    border-left-color: var(--red) !important;
+
+    transform: translateY(-2px) !important;
 
     box-shadow:
-    0 0 18px rgba(255,70,85,0.12) !important;
+    0 0 18px rgba(255,70,85,0.12);
+
+    color: white !important;
 }
 
-/* USER */
-
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]){
+/* ==============================
+   CHAT USER
+============================== */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
 
     background:
     linear-gradient(
@@ -170,246 +368,240 @@ html, body, .stApp{
     rgba(255,70,85,0.03)
     );
 
-    border:1px solid rgba(255,70,85,0.15);
+    border: 1px solid rgba(255,70,85,0.12);
 
-    border-right:3px solid var(--red);
+    border-right: 3px solid var(--red);
 
-    border-radius:14px;
+    border-radius: 14px;
 
-    padding:16px;
+    padding: 16px;
 
-    margin:10px 0;
+    margin: 8px 0;
 }
 
-/* ASSISTANT */
-
-[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]){
+/* ==============================
+   CHAT BOT
+============================== */
+[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
 
     background:
     linear-gradient(
     145deg,
-    rgba(25,31,42,0.96),
+    rgba(28,32,42,0.96),
     rgba(18,22,30,0.98)
     );
 
-    border:1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.05);
 
-    border-left:3px solid var(--red);
+    border-left: 3px solid var(--red);
 
-    border-radius:14px;
+    border-radius: 14px;
 
-    padding:16px;
+    padding: 16px;
 
-    margin:10px 0;
+    margin: 8px 0;
 
     box-shadow:
-    0 0 20px rgba(255,70,85,0.04);
+    0 0 18px rgba(255,70,85,0.05);
 }
 
-/* TEXT */
-
+/* CHAT TEXT */
 [data-testid="stChatMessage"] p,
-[data-testid="stChatMessage"] li{
-    color:#eef2f7 !important;
-    line-height:1.85 !important;
-    font-size:15px !important;
+[data-testid="stChatMessage"] li {
+
+    font-size: clamp(14px, 3.5vw, 15px) !important;
+
+    line-height: 1.9 !important;
+
+    color: #f1f4f9 !important;
+
+    font-weight: 400;
+
+    text-shadow:
+    0 0 8px rgba(255,255,255,0.02);
 }
 
-/* INPUT */
+[data-testid="stChatMessage"] h3 {
 
-.stChatInput textarea{
+    font-family: 'Rajdhani', sans-serif !important;
 
-    background:#151b24 !important;
+    font-size: clamp(15px, 4vw, 18px) !important;
 
-    color:white !important;
+    font-weight: 700 !important;
 
-    border:1px solid rgba(255,255,255,0.08) !important;
+    text-transform: uppercase !important;
 
-    border-radius:12px !important;
+    letter-spacing: 1px !important;
 
-    font-size:15px !important;
+    color: white !important;
+
+    margin-bottom: 8px !important;
 }
 
-/* SIDEBAR */
-
-section[data-testid="stSidebar"]{
-    background:#0a0d12 !important;
-    border-right:1px solid rgba(255,70,85,0.1);
+[data-testid="stChatMessage"] strong {
+    color: #ff8590 !important;
 }
 
-section[data-testid="stSidebar"] *{
-    color:#d0d6e0 !important;
+[data-testid="stChatMessage"] code {
+
+    background:
+    rgba(255,70,85,0.10) !important;
+
+    color: #ff9ca5 !important;
+
+    border-radius: 6px !important;
+
+    padding: 2px 6px !important;
+
+    font-size: 12px !important;
 }
 
-/* HIDE */
+/* ==============================
+   CHAT INPUT
+============================== */
+.stChatInput textarea {
 
+    background:
+    rgba(24,29,39,0.98) !important;
+
+    color: white !important;
+
+    border: 1px solid rgba(255,255,255,0.08) !important;
+
+    border-radius: 14px !important;
+
+    font-family: 'Barlow', sans-serif !important;
+
+    font-size: 15px !important;
+
+    caret-color: var(--red) !important;
+}
+
+.stChatInput textarea:focus {
+
+    border-color: rgba(255,70,85,0.4) !important;
+
+    box-shadow:
+    0 0 20px rgba(255,70,85,0.12) !important;
+}
+
+.stChatInput textarea::placeholder {
+    color: #68707d !important;
+}
+
+/* ==============================
+   SIDEBAR
+============================== */
+section[data-testid="stSidebar"] {
+
+    background:
+    linear-gradient(
+    180deg,
+    #0a0d12,
+    #0d1117
+    ) !important;
+
+    border-right:
+    1px solid rgba(255,70,85,0.08) !important;
+}
+
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div,
+section[data-testid="stSidebar"] small {
+
+    color: #b8c0cb !important;
+
+    font-size: 13px !important;
+
+    font-family: 'Barlow', sans-serif !important;
+}
+
+section[data-testid="stSidebar"] h2 {
+
+    font-family: 'Rajdhani', sans-serif !important;
+
+    color: white !important;
+
+    text-transform: uppercase !important;
+
+    letter-spacing: 2px !important;
+}
+
+/* Sidebar button */
+section[data-testid="stSidebar"] .stButton > button {
+
+    background: transparent !important;
+
+    border: 1px solid rgba(255,70,85,0.15) !important;
+
+    border-left: 2px solid var(--red) !important;
+
+    color: #c8d0db !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+
+    background:
+    rgba(255,70,85,0.08) !important;
+
+    color: white !important;
+}
+
+/* ==============================
+   SPINNER
+============================== */
+[data-testid="stSpinner"] p {
+
+    color: #d7dde6 !important;
+
+    font-family: 'Barlow Condensed', sans-serif !important;
+
+    letter-spacing: 2px !important;
+
+    font-size: 12px !important;
+}
+
+/* ==============================
+   HIDE STREAMLIT UI
+============================== */
 #MainMenu,
 footer,
-header{
-    visibility:hidden;
+header {
+    visibility: hidden !important;
 }
 
-.block-container{
-    max-width:850px !important;
-    padding-top:1rem !important;
+.block-container {
+    padding-top: 1.2rem !important;
+    padding-bottom: 1.5rem !important;
+    max-width: 820px !important;
 }
 
+/* ==============================
+   MOBILE
+============================== */
+@media (max-width: 600px) {
+
+    .block-container {
+        padding: 0.8rem 0.5rem 4.5rem !important;
+    }
+
+    .valo-title {
+        font-size: 44px;
+    }
+
+    [data-testid="stChatMessage"] {
+        padding: 12px !important;
+    }
+
+    .stButton > button {
+        min-height: 46px !important;
+    }
+
+    .valo-greeting {
+        padding: 18px;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
-
-# =========================
-# GROQ CLIENT
-# =========================
-try:
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except:
-    st.error("❌ Chưa thêm GROQ_API_KEY vào Secrets")
-    st.stop()
-
-# =========================
-# DATABASE
-# =========================
-def load_database():
-    if os.path.exists("database_pc.json"):
-        with open("database_pc.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"loi_he_thong": [], "linh_kien_pc": []}
-
-data_pc = load_database()
-
-# =========================
-# SESSION
-# =========================
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# =========================
-# SIDEBAR
-# =========================
-with st.sidebar:
-
-    st.markdown("## ⚡ PC SOLVING SYSTEM")
-    st.markdown("---")
-    st.markdown("Hệ thống hỗ trợ xử lý lỗi và tư vấn linh kiện PC.")
-
-    if st.button("⟳ PHIÊN MỚI", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
-
-    st.markdown("---")
-    st.markdown("Lê Văn Chung — 10A4")
-
-# =========================
-# HEADER
-# =========================
-st.markdown("""
-<div class="valo-header">
-    <div class="valo-title">
-        PC <span>SOLVING</span>
-    </div>
-
-    <div class="valo-sub">
-        Diagnostic • Hardware • Performance
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# =========================
-# GREETING
-# =========================
-if len(st.session_state.messages) == 0:
-
-    st.markdown("""
-    <div class="valo-box">
-
-    <h3>💻 Hệ thống hỗ trợ kỹ thuật PC</h3>
-
-    <p>
-    Nhập mã lỗi Windows, mô tả hiện tượng hoặc linh kiện cần tư vấn.
-    Hệ thống sẽ tự động phân tích và đưa ra giải pháp phù hợp.
-    </p>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-# =========================
-# SHOW CHAT
-# =========================
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# =========================
-# ASK MODEL
-# =========================
-def ask_bot(prompt):
-
-    system_prompt = """
-Bạn là chuyên gia phần cứng máy tính của Lê Văn Chung lớp 10A4.
-
-Nhiệm vụ:
-- Chẩn đoán lỗi PC
-- Giải thích lỗi Windows
-- Tư vấn CPU GPU RAM Mainboard PSU
-- Hướng dẫn sửa lỗi theo từng bước
-
-QUY TẮC:
-- Không nói mình là AI
-- Trả lời chuyên nghiệp
-- Chia bước rõ ràng
-- Không lan man
-"""
-
-    response = client.chat.completions.create(
-
-        model="llama-3.3-70b-versatile",
-
-        messages=[
-            {
-                "role": "system",
-                "content": system_prompt
-            },
-
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-
-        temperature=0.4,
-        max_tokens=700
-    )
-
-    return response.choices[0].message.content
-
-# =========================
-# CHAT INPUT
-# =========================
-if prompt := st.chat_input("Nhập lỗi PC hoặc linh kiện cần tư vấn..."):
-
-    st.session_state.messages.append({
-        "role": "user",
-        "content": prompt
-    })
-
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-
-        with st.spinner("ĐANG PHÂN TÍCH HỆ THỐNG..."):
-
-            try:
-
-                answer = ask_bot(prompt)
-
-                st.markdown(answer)
-
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": answer
-                })
-
-            except Exception as e:
-
-                st.error(f"❌ Lỗi hệ thống: {str(e)}")
+```
