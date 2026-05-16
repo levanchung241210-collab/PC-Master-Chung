@@ -33,10 +33,10 @@ with st.sidebar:
     st.success("⚡ HỆ THỐNG: SIÊU TỐC ĐỘ VUA PC")
     st.markdown("---")
     st.write("📊 **Bộ nhớ Hệ chuyên gia:**")
-    st.info(f"✔️ Kích hoạt thuật toán chấm điểm từ khóa")
+    st.info(f"✔️ Thuật toán phân tách ý định")
     st.info(f"✔️ Quản lý danh mục qua JSON dữ liệu lớn")
     st.markdown("---")
-    st.warning("🤖 Phiên bản: Vua PC AI Engine v4.0")
+    st.warning("🤖 Phiên bản: Vua PC AI Engine v5.0")
     st.info("👨‍💻 Tác giả dự án STEM:\n\n**Lê Văn Chung - Lớp 10A4**")
 
 st.markdown('<div class="neon-title">👑 VUA PC - CHATBOT HỆ CHUYÊN GIA NÂNG CAO</div>', unsafe_allow_html=True)
@@ -47,65 +47,71 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+    with st.chat_message(msg["role"]): st.markdown(msg["content"])
 
 # ==========================================
-# THUẬT TOÁN CHẤM ĐIỂM TỪ KHÓA (KEYWORD SCORING ENGINE)
+# THUẬT TOÁN TƯ DUY PHÂN TÁCH Ý ĐỊNH VÀ CHẤM ĐIỂM
 # ==========================================
 def engine_vua_pc(user_query):
     q_clean = user_query.lower().strip()
-    # Chẻ câu hỏi của người dùng thành danh sách các từ đơn lẻ
     user_words = re.sub(r'[^\w\s]', ' ', q_clean).split()
     
     if not user_words:
-        return "🤖 Vui lòng nhập nội dung câu hỏi rõ ràng hơn để tôi chẩn đoán nhé!"
+        return "🤖 Vui lòng nhập nội dung câu hỏi rõ ràng để tôi chẩn đoán nhé!"
 
-    # Xử lý lời chào
+    # 1. XỬ LÝ CHÀO HỎI
     if any(w in ["hi", "hello", "chào", "xin chào", "alo"] for w in user_words):
-        return ("👋 **Xin chào! Tôi là Vua PC - Hệ chuyên gia chẩn đoán lỗi phần cứng tinh vi của Lê Văn Chung 10A4.**\n\n"
-                "Tôi sử dụng thuật toán bóc tách từ khóa để xử lý hàng ngàn mã lỗi. Bạn cứ gõ mô tả hiện tượng máy tính bị sao đi, tôi 'bắt bài' cho câu trả lời ngay lập tức!")
+        return ("👋 **Xin chào! Tôi là Vua PC - Hệ chuyên gia trợ lý máy tính lớp 10A4.**\n\n"
+                "Tôi đã được nâng cấp bộ lọc ý định tránh nhận diện sai. Bạn cần tôi kiểm tra lỗi hệ thống hay tư vấn thông số linh kiện phần cứng?")
+
+    # 2. PHÂN TÍCH Ý ĐỊNH (INTENT CLASSIFICATION)
+    tu_van_keywords = ["chạy", "được", "không", "ko", "so", "sánh", "mạnh", "hơn", "max", "hiệu", "năng", "tư", "vấn", "thông", "số"]
+    is_tu_van_hardware = any(w in tu_van_keywords for w in user_words)
 
     best_match = None
     max_score = 0
 
-    # 1. DUYỆT VÀ CHẤM ĐIỂM KHO LỖI HỆ THỐNG
-    for item in data_pc.get("loi_he_thong", []):
-        score = 0
-        # Đếm xem có bao nhiêu từ của người dùng trùng với mảng keywords của lỗi này
-        for word in user_words:
-            if word in item["keywords"]:
-                score += 1 # Cộng 1 điểm cho mỗi từ trùng khớp
-        
-        if score > max_score:
-            max_score = score
-            best_match = {
-                "type": "loi",
-                "data": item
-            }
+    # TẦNG LUẬT 1: NẾU LÀ Ý ĐỊNH HỎI THÔNG SỐ/TƯ VẤN -> CHỈ QUÉT KHO LINH KIỆN
+    if is_tu_van_hardware:
+        for item in data_pc.get("linh_kien_pc", []):
+            score = 0
+            for word in user_words:
+                if word in item["keywords"]:
+                    score += 1
+            if score > max_score:
+                max_score = score
+                best_match = {"type": "linh_kien", "data": item}
+                
+    # TẦNG LUẬT 2: NẾU KHÔNG CÓ TỪ KHÓA TƯ VẤN -> TIẾN HÀNH QUÉT KHO LỖI TRƯỚC, LINH KIỆN SAU
+    else:
+        for item in data_pc.get("loi_he_thong", []):
+            score = 0
+            for word in user_words:
+                if word in item["keywords"]:
+                    score += 1
+            if score > max_score:
+                max_score = score
+                best_match = {"type": "loi", "data": item}
+                
+        if max_score == 0: # Nếu kho lỗi không trùng, quét thử kho linh kiện
+            for item in data_pc.get("linh_kien_pc", []):
+                score = 0
+                for word in user_words:
+                    if word in item["keywords"]:
+                        score += 1
+                if score > max_score:
+                    max_score = score
+                    best_match = {"type": "linh_kien", "data": item}
 
-    # 2. DUYỆT VÀ CHẤM ĐIỂM KHO LINH KIỆN PC
-    for item in data_pc.get("linh_kien_pc", []):
-        score = 0
-        for word in user_words:
-            if word in item["keywords"]:
-                score += 1
-        
-        if score > max_score:
-            max_score = score
-            best_match = {
-                "type": "linh_kien",
-                "data": item
-            }
-
-    # THIẾT LẬP NGƯỠNG ĐIỂM (Chỉ chấp nhận nếu trùng từ 1 từ khóa trở lên)
-    if max_score >= 1 and best_match:
+    # 3. ĐÁNH GIÁ CHẤT LƯỢNG ĐẦU RA VÀ PHẢN HỒI
+    # Thiết lập ngưỡng: Phải trùng ít chơi là 2 từ khóa hoặc từ khóa mang tính định danh cao thì mới xuất kết quả
+    if max_score >= 2 and best_match:
         res_data = best_match["data"]
         if best_match["type"] == "loi":
             response = f"### 🎯 Phân tích phát hiện lỗi: {res_data['ten']}\n"
-            response += f"⚠️ **Phân loại:** `{res_data['loai']}` *(Độ chính xác thuật toán: {max_score} điểm từ khóa)*\n\n"
+            response += f"⚠️ **Phân loại:** `{res_data['loai']}`\n\n"
             response += f"❌ **Nguyên nhân cốt lõi:** {res_data['nguyen_nhan']}\n\n"
-            response += f"🛠️ **Phác đồ khắc phục chuyên sâu:**\n{res_data['giai_phap']}"
+            response += f"🛠 **Phác đồ khắc phục chuyên sâu:**\n{res_data['giai_phap']}"
             return response
         else:
             response = f"### 📦 Thông tin linh kiện: {res_data['ten']}\n"
@@ -113,8 +119,14 @@ def engine_vua_pc(user_query):
             response += f"💡 **Tư vấn cấu hình từ Chung 10A4:** *{res_data['chuyen_gia_tu_van']}*"
             return response
 
-    return ("🤖 **Vua PC phản hồi:** Tôi đã quét qua toàn bộ ma trận dữ liệu cục bộ nhưng chưa tìm thấy lỗi nào trùng khớp với mô tả của bạn.\n\n"
-            "💡 *Lời khuyên: Hãy thử gõ các từ khóa cốt lõi của lỗi như: sập nguồn, xanh màn hình, ram, i3 12100f...*")
+    # 4. TẦNG TỪ CHỐI THÔNG MINH (KHI KHÔNG ĐỦ ĐIỂM HOẶC KHÔNG TÌM THẤY TRONG DATABASE)
+    if is_tu_van_hardware:
+        return ("🤖 **Vua PC phản hồi:** Tôi nhận thấy bạn đang muốn tư vấn hoặc so sánh thông số linh kiện phần cứng.\n\n"
+                "Tuy nhiên, linh kiện này (hoặc cặp linh kiện đối đầu này) hiện chưa được nạp dữ liệu thông số vào file `database_pc.json` cục bộ của hệ thống.\n"
+                "💡 *Mẹo cho Chung: Hãy mở file JSON ra và bổ sung thêm từ khóa của thiết bị này vào danh mục `linh_kien_pc` nhé!*")
+    else:
+        return ("🤖 **Vua PC phản hồi:** Hệ thống đã bóc tách từ khóa mô tả của bạn nhưng chưa tìm thấy mã lỗi nào có phác đồ sửa chữa tương ứng trong cơ sở dữ liệu.\n\n"
+                "💡 *Mẹo: Bạn có thể kiểm tra lại chính tả hoặc bổ sung thêm kịch bản sửa lỗi này vào kho lưu trữ `loi_he_thong` trong file JSON.*")
 
 # XỬ LÝ NHẬP LIỆU CHAT
 if prompt := st.chat_input("Mô tả lỗi máy tính hoặc linh kiện bạn cần chẩn đoán tại đây..."):
@@ -122,7 +134,7 @@ if prompt := st.chat_input("Mô tả lỗi máy tính hoặc linh kiện bạn c
     with st.chat_message("user"): st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("💾 Thuật toán đang bóc tách và chấm điểm ma trận dữ liệu..."):
+        with st.spinner("💾 Thuật toán đang bóc tách ý định và chấm điểm ma trận..."):
             answer = engine_vua_pc(prompt)
             st.markdown(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
