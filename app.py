@@ -4,14 +4,14 @@ from groq import Groq
 
 st.set_page_config(page_title="PC Solving System — Lê Văn Chung 10A4", page_icon="⚡", layout="centered")
 
-# ====================== CSS VALORANT NÂNG CẤP ======================
+# ====================== CSS VALORANT NÂNG CẤP MẠNH ======================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
 
 :root {
-    --R: #ff4655; --R2: #ff7080; --R3: rgba(255,70,85,0.18);
-    --T: #00d4bf; --T2: #00ffe7; --T3: rgba(0,212,191,0.15);
+    --R: #ff4655; --R2: #ff7080; --R3: rgba(255,70,85,0.25);
+    --T: #00d4bf; --T2: #00ffe7; --T3: rgba(0,212,191,0.22);
     --G: #e8c97a;
     --bg: #090b11; --p1: #0f1320; --p2: #151929; --p3: #1c2236;
     --W: #ffffff; --C: #ece8e1; --S: #b8b4ac;
@@ -19,62 +19,61 @@ st.markdown("""
 
 html, body, .stApp { background:var(--bg) !important; color:var(--C) !important; font-family:'Barlow',sans-serif !important; }
 
-/* BACKGROUND - Nâng cấp tactical mạnh hơn */
+/* Background Tactical đậm & thu hút hơn */
 .stApp::before {
     content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
     background:
-        linear-gradient(135deg, rgba(255,70,85,0.13) 0%, transparent 45%),
-        linear-gradient(315deg, rgba(0,212,191,0.10) 0%, transparent 45%),
-        radial-gradient(ellipse 40% 30% at 100% 0%, rgba(189,147,249,0.07) 0%, transparent 60%),
-        repeating-linear-gradient(-55deg, transparent 0, transparent 48px, rgba(255,70,85,0.025) 48px, rgba(255,70,85,0.028) 49px),
-        repeating-linear-gradient(35deg, transparent 0, transparent 72px, rgba(0,212,191,0.018) 72px, rgba(0,212,191,0.02) 73px),
-        repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(255,255,255,0.005) 3px, rgba(255,255,255,0.005) 4px);
+        linear-gradient(135deg, rgba(255,70,85,0.16) 0%, transparent 45%),
+        linear-gradient(315deg, rgba(0,212,191,0.13) 0%, transparent 45%),
+        radial-gradient(ellipse 40% 30% at 100% 0%, rgba(189,147,249,0.08) 0%, transparent 60%),
+        repeating-linear-gradient(-55deg, transparent 0, transparent 48px, rgba(255,70,85,0.032) 48px, rgba(255,70,85,0.038) 49px),
+        repeating-linear-gradient(35deg, transparent 0, transparent 72px, rgba(0,212,191,0.028) 72px, rgba(0,212,191,0.033) 73px);
 }
 
-/* Top glow bar mạnh & đẹp hơn */
+/* Top Glow Bar mạnh */
 .stApp::after {
     content:''; position:fixed; top:0; left:0; right:0; height:3px; z-index:9999;
     background:linear-gradient(90deg,transparent 0%,#ff4655 15%,#ff7080 30%,transparent 45%,transparent 55%,#00d4bf 70%,#00ffe7 85%,transparent 100%);
-    filter:drop-shadow(0 0 12px #ff4655) drop-shadow(0 0 25px #00d4bf);
+    filter:drop-shadow(0 0 12px #ff4655) drop-shadow(0 0 28px #00d4bf);
 }
 
-/* Greeting Panel - Glow mạnh hơn */
+/* Greeting Panel Glow mạnh */
 .valo-greeting {
-    box-shadow: 0 0 70px rgba(255,70,85,0.28), 0 0 130px rgba(0,212,191,0.15),
-                0 8px 40px rgba(0,0,0,0.85), inset 0 0 90px rgba(255,70,85,0.06) !important;
-    animation:greetGlow 4.5s ease-in-out infinite;
+    box-shadow: 0 0 85px rgba(255,70,85,0.4), 0 0 160px rgba(0,212,191,0.28),
+                0 10px 50px rgba(0,0,0,0.9), inset 0 0 95px rgba(255,70,85,0.1) !important;
+    animation:greetGlow 4.2s ease-in-out infinite;
 }
 
 @keyframes greetGlow {
-    0%,100% { box-shadow:0 0 55px rgba(255,70,85,0.22),0 0 110px rgba(255,70,85,0.06),0 8px 40px rgba(0,0,0,0.8); }
-    50% { box-shadow:0 0 90px rgba(255,70,85,0.38),0 0 150px rgba(0,212,191,0.20),0 8px 40px rgba(0,0,0,0.8); }
+    0%,100% { box-shadow:0 0 60px rgba(255,70,85,0.32),0 0 130px rgba(255,70,85,0.1),0 10px 50px rgba(0,0,0,0.9); }
+    50% { box-shadow:0 0 100px rgba(255,70,85,0.52),0 0 180px rgba(0,212,191,0.35),0 10px 50px rgba(0,0,0,0.9); }
 }
 
-/* Chat Bubbles - Sharp & Glow mạnh */
+/* Chat Bubbles */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
     border-right:5px solid var(--R) !important;
-    box-shadow:6px 0 35px rgba(255,70,85,0.35), 0 4px 25px rgba(0,0,0,0.85) !important;
+    box-shadow:7px 0 40px rgba(255,70,85,0.38) !important;
 }
 
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     border-left:5px solid var(--T) !important;
-    box-shadow:-6px 0 35px rgba(0,212,191,0.35), 0 4px 25px rgba(0,0,0,0.85) !important;
+    box-shadow:-7px 0 40px rgba(0,212,191,0.38) !important;
 }
 
 /* Button hover */
 .stButton > button:hover {
-    transform:translateX(8px) !important;
-    box-shadow:0 0 35px rgba(0,212,191,0.55) !important;
+    transform:translateX(10px) !important;
+    box-shadow:0 0 40px rgba(0,212,191,0.6) !important;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar{width:4px;} 
-::-webkit-scrollbar-thumb{background:rgba(255,70,85,0.6);border-radius:2px;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:linear-gradient(#ff4655, #00d4bf); border-radius:2px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--R);}
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== PHẦN CODE CÒN LẠI GIỮ NGUYÊN HOÀN TOÀN ======================
+# ====================== PHẦN CODE GỐC CỦA BẠN (GIỮ NGUYÊN HOÀN TOÀN) ======================
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except:
@@ -194,7 +193,6 @@ for i,(lb,qr) in enumerate(st.session_state.suggestions):
 for m in st.session_state.messages:
     with st.chat_message(m["role"]): st.markdown(m["content"])
 
-# ====================== CÁC HÀM CÒN LẠI GIỮ NGUYÊN ======================
 def score(item,q,nums):
     s=0; kws=[str(k).lower().strip() for k in item.get("keywords",[])]; ws=q.split()
     for k in kws:
