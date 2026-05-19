@@ -4,250 +4,213 @@ from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
+# ══════════════════════════════════════════
+#  JAVASCRIPT — fixes Streamlit chat input
+#  by directly targeting the real DOM node
+# ══════════════════════════════════════════
+st.markdown("""
+<script>
+(function fixInput(){
+  const apply = () => {
+    // target every textarea on page
+    document.querySelectorAll('textarea').forEach(el => {
+      el.style.setProperty('color',           '#ece8e1', 'important');
+      el.style.setProperty('background',      '#08090f', 'important');
+      el.style.setProperty('background-color','#08090f', 'important');
+      el.style.setProperty('caret-color',     '#ff4655', 'important');
+      el.style.setProperty('-webkit-text-fill-color','#ece8e1','important');
+    });
+    // also parent containers
+    document.querySelectorAll('[data-testid="stChatInput"]').forEach(el=>{
+      el.style.setProperty('background','#08090f','important');
+    });
+  };
+  // run immediately + observe for Streamlit re-renders
+  apply();
+  new MutationObserver(apply).observe(document.body,{subtree:true,childList:true,attributes:true});
+})();
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap');
 
-:root {
-  --r:#ff4655; --r2:#e03040; --rg:rgba(255,70,85,0.12);
-  --t:#00d4bf; --t2:#00ffe7; --tg:rgba(0,212,191,0.10);
+/* ─── PALETTE ─── */
+:root{
+  --r:#ff4655; --r2:#e0303f; --rd:rgba(255,70,85,0.12);
+  --t:#00d4bf; --t2:#00ffe7; --td:rgba(0,212,191,0.10);
   --g:#e8c97a; --p:#bd93f9;
-  --bg:#09090f; --bg1:#0e1018; --bg2:#131722; --bg3:#192030;
-  --w:#ffffff; --c:#ece8e1; --s:#b0aca4; --d:#363a46;
+  --bg:#08090f; --bg1:#0e1018; --bg2:#131722; --bg3:#192030;
+  --w:#ffffff;  --c:#ece8e1;  --s:#b0aca4; --d:#363a46;
 }
-html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-family:'Barlow',sans-serif !important;}
 
-/* ══════════════════════════════════════
-   BACKGROUND — Valorant V-shape + smoke
-══════════════════════════════════════ */
-.stApp::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+/* ─── BASE ─── */
+html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-family:'Barlow',sans-serif!important;}
+
+/* ─── 1. V-SHAPE BACKGROUND ─── */
+.stApp::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    /* V-shape light — main Valorant signature */
-    conic-gradient(from 180deg at 50% -20%,
-      transparent 60deg,
-      rgba(255,50,60,0.09) 80deg,
-      rgba(255,70,85,0.15) 90deg,
-      rgba(255,50,60,0.09) 100deg,
-      transparent 120deg),
-    /* Red smoke left */
-    radial-gradient(ellipse 50% 60% at -8% 30%, rgba(255,40,55,0.13) 0%, transparent 60%),
-    /* Teal smoke right */
-    radial-gradient(ellipse 50% 60% at 108% 70%, rgba(0,212,191,0.10) 0%, transparent 60%),
-    /* Purple top-right */
-    radial-gradient(ellipse 35% 25% at 100% 0%, rgba(189,147,249,0.06) 0%, transparent 55%),
-    /* Warm floor glow */
-    radial-gradient(ellipse 80% 20% at 50% 110%, rgba(255,70,85,0.07) 0%, transparent 55%),
-    /* HUD grid subtle */
-    linear-gradient(rgba(255,70,85,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,70,85,0.03) 1px, transparent 1px),
-    /* Cross diagonal slashes */
-    repeating-linear-gradient(-52deg, transparent 0, transparent 80px, rgba(255,70,85,0.018) 80px, rgba(255,70,85,0.018) 81px),
-    repeating-linear-gradient( 38deg, transparent 0, transparent 110px, rgba(0,212,191,0.012) 110px, rgba(0,212,191,0.012) 111px);
-  background-size: auto,auto,auto,auto,auto, 44px 44px, 44px 44px, auto, auto;
+    conic-gradient(from 180deg at 50% -15%,
+      transparent 62deg,rgba(255,50,60,0.08) 78deg,
+      rgba(255,70,85,0.13) 90deg,rgba(255,50,60,0.08) 102deg,
+      transparent 118deg),
+    radial-gradient(ellipse 55% 65% at -8% 25%,rgba(255,40,55,0.11) 0%,transparent 60%),
+    radial-gradient(ellipse 55% 65% at 108% 75%,rgba(0,212,191,0.09) 0%,transparent 60%),
+    radial-gradient(ellipse 35% 25% at 100% 0%,rgba(189,147,249,0.06) 0%,transparent 55%),
+    linear-gradient(rgba(255,70,85,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,70,85,0.025) 1px,transparent 1px),
+    repeating-linear-gradient(-52deg,transparent 0,transparent 80px,rgba(255,70,85,0.018) 80px,rgba(255,70,85,0.018) 81px),
+    repeating-linear-gradient(38deg,transparent 0,transparent 110px,rgba(0,212,191,0.012) 110px,rgba(0,212,191,0.012) 111px);
+  background-size:auto,auto,auto,auto,44px 44px,44px 44px,auto,auto;
+}
+/* ─── 2. TOP BAR ─── */
+.stApp::after{
+  content:'';position:fixed;top:0;left:0;right:0;height:3px;z-index:9999;
+  background:linear-gradient(90deg,var(--r2) 0%,var(--r) 80px,var(--g) 50%,var(--t) calc(100% - 80px),var(--t2) 100%);
+  box-shadow:0 0 10px rgba(255,70,85,0.5),0 0 20px rgba(255,70,85,0.15);
 }
 
-/* ══ TOP NEON LINE — softer ══ */
-.stApp::after {
-  content:''; position:fixed; top:0; left:0; right:0; height:3px; z-index:9999;
-  background:linear-gradient(90deg, var(--r2) 0%, var(--r) 80px, var(--g) 50%, var(--t) calc(100% - 80px), var(--t2) 100%);
-  box-shadow:0 0 10px rgba(255,70,85,0.5), 0 0 20px rgba(255,70,85,0.15), 0 2px 6px rgba(0,212,191,0.15);
-}
+/* ─── 3. FLOATING SMOKE ─── */
+@keyframes sd1{0%{transform:translate(0,0)scale(1);opacity:.10;}50%{transform:translate(18px,-28px)scale(1.35);opacity:.14;}100%{transform:translate(-8px,-55px)scale(1.7);opacity:0;}}
+@keyframes sd2{0%{transform:translate(0,0)scale(1);opacity:.08;}60%{transform:translate(-22px,-36px)scale(1.4);opacity:.12;}100%{transform:translate(12px,-70px)scale(1.8);opacity:0;}}
+@keyframes sd3{0%{transform:translate(0,0)scale(1);opacity:.07;}70%{transform:translate(26px,-42px)scale(1.5);opacity:.10;}100%{transform:translate(-4px,-80px)scale(2);opacity:0;}}
+.smoke-1,.smoke-2,.smoke-3{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+.smoke-1{width:140px;height:140px;bottom:8%;left:4%;background:radial-gradient(circle,rgba(255,70,85,0.10) 0%,transparent 65%);animation:sd1 5s ease-in-out infinite;}
+.smoke-2{width:120px;height:120px;bottom:14%;right:6%;background:radial-gradient(circle,rgba(0,212,191,0.09) 0%,transparent 65%);animation:sd2 6.5s ease-in-out infinite 1.5s;}
+.smoke-3{width:100px;height:100px;bottom:4%;left:38%;background:radial-gradient(circle,rgba(232,201,122,0.07) 0%,transparent 65%);animation:sd3 8s ease-in-out infinite 3s;}
 
-/* ══ SMOKE PARTICLES drifting ══ */
-/* Smoke — faster, slightly more visible */
-@keyframes smokeDrift1 { 0%{transform:translate(0,0) scale(1);opacity:.09;} 50%{transform:translate(18px,-28px) scale(1.35);opacity:.13;} 100%{transform:translate(-8px,-55px) scale(1.7);opacity:0;} }
-@keyframes smokeDrift2 { 0%{transform:translate(0,0) scale(1);opacity:.08;} 60%{transform:translate(-22px,-36px) scale(1.4);opacity:.11;} 100%{transform:translate(12px,-70px) scale(1.8);opacity:0;} }
-@keyframes smokeDrift3 { 0%{transform:translate(0,0) scale(1);opacity:.06;} 70%{transform:translate(26px,-42px) scale(1.5);opacity:.09;} 100%{transform:translate(-4px,-80px) scale(2);opacity:0;} }
-.smoke-1,.smoke-2,.smoke-3 { position:absolute; border-radius:50%; pointer-events:none; }
-.smoke-1 { width:130px; height:130px; bottom:10%; left:5%; background:radial-gradient(circle,rgba(255,70,85,0.09) 0%,transparent 65%); animation:smokeDrift1 5s ease-in-out infinite; }
-.smoke-2 { width:110px; height:110px; bottom:15%; right:8%; background:radial-gradient(circle,rgba(0,212,191,0.08) 0%,transparent 65%); animation:smokeDrift2 6.5s ease-in-out infinite 1.5s; }
-.smoke-3 { width:90px; height:90px; bottom:5%; left:40%; background:radial-gradient(circle,rgba(232,201,122,0.06) 0%,transparent 65%); animation:smokeDrift3 8s ease-in-out infinite 3s; }
+/* ─── 4. SCAN LINE ─── */
+@keyframes scan{0%{top:-40%;opacity:.7}80%{opacity:.35}100%{top:130%;opacity:0}}
+.scan-wrap{position:relative;overflow:hidden;}
+.scan-wrap::after{content:'';position:absolute;top:-40%;left:0;right:0;height:35%;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.04) 50%,transparent 100%);
+  animation:scan 3.5s linear infinite;pointer-events:none;z-index:2;}
 
-/* ══ SCAN LINE — faster ══ */
-@keyframes scanDown { 0%{top:-40%;opacity:.7} 70%{opacity:.4} 100%{top:130%;opacity:0} }
-.scan-wrap { position:relative; overflow:hidden; }
-.scan-wrap::after { content:''; position:absolute; top:-40%; left:0; right:0; height:35%;
-  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.045) 50%,transparent 100%);
-  animation:scanDown 3.5s linear infinite; pointer-events:none; z-index:2; }
-
-/* ══ HEADER ══ */
-.valo-header { text-align:center; padding:10px 0 2px; position:relative; }
-
-/* author */
-.valo-author {
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
-  letter-spacing:3px; text-transform:uppercase; color:var(--t2);
+/* ─── 5. HEADER ─── */
+.valo-header{text-align:center;padding:10px 0 2px;position:relative;}
+.valo-author{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--t2);
   text-shadow:0 0 10px rgba(0,255,231,0.6);
-  text-align:right; margin-bottom:4px;
-  display:flex; align-items:center; justify-content:flex-end; gap:6px;
+  text-align:right;margin-bottom:4px;
+  display:flex;align-items:center;justify-content:flex-end;gap:6px;
 }
-.valo-author::before { content:''; width:22px; height:1px; background:linear-gradient(90deg,transparent,var(--t2)); box-shadow:0 0 5px var(--t2); }
-
-/* eyebrow */
-.valo-eyebrow {
-  font-family:'Barlow Condensed',sans-serif; font-size:clamp(9px,2vw,11px);
-  font-weight:800; letter-spacing:7px; color:var(--r); text-transform:uppercase; margin-bottom:6px;
-  display:flex; align-items:center; justify-content:center; gap:12px;
+.valo-author::before{content:'';width:22px;height:1px;background:linear-gradient(90deg,transparent,var(--t2));box-shadow:0 0 5px var(--t2);}
+.valo-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(9px,2vw,11px);
+  font-weight:800;letter-spacing:7px;color:var(--r);text-transform:uppercase;margin-bottom:6px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
   text-shadow:0 0 12px rgba(255,70,85,0.7);
 }
-.valo-eyebrow::before { content:''; width:40px; height:1px; background:linear-gradient(90deg,transparent,var(--r)); box-shadow:0 0 6px rgba(255,70,85,0.5); }
-.valo-eyebrow::after  { content:''; width:40px; height:1px; background:linear-gradient(90deg,var(--r),transparent); box-shadow:0 0 6px rgba(255,70,85,0.5); }
+.valo-eyebrow::before{content:'';width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--r));box-shadow:0 0 6px rgba(255,70,85,0.5);}
+.valo-eyebrow::after {content:'';width:40px;height:1px;background:linear-gradient(90deg,var(--r),transparent);box-shadow:0 0 6px rgba(255,70,85,0.5);}
 
-/* logo + title */
-.valo-logo-wrap { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:4px; }
-.lvc-logo { width:clamp(40px,7vw,56px); height:clamp(40px,7vw,56px); flex-shrink:0;
-  filter:drop-shadow(0 0 8px rgba(255,70,85,0.55)) drop-shadow(0 0 16px rgba(255,70,85,0.2)); }
-.lvc-logo svg { width:100%; height:100%; }
-.valo-title {
-  font-family:'Rajdhani',sans-serif; font-size:clamp(30px,8vw,68px); font-weight:700;
-  letter-spacing:3px; line-height:1; text-transform:uppercase; margin:0;
-  color:var(--w); text-shadow:0 0 24px rgba(255,255,255,0.1),0 2px 8px rgba(0,0,0,0.95);
+/* ─── 6. LOGO + TITLE ─── */
+.valo-logo-wrap{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:4px;}
+.lvc-logo{width:clamp(40px,7vw,56px);height:clamp(40px,7vw,56px);flex-shrink:0;
+  filter:drop-shadow(0 0 8px rgba(255,70,85,0.55)) drop-shadow(0 0 16px rgba(255,70,85,0.2));}
+.lvc-logo svg{width:100%;height:100%;}
+.valo-title{
+  font-family:'Rajdhani',sans-serif;font-size:clamp(30px,8vw,68px);font-weight:700;
+  letter-spacing:3px;line-height:1;text-transform:uppercase;margin:0;
+  color:var(--w);text-shadow:0 0 24px rgba(255,255,255,0.1),0 2px 8px rgba(0,0,0,0.95);
 }
-.valo-title .red { color:var(--r); text-shadow:0 0 16px rgba(255,70,85,0.8),0 0 32px rgba(255,70,85,0.3); }
-.valo-title .slash { color:var(--r); opacity:.45; margin:0 3px; }
+.valo-title .red{color:var(--r);text-shadow:0 0 16px rgba(255,70,85,0.8),0 0 32px rgba(255,70,85,0.3);}
+.valo-title .slash{color:var(--r);opacity:.45;margin:0 3px;}
 
-/* subtitle */
-.valo-subtitle {
-  font-family:'Barlow Condensed',sans-serif; font-size:clamp(11px,2.8vw,14px);
-  font-weight:800; letter-spacing:5px; text-transform:uppercase; margin-top:8px;
-  display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;
+/* ─── 7. SUBTITLE ─── */
+.valo-subtitle{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(11px,2.8vw,14px);
+  font-weight:800;letter-spacing:5px;text-transform:uppercase;margin-top:8px;
+  display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
 }
-.sub-r { color:var(--r); text-shadow:0 0 10px rgba(255,70,85,0.7); }
-.sub-w { color:var(--w); text-shadow:0 0 6px rgba(255,255,255,0.2); }
-.sub-t { color:var(--t); text-shadow:0 0 10px rgba(0,212,191,0.7); }
-.sub-d { display:inline-block; width:5px; height:5px; transform:rotate(45deg); }
-.sub-d.r { background:var(--r); box-shadow:0 0 6px var(--r); }
-.sub-d.t { background:var(--t); box-shadow:0 0 6px var(--t); }
+.sub-r{color:var(--r);text-shadow:0 0 10px rgba(255,70,85,0.7);}
+.sub-w{color:var(--w);text-shadow:0 0 6px rgba(255,255,255,0.2);}
+.sub-t{color:var(--t);text-shadow:0 0 10px rgba(0,212,191,0.7);}
+.sub-d{display:inline-block;width:5px;height:5px;transform:rotate(45deg);}
+.sub-d.r{background:var(--r);box-shadow:0 0 6px var(--r);}
+.sub-d.t{background:var(--t);box-shadow:0 0 6px var(--t);}
 
-/* divider */
-.valo-divider { display:flex; align-items:center; margin:12px 0 8px; }
-.valo-divider::before,.valo-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
-.valo-divider-inner { display:flex; align-items:center; gap:6px; padding:0 14px; }
-.vd { width:6px; height:6px; transform:rotate(45deg); }
-.vd.r { background:var(--r); box-shadow:0 0 8px var(--r),0 0 16px rgba(255,70,85,0.4); }
-.vd.t { background:var(--t); width:5px; height:5px; box-shadow:0 0 8px var(--t),0 0 16px rgba(0,212,191,0.4); }
-.vdbar {
-  width:60px; height:2px;
-  background:linear-gradient(90deg,var(--r),var(--g),var(--t));
+/* ─── 8. DIVIDER ─── */
+.valo-divider{display:flex;align-items:center;margin:12px 0 8px;}
+.valo-divider::before,.valo-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
+.valo-divider-inner{display:flex;align-items:center;gap:6px;padding:0 14px;}
+.vd{width:6px;height:6px;transform:rotate(45deg);}
+.vd.r{background:var(--r);box-shadow:0 0 8px var(--r),0 0 16px rgba(255,70,85,0.4);}
+.vd.t{background:var(--t);width:5px;height:5px;box-shadow:0 0 8px var(--t),0 0 16px rgba(0,212,191,0.4);}
+.vdbar{width:60px;height:2px;background:linear-gradient(90deg,var(--r),var(--g),var(--t));
   clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
-  box-shadow:0 0 8px rgba(0,212,191,0.4),0 0 5px rgba(255,70,85,0.3);
-}
+  box-shadow:0 0 8px rgba(0,212,191,0.4),0 0 5px rgba(255,70,85,0.3);}
 
-/* ═══════════════════════════
-   CORNER BRACKETS
-═══════════════════════════ */
-.valo-bracket { position:absolute; width:14px; height:14px; }
-.valo-bracket.tl { top:6px; left:6px; border-top:2px solid var(--r); border-left:2px solid var(--r); box-shadow:-1px -1px 6px rgba(255,70,85,0.35); }
-.valo-bracket.tr { top:6px; right:6px; border-top:2px solid var(--t); border-right:2px solid var(--t); box-shadow:1px -1px 6px rgba(0,212,191,0.35); }
-.valo-bracket.bl { bottom:6px; left:6px; border-bottom:2px solid var(--t); border-left:2px solid var(--t); box-shadow:-1px 1px 6px rgba(0,212,191,0.35); }
-.valo-bracket.br { bottom:6px; right:6px; border-bottom:2px solid var(--r); border-right:2px solid var(--r); box-shadow:1px 1px 6px rgba(255,70,85,0.35); }
+/* ─── 9. CORNER BRACKETS ─── */
+.valo-bracket{position:absolute;width:14px;height:14px;}
+.valo-bracket.tl{top:6px;left:6px;border-top:2px solid var(--r);border-left:2px solid var(--r);box-shadow:-1px -1px 6px rgba(255,70,85,0.35);}
+.valo-bracket.tr{top:6px;right:6px;border-top:2px solid var(--t);border-right:2px solid var(--t);box-shadow:1px -1px 6px rgba(0,212,191,0.35);}
+.valo-bracket.bl{bottom:6px;left:6px;border-bottom:2px solid var(--t);border-left:2px solid var(--t);box-shadow:-1px 1px 6px rgba(0,212,191,0.35);}
+.valo-bracket.br{bottom:6px;right:6px;border-bottom:2px solid var(--r);border-right:2px solid var(--r);box-shadow:1px 1px 6px rgba(255,70,85,0.35);}
 
-/* ═══════════════════════════
-   GREETING BOX — Valorant panel
-   Smoky dark, not pure black
-═══════════════════════════ */
-.valo-greeting {
+/* ─── 10. GREETING BOX ─── */
+.valo-greeting{
   position:relative;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,50,60,0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 60% at 100% 100%, rgba(0,212,191,0.06) 0%, transparent 55%),
-    linear-gradient(160deg, rgba(38,12,18,0.97) 0%, rgba(16,19,32,0.98) 45%, rgba(8,26,28,0.97) 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,50,60,0.07) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 60% at 100% 100%,rgba(0,212,191,0.06) 0%,transparent 55%),
+    linear-gradient(160deg,rgba(38,12,18,0.97) 0%,rgba(16,19,32,0.98) 45%,rgba(8,26,28,0.97) 100%);
   clip-path:polygon(20px 0%,100% 0%,100% calc(100% - 14px),calc(100% - 14px) 100%,0% 100%,0% 20px);
   padding:clamp(18px,5vw,28px) clamp(16px,5vw,28px) clamp(14px,4vw,22px);
-  margin:4px 0 14px; overflow:hidden;
+  margin:4px 0 14px;overflow:hidden;
   border:1px solid rgba(255,70,85,0.22);
-  box-shadow:
-    0 0 40px rgba(255,70,85,0.09),
-    0 0 80px rgba(0,212,191,0.04),
-    0 8px 40px rgba(0,0,0,0.85);
+  box-shadow:0 0 28px rgba(255,70,85,0.07),0 0 60px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85);
   animation:greetBreathe 2.8s ease-in-out infinite;
 }
-@keyframes greetBreathe {
-  0%,100%{ box-shadow:0 0 26px rgba(255,70,85,0.07),0 8px 40px rgba(0,0,0,0.85); border-color:rgba(255,70,85,0.2); }
-  50%    { box-shadow:0 0 38px rgba(255,70,85,0.11),0 0 50px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85); border-color:rgba(255,70,85,0.28); }
+@keyframes greetBreathe{
+  0%,100%{box-shadow:0 0 28px rgba(255,70,85,0.07),0 8px 40px rgba(0,0,0,0.85);}
+  50%    {box-shadow:0 0 40px rgba(255,70,85,0.11),0 0 60px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85);}
 }
+.vg-topline{position:absolute;top:0;left:20px;right:0;height:2px;background:linear-gradient(90deg,var(--r),rgba(255,70,85,0.2));box-shadow:0 0 10px rgba(255,70,85,0.6);}
+.vg-leftline{position:absolute;left:0;top:20px;bottom:0;width:2px;background:linear-gradient(180deg,var(--r),rgba(0,212,191,0.2));box-shadow:0 0 8px rgba(255,70,85,0.4);}
+.vg-cut-h{position:absolute;top:20px;left:20px;width:28px;height:1px;background:var(--t);opacity:.45;box-shadow:0 0 5px var(--t);}
+.vg-cut-v{position:absolute;top:20px;left:20px;width:1px;height:20px;background:var(--t);opacity:.38;box-shadow:0 0 5px var(--t);}
+.vg-smoke-r{position:absolute;top:-20px;right:10%;width:180px;height:120px;background:radial-gradient(ellipse,rgba(255,50,60,0.07) 0%,transparent 65%);pointer-events:none;animation:floatSmoke 4s ease-in-out infinite;}
+.vg-smoke-t{position:absolute;bottom:-20px;left:5%;width:160px;height:100px;background:radial-gradient(ellipse,rgba(0,212,191,0.06) 0%,transparent 65%);pointer-events:none;animation:floatSmoke 5.5s ease-in-out infinite 1.5s;}
+@keyframes floatSmoke{0%,100%{transform:translate(0,0)scale(1);opacity:1;}50%{transform:translate(12px,-10px)scale(1.12);opacity:.65;}}
+.valo-vbar{position:absolute;left:2px;top:20px;bottom:0;width:3px;background:linear-gradient(180deg,var(--r) 0%,var(--g) 45%,var(--t) 80%,transparent 100%);box-shadow:0 0 8px rgba(255,70,85,0.35);opacity:.8;}
 
-/* Structural lines inside box */
-.vg-topline { position:absolute; top:0; left:20px; right:0; height:2px;
-  background:linear-gradient(90deg,var(--r),rgba(255,70,85,0.2));
-  box-shadow:0 0 10px rgba(255,70,85,0.6); }
-.vg-leftline { position:absolute; left:0; top:20px; bottom:0; width:2px;
-  background:linear-gradient(180deg,var(--r),rgba(0,212,191,0.2));
-  box-shadow:0 0 8px rgba(255,70,85,0.4); }
-/* Inner accent lines at cut corner */
-.vg-cut-h { position:absolute; top:20px; left:20px; width:24px; height:1px;
-  background:var(--t); opacity:.45; box-shadow:0 0 5px var(--t); }
-.vg-cut-v { position:absolute; top:20px; left:20px; width:1px; height:18px;
-  background:var(--t); opacity:.38; box-shadow:0 0 5px var(--t); }
-/* Bottom BR cut line */
-.vg-br-line { position:absolute; bottom:14px; right:0; width:40px; height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,70,85,0.3)); }
-/* Floating smoke blobs inside box */
-.vg-smoke-r { position:absolute; top:-20px; right:10%; width:180px; height:120px;
-  background:radial-gradient(ellipse,rgba(255,50,60,0.07) 0%,transparent 65%);
-  pointer-events:none; animation:floatSmoke 4s ease-in-out infinite; }
-.vg-smoke-t { position:absolute; bottom:-20px; left:5%; width:160px; height:100px;
-  background:radial-gradient(ellipse,rgba(0,212,191,0.06) 0%,transparent 65%);
-  pointer-events:none; animation:floatSmoke 5.5s ease-in-out infinite 1.5s; }
-@keyframes floatSmoke { 0%,100%{transform:translate(0,0) scale(1);opacity:1;} 50%{transform:translate(12px,-10px) scale(1.12);opacity:.65;} }
-/* Left triple-color bar */
-.valo-vbar { position:absolute; left:2px; top:20px; bottom:0; width:3px;
-  background:linear-gradient(180deg,var(--r) 0%,var(--g) 45%,var(--t) 80%,transparent 100%);
-  box-shadow:0 0 8px rgba(255,70,85,0.35); opacity:.8; }
+/* ─── 11. STATUS DOT with rings ─── */
+.valo-status-row{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px;}
+.valo-status-dot-wrap{position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.valo-status-dot{width:8px;height:8px;background:var(--t);border-radius:50%;box-shadow:0 0 10px var(--t),0 0 4px var(--t2);z-index:1;position:relative;animation:dotBlink 1.2s ease-in-out infinite;}
+@keyframes dotBlink{0%,100%{opacity:1;box-shadow:0 0 10px var(--t);}50%{opacity:.4;box-shadow:0 0 4px var(--t);}}
+.valo-status-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,212,191,0.45);animation:ringPulse 1.4s ease-out infinite;}
+.valo-status-ring.r1{width:14px;height:14px;animation-delay:0s;}
+.valo-status-ring.r2{width:21px;height:21px;animation-delay:.35s;border-color:rgba(0,212,191,0.2);}
+@keyframes ringPulse{0%{transform:scale(.5);opacity:.9;}100%{transform:scale(1.9);opacity:0;}}
+.valo-status-text{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:var(--t2);text-transform:uppercase;text-shadow:0 0 8px rgba(0,255,231,0.5);}
+.valo-greeting-icon{font-size:clamp(28px,5vw,36px);display:block;text-align:center;margin-bottom:10px;filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));animation:iconGlow 2s ease-in-out infinite;}
+@keyframes iconGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));}50%{filter:drop-shadow(0 0 18px rgba(255,130,50,0.85)) drop-shadow(0 0 6px rgba(255,200,100,0.4));}}
+.valo-greeting-title{font-family:'Rajdhani',sans-serif;font-size:clamp(15px,4vw,22px);font-weight:700;color:var(--w);text-align:center;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+.valo-greeting-sub{font-size:clamp(12px,3vw,13.5px);color:var(--s);text-align:center;line-height:1.7;}
+.valo-stats{display:flex;justify-content:center;gap:clamp(12px,3vw,28px);margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);}
+.valo-stat{text-align:center;line-height:1.2;}
+.valo-stat-num{font-family:'Rajdhani',sans-serif;font-size:clamp(18px,4vw,24px);font-weight:700;color:var(--r);display:block;text-shadow:0 0 12px rgba(255,70,85,0.6);}
+.valo-stat-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;color:var(--d);text-transform:uppercase;}
+.valo-stat-div{width:1px;background:rgba(255,255,255,0.09);align-self:stretch;}
 
-/* Status row */
-.valo-status-row { display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:12px; }
-.valo-status-dot-wrap { position:relative; width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
-.valo-status-dot { width:8px; height:8px; background:var(--t); border-radius:50%;
-  box-shadow:0 0 10px var(--t),0 0 4px var(--t2); z-index:1; position:relative;
-  animation:dotBlink 1.2s ease-in-out infinite; }
-@keyframes dotBlink { 0%,100%{opacity:1;box-shadow:0 0 10px var(--t);}50%{opacity:.5;box-shadow:0 0 4px var(--t);} }
-.valo-status-ring { position:absolute; border-radius:50%;
-  border:1px solid rgba(0,212,191,0.45); animation:ringPulse 1.4s ease-out infinite; }
-.valo-status-ring.r1 { width:13px; height:13px; animation-delay:0s; }
-.valo-status-ring.r2 { width:20px; height:20px; animation-delay:.35s; border-color:rgba(0,212,191,0.22); }
-@keyframes ringPulse { 0%{transform:scale(0.5);opacity:.9;} 100%{transform:scale(1.9);opacity:0;} }
-.valo-status-text { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
-  letter-spacing:3px; color:var(--t2); text-transform:uppercase;
-  text-shadow:0 0 8px rgba(0,255,231,0.5); }
-
-.valo-greeting-icon { font-size:clamp(28px,5vw,36px); display:block; text-align:center; margin-bottom:10px;
-  filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));
-  animation:iconGlow 2s ease-in-out infinite; }
-@keyframes iconGlow { 0%,100%{filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));} 50%{filter:drop-shadow(0 0 18px rgba(255,120,50,0.85)) drop-shadow(0 0 6px rgba(255,200,100,0.4));} }
-.valo-greeting-title { font-family:'Rajdhani',sans-serif; font-size:clamp(15px,4vw,22px); font-weight:700;
-  color:var(--w); text-align:center; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
-.valo-greeting-sub { font-size:clamp(12px,3vw,13.5px); color:var(--s); text-align:center; line-height:1.7; }
-.valo-stats { display:flex; justify-content:center; gap:clamp(12px,3vw,28px);
-  margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.07); }
-.valo-stat { text-align:center; line-height:1.2; }
-.valo-stat-num { font-family:'Rajdhani',sans-serif; font-size:clamp(18px,4vw,24px); font-weight:700;
-  color:var(--r); display:block; text-shadow:0 0 12px rgba(255,70,85,0.6); }
-.valo-stat-label { font-family:'Barlow Condensed',sans-serif; font-size:9px;
-  letter-spacing:2px; color:var(--d); text-transform:uppercase; }
-.valo-stat-div { width:1px; background:rgba(255,255,255,0.09); align-self:stretch; }
-
-/* ═══════════════════════════
-   SUGGEST LABEL
-═══════════════════════════ */
-.valo-suggest-label { display:flex; align-items:center; gap:10px; margin:10px 0 12px; }
-.valo-suggest-label::before { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(255,70,85,0.5)); }
-.valo-suggest-label::after  { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(0,212,191,0.5),transparent); }
-.valo-suggest-label span {
-  background:linear-gradient(90deg,var(--r2),var(--r));
-  color:var(--w); font-family:'Barlow Condensed',sans-serif;
-  font-size:12px; font-weight:800; letter-spacing:3px; text-transform:uppercase;
-  padding:5px 20px;
-  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+/* ─── 12. SUGGEST LABEL ─── */
+.valo-suggest-label{display:flex;align-items:center;gap:10px;margin:10px 0 12px;}
+.valo-suggest-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,70,85,0.5));}
+.valo-suggest-label::after {content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,212,191,0.5),transparent);}
+.valo-suggest-label span{
+  background:linear-gradient(90deg,var(--r2),var(--r));color:var(--w);
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
+  padding:5px 20px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
   box-shadow:0 0 18px rgba(255,70,85,0.45),0 0 36px rgba(255,70,85,0.15);
 }
 
-/* ═══════════════════════════
-   BUTTONS — dark teal, clearly visible text
-═══════════════════════════ */
-.stButton > button {
-  /* Darker background so text pops */
+/* ─── 13. SUGGESTION BUTTONS ─── */
+.stButton>button{
   background:linear-gradient(90deg,rgba(0,60,55,0.88),rgba(6,12,22,0.96)) !important;
   color:#e0f8f5 !important;
   border:1px solid rgba(0,212,191,0.32) !important;
@@ -255,38 +218,35 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
   clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%) !important;
   border-radius:0 !important;
   font-family:'Barlow Condensed',sans-serif !important;
-  font-size:clamp(12px,3vw,14px) !important; font-weight:700 !important; letter-spacing:.5px !important;
-  padding:12px 14px !important; width:100% !important; text-align:left !important;
-  white-space:normal !important; min-height:50px !important; line-height:1.45 !important;
+  font-size:clamp(12px,3vw,14px) !important;font-weight:700 !important;letter-spacing:.5px !important;
+  padding:12px 14px !important;width:100% !important;text-align:left !important;
+  white-space:normal !important;min-height:50px !important;line-height:1.45 !important;
   transition:all .15s ease !important;
-  box-shadow:0 0 10px rgba(0,212,191,0.1),0 2px 10px rgba(0,0,0,0.7),inset 0 1px 0 rgba(0,212,191,0.06) !important;
+  box-shadow:0 0 10px rgba(0,212,191,0.1),0 2px 10px rgba(0,0,0,0.7) !important;
   text-shadow:0 1px 4px rgba(0,0,0,0.6) !important;
 }
-.stButton > button:hover {
+.stButton>button:hover{
   background:linear-gradient(90deg,rgba(0,212,191,0.2),rgba(255,70,85,0.12)) !important;
-  border-left-color:var(--r) !important; border-color:rgba(0,212,191,0.5) !important;
-  color:#ffffff !important; transform:translateX(5px) !important;
+  border-left-color:var(--r) !important;border-color:rgba(0,212,191,0.5) !important;
+  color:#ffffff !important;transform:translateX(5px) !important;
   box-shadow:0 0 22px rgba(0,212,191,0.4),0 0 44px rgba(0,212,191,0.15),0 4px 16px rgba(0,0,0,0.7) !important;
-  text-shadow:0 0 8px rgba(0,255,231,0.3) !important;
 }
 
-/* ═══════════════════════════
-   AVATARS — sharp angular
-═══════════════════════════ */
-[data-testid="chatAvatarIcon-user"] {
+/* ─── 14. AVATARS ─── */
+[data-testid="chatAvatarIcon-user"]{
   background:linear-gradient(135deg,#5c0e1a,#200508) !important;
-  border:2px solid var(--r) !important; border-radius:0 !important;
+  border:2px solid var(--r) !important;border-radius:0 !important;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%) !important;
   box-shadow:0 0 14px rgba(255,70,85,0.6),0 0 28px rgba(255,70,85,0.2) !important;
   overflow:hidden !important;
 }
 [data-testid="chatAvatarIcon-user"]>*{display:none !important;}
 [data-testid="chatAvatarIcon-user"]::before{content:'';display:block;width:100%;height:100%;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' fill='%235c0e1a'/%3E%3Cpolygon points='18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5' fill='none' stroke='%23ff4655' stroke-width='1.8'/%3E%3Cpolygon points='18,9 25,13 25,23 18,27 11,23 11,13' fill='rgba(255,70,85,0.15)'/%3E%3Ctext x='18' y='22' text-anchor='middle' font-family='Rajdhani,sans-serif' font-size='9' font-weight='700' fill='%23ff8090' letter-spacing='0.5'%3EUSR%3C/text%3E%3Cline x1='5' y1='10.5' x2='11' y2='16.5' stroke='%23ff4655' stroke-width='0.8' opacity='0.5'/%3E%3Ccircle cx='18' cy='31' r='1.5' fill='%23ff4655'/%3E%3C/svg%3E") center/cover no-repeat !important;}
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' fill='%235c0e1a'/%3E%3Cpolygon points='18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5' fill='none' stroke='%23ff4655' stroke-width='1.8'/%3E%3Cpolygon points='18,9 25,13 25,23 18,27 11,23 11,13' fill='rgba(255,70,85,0.15)'/%3E%3Ctext x='18' y='22' text-anchor='middle' font-family='Rajdhani,sans-serif' font-size='9' font-weight='700' fill='%23ff8090' letter-spacing='0.5'%3EUSR%3C/text%3E%3Ccircle cx='18' cy='31' r='1.5' fill='%23ff4655'/%3E%3C/svg%3E") center/cover no-repeat !important;}
 
-[data-testid="chatAvatarIcon-assistant"] {
+[data-testid="chatAvatarIcon-assistant"]{
   background:linear-gradient(135deg,#003c38,#000e0d) !important;
-  border:2px solid var(--t) !important; border-radius:0 !important;
+  border:2px solid var(--t) !important;border-radius:0 !important;
   clip-path:polygon(9px 0,100% 0,100% 100%,0 100%,0 9px) !important;
   box-shadow:0 0 14px rgba(0,212,191,0.6),0 0 28px rgba(0,212,191,0.2) !important;
   overflow:hidden !important;
@@ -295,203 +255,149 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
 [data-testid="chatAvatarIcon-assistant"]::before{content:'';display:block;width:100%;height:100%;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' fill='%23003c38'/%3E%3Cpolygon points='18,2 32,10 32,26 18,34 4,26 4,10' fill='none' stroke='%2300d4bf' stroke-width='1.8'/%3E%3Ccircle cx='18' cy='18' r='6.5' fill='none' stroke='%2300d4bf' stroke-width='1.2' opacity='0.8'/%3E%3Ccircle cx='18' cy='18' r='2.8' fill='%2300ffe7'/%3E%3Cline x1='18' y1='2' x2='18' y2='10' stroke='%2300d4bf' stroke-width='1' opacity='0.6'/%3E%3Cline x1='18' y1='26' x2='18' y2='34' stroke='%2300d4bf' stroke-width='1' opacity='0.6'/%3E%3Cline x1='4' y1='18' x2='11' y2='18' stroke='%2300d4bf' stroke-width='1' opacity='0.5'/%3E%3Cline x1='25' y1='18' x2='32' y2='18' stroke='%2300d4bf' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E") center/cover no-repeat !important;}
 
-/* ═══════════════════════════
-   CHAT BUBBLES — Valorant panels
-   Dark enough but NOT black
-═══════════════════════════ */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+/* ─── 15. CHAT BUBBLES ─── */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]){
   background:
-    radial-gradient(ellipse 80% 80% at 100% 50%, rgba(255,50,60,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 100% 50%,rgba(255,50,60,0.06) 0%,transparent 60%),
     linear-gradient(135deg,rgba(80,14,22,0.95) 0%,rgba(48,8,14,0.97) 40%,rgba(16,8,12,0.98) 100%) !important;
   border:1px solid rgba(255,70,85,0.35) !important;
   clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px)) !important;
-  border-radius:0 !important;
-  padding:15px 20px !important; margin:8px 0 !important;
+  border-radius:0 !important;padding:15px 20px !important;margin:8px 0 !important;
   box-shadow:3px 0 20px rgba(255,70,85,0.1),0 4px 20px rgba(0,0,0,0.75) !important;
 }
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]){
   background:
-    radial-gradient(ellipse 80% 80% at 0% 50%, rgba(0,212,191,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 0% 50%,rgba(0,212,191,0.05) 0%,transparent 60%),
     linear-gradient(135deg,rgba(5,52,50,0.95) 0%,rgba(4,30,30,0.97) 40%,rgba(5,10,16,0.98) 100%) !important;
   border:1px solid rgba(0,212,191,0.28) !important;
   clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px) !important;
-  border-radius:0 !important;
-  padding:15px 20px !important; margin:8px 0 !important;
+  border-radius:0 !important;padding:15px 20px !important;margin:8px 0 !important;
   box-shadow:-3px 0 20px rgba(0,212,191,0.08),0 4px 20px rgba(0,0,0,0.75) !important;
 }
-
-/* ═══════════════════════════
-   CHAT TEXT — high contrast
-═══════════════════════════ */
-[data-testid="stChatMessage"] p,
-[data-testid="stChatMessage"] li {
-  font-size:clamp(13.5px,3.8vw,15px) !important; line-height:1.82 !important;
-  color:#f4ede7 !important; text-shadow:0 1px 6px rgba(0,0,0,0.95) !important;
+[data-testid="stChatMessage"] p,[data-testid="stChatMessage"] li{
+  font-size:clamp(13.5px,3.8vw,15px) !important;line-height:1.82 !important;
+  color:#f4ede7 !important;text-shadow:0 1px 6px rgba(0,0,0,0.95) !important;
 }
-[data-testid="stChatMessage"] h3 {
-  font-family:'Rajdhani',sans-serif !important; font-size:clamp(14px,4vw,19px) !important;
-  font-weight:700 !important; text-transform:uppercase !important; letter-spacing:2.5px !important;
-  color:#ffffff !important; margin-bottom:8px !important; padding-bottom:6px !important;
+[data-testid="stChatMessage"] h3{
+  font-family:'Rajdhani',sans-serif !important;font-size:clamp(14px,4vw,19px) !important;
+  font-weight:700 !important;text-transform:uppercase !important;letter-spacing:2.5px !important;
+  color:#ffffff !important;margin-bottom:8px !important;padding-bottom:6px !important;
   border-bottom:1px solid rgba(255,255,255,0.09) !important;
-  text-shadow:0 0 14px rgba(255,255,255,0.12) !important;
 }
-[data-testid="stChatMessage"] strong { color:#ffbfc6 !important; font-weight:700 !important; text-shadow:0 0 8px rgba(255,70,85,0.3) !important; }
-[data-testid="stChatMessage"] em { color:var(--t2) !important; font-style:normal !important; font-size:11px !important; }
-[data-testid="stChatMessage"] code { background:rgba(0,212,191,0.13) !important; color:#70ffee !important;
-  border:1px solid rgba(0,212,191,0.38) !important; border-radius:2px !important;
-  padding:2px 7px !important; font-size:12px !important; }
+[data-testid="stChatMessage"] strong{color:#ffbfc6 !important;font-weight:700 !important;text-shadow:0 0 8px rgba(255,70,85,0.3) !important;}
+[data-testid="stChatMessage"] em{color:var(--t2) !important;font-style:normal !important;font-size:11px !important;}
+[data-testid="stChatMessage"] code{background:rgba(0,212,191,0.13) !important;color:#70ffee !important;border:1px solid rgba(0,212,191,0.38) !important;border-radius:2px !important;padding:2px 7px !important;font-size:12px !important;}
 
-/* ═══════════════════════════
-   CHAT INPUT — FIXED TEXT VISIBILITY
-   CHAT INPUT — dark panel, clearly visible text
-═══════════════════════════ */
-
-/* Outer wrapper — Valorant dark panel */
-.stChatInput {
-  position: relative !important;
+/* ─────────────────────────────────────────
+   16. CHAT INPUT — VALORANT HUD STYLE
+   Complete redesign, guaranteed readable
+───────────────────────────────────────── */
+/* Outer container */
+.stChatInput,
+[data-testid="stChatInput"],
+div[class*="stChatInput"]{
+  position:relative !important;
 }
-.stChatInput > div {
-  background: linear-gradient(135deg,
-    rgba(8,10,18,0.99) 0%,
-    rgba(12,15,24,0.99) 100%) !important;
-  border: 1px solid rgba(255,70,85,0.28) !important;
-  border-top: 2px solid rgba(255,70,85,0.5) !important;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%) !important;
-  border-radius: 0 !important;
-  box-shadow:
-    0 0 20px rgba(255,70,85,0.07),
-    0 -2px 30px rgba(255,70,85,0.04),
-    0 4px 20px rgba(0,0,0,0.85) !important;
-  animation: inputBreath 4s ease-in-out infinite !important;
-}
-@keyframes inputBreath {
-  0%,100% { box-shadow: 0 0 20px rgba(255,70,85,0.07), 0 4px 20px rgba(0,0,0,0.85); border-top-color: rgba(255,70,85,0.4); }
-  50%      { box-shadow: 0 0 30px rgba(255,70,85,0.11), 0 0 60px rgba(0,212,191,0.03), 0 4px 20px rgba(0,0,0,0.85); border-top-color: rgba(255,70,85,0.7); }
-}
-
-/* Corner bracket TL on input */
-.stChatInput > div::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 4px !important; left: 4px !important;
-  width: 10px !important; height: 10px !important;
-  border-top: 1px solid rgba(0,212,191,0.5) !important;
-  border-left: 1px solid rgba(0,212,191,0.5) !important;
-  pointer-events: none !important;
-}
-
-/* THE ACTUAL FIX — textarea dark bg + cream text */
-.stChatInput textarea {
-  background: rgba(6, 8, 16, 0.96) !important;
-  color: #ece8e1 !important;
-  -webkit-text-fill-color: #ece8e1 !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  border-bottom: 2px solid rgba(255,70,85,0.35) !important;
-  border-radius: 0 !important;
-  font-family: 'Barlow', sans-serif !important;
-  font-size: clamp(13px,3.5vw,14px) !important;
-  caret-color: var(--r) !important;
-  opacity: 1 !important;
-  transition: all 0.2s ease !important;
-  letter-spacing: 0.3px !important;
-}
-.stChatInput textarea:focus {
-  background: rgba(8, 10, 20, 0.98) !important;
-  color: #f4f0e8 !important;
-  -webkit-text-fill-color: #f4f0e8 !important;
-  border-color: rgba(255,70,85,0.2) !important;
-  border-bottom-color: var(--r) !important;
-  box-shadow: 0 3px 16px rgba(255,70,85,0.1), inset 0 0 20px rgba(255,70,85,0.02) !important;
-  outline: none !important;
-}
-.stChatInput textarea::placeholder {
-  color: rgba(180,176,168,0.35) !important;
-  -webkit-text-fill-color: rgba(180,176,168,0.35) !important;
-  font-style: italic !important;
-  letter-spacing: 0.5px !important;
-}
-/* Catch all child inputs */
-.stChatInput input,
-.stChatInput [contenteditable] {
-  color: #ece8e1 !important;
-  -webkit-text-fill-color: #ece8e1 !important;
-  background: rgba(6,8,16,0.96) !important;
-}
-
-/* ── Streamlit data-testid (actual DOM) ── */
-[data-testid="stChatInput"] {
-  background: linear-gradient(135deg,rgba(8,10,18,0.99),rgba(12,15,24,0.99)) !important;
-  border:1px solid rgba(255,70,85,0.28) !important;
-  border-top:2px solid rgba(255,70,85,0.45) !important;
+.stChatInput>div,
+[data-testid="stChatInput"]>div{
+  background:#08090f !important;
+  border:none !important;
   border-radius:0 !important;
-  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%) !important;
-  box-shadow:0 0 20px rgba(255,70,85,0.06),0 4px 20px rgba(0,0,0,0.85) !important;
+  padding:2px !important;
+  box-shadow:none !important;
 }
+
+/* The actual styled input shell */
+.stChatInput textarea,
 [data-testid="stChatInput"] textarea,
 [data-testid="stChatInputTextArea"],
-[data-testid="stChatInput"] > div > div > textarea,
-div[class*="stChatInput"] textarea {
-  background: rgba(6,8,16,0.97) !important;
-  background-color: rgba(6,8,16,0.97) !important;
-  color: #ece8e1 !important;
-  -webkit-text-fill-color: #ece8e1 !important;
-  caret-color: #ff4655 !important;
-  border:none !important;
-  border-bottom:2px solid rgba(255,70,85,0.32) !important;
-  border-radius:0 !important;
-  font-family:'Barlow',sans-serif !important;
-  font-size:clamp(13px,3.5vw,14px) !important;
-  opacity:1 !important;
-}
-[data-testid="stChatInput"] textarea:focus {
-  color:#f4f0e8 !important;
-  -webkit-text-fill-color:#f4f0e8 !important;
-  border-bottom-color:#ff4655 !important;
-  outline:none !important;
-  box-shadow:0 3px 12px rgba(255,70,85,0.1) !important;
-}
-[data-testid="stChatInput"] textarea::placeholder {
-  color:rgba(180,176,168,0.35) !important;
-  -webkit-text-fill-color:rgba(180,176,168,0.35) !important;
-  font-style:italic !important;
-}
-[data-testid="stChatInput"] button {
-  background:rgba(255,70,85,0.15) !important;
-  border:1px solid rgba(255,70,85,0.3) !important;
-  color:#ff4655 !important; border-radius:2px !important;
-}
-[data-testid="stChatInput"] button:hover {
-  background:rgba(255,70,85,0.28) !important;
-  box-shadow:0 0 12px rgba(255,70,85,0.3) !important;
-}
-/* Nuclear — force all textarea on page */
-textarea {
+div[class*="stChatInput"] textarea{
+  background:#0e1118 !important;
+  background-color:#0e1118 !important;
   color:#ece8e1 !important;
   -webkit-text-fill-color:#ece8e1 !important;
-  background-color:rgba(6,8,16,0.97) !important;
+  border:1px solid rgba(255,70,85,0.35) !important;
+  border-top:2px solid rgba(255,70,85,0.6) !important;
+  border-bottom:1px solid rgba(0,212,191,0.25) !important;
+  border-radius:0 !important;
+  /* Valorant diagonal cut */
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%) !important;
+  font-family:'Barlow',sans-serif !important;
+  font-size:clamp(13px,3.5vw,15px) !important;
+  font-weight:400 !important;
+  letter-spacing:0.3px !important;
+  caret-color:#ff4655 !important;
+  opacity:1 !important;
+  padding:14px 16px !important;
+  box-shadow:
+    inset 0 0 30px rgba(255,70,85,0.03),
+    inset 0 1px 0 rgba(255,70,85,0.08),
+    0 0 20px rgba(255,70,85,0.06),
+    0 0 40px rgba(0,212,191,0.03) !important;
+  transition:all 0.2s ease !important;
+}
+.stChatInput textarea:focus,
+[data-testid="stChatInput"] textarea:focus{
+  background:#0e1118 !important;
+  background-color:#0e1118 !important;
+  color:#f4f0e8 !important;
+  -webkit-text-fill-color:#f4f0e8 !important;
+  border-color:rgba(255,70,85,0.55) !important;
+  border-top-color:var(--r) !important;
+  outline:none !important;
+  box-shadow:
+    inset 0 0 30px rgba(255,70,85,0.04),
+    0 0 24px rgba(255,70,85,0.1),
+    0 0 48px rgba(255,70,85,0.04) !important;
+}
+.stChatInput textarea::placeholder,
+[data-testid="stChatInput"] textarea::placeholder{
+  color:rgba(176,172,164,0.38) !important;
+  -webkit-text-fill-color:rgba(176,172,164,0.38) !important;
+  font-style:italic !important;
 }
 
-/* ═══════════════════════════
-   SIDEBAR
-═══════════════════════════ */
+/* Submit button — Valorant red */
+.stChatInput button,
+[data-testid="stChatInput"] button,
+[data-testid="stChatInputSubmitButton"]{
+  background:linear-gradient(135deg,rgba(255,70,85,0.2),rgba(192,48,61,0.15)) !important;
+  border:1px solid rgba(255,70,85,0.4) !important;
+  border-radius:2px !important;
+  color:#ff4655 !important;
+  box-shadow:0 0 10px rgba(255,70,85,0.2) !important;
+  transition:all 0.15s ease !important;
+}
+.stChatInput button:hover,
+[data-testid="stChatInput"] button:hover{
+  background:linear-gradient(135deg,rgba(255,70,85,0.35),rgba(192,48,61,0.28)) !important;
+  box-shadow:0 0 18px rgba(255,70,85,0.4) !important;
+  transform:scale(1.05) !important;
+}
+
+/* Nuclear fallback */
+textarea{
+  color:#ece8e1 !important;
+  -webkit-text-fill-color:#ece8e1 !important;
+  background-color:#0e1118 !important;
+}
+
+/* ─── 17. SIDEBAR ─── */
 section[data-testid="stSidebar"]{background:linear-gradient(180deg,#08090e,#0b0d16) !important;border-right:1px solid rgba(255,70,85,0.16) !important;}
 section[data-testid="stSidebar"] p,section[data-testid="stSidebar"] span,section[data-testid="stSidebar"] div,section[data-testid="stSidebar"] small{color:#60625e !important;font-size:13px !important;}
 section[data-testid="stSidebar"] h2{font-family:'Rajdhani',sans-serif !important;font-size:17px !important;color:var(--c) !important;text-transform:uppercase !important;letter-spacing:3px !important;}
 section[data-testid="stSidebar"] .stButton>button{background:transparent !important;border:1px solid rgba(255,70,85,0.2) !important;border-left:2px solid var(--r) !important;color:#606060 !important;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%) !important;border-radius:0 !important;box-shadow:none !important;font-family:'Barlow Condensed',sans-serif !important;font-weight:700 !important;letter-spacing:1px !important;}
 section[data-testid="stSidebar"] .stButton>button:hover{background:rgba(255,70,85,0.07) !important;color:var(--c) !important;transform:none !important;}
 
-/* ═══════════════════════════
-   SPINNER
-═══════════════════════════ */
+/* ─── 18. SPINNER ─── */
 [data-testid="stSpinner"] p{color:var(--t) !important;font-family:'Barlow Condensed',sans-serif !important;letter-spacing:4px !important;font-size:11px !important;text-transform:uppercase !important;text-shadow:0 0 10px rgba(0,212,191,0.6) !important;}
 
-/* ═══════════════════════════
-   SCROLLBAR + misc
-═══════════════════════════ */
+/* ─── 19. SCROLLBAR ─── */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:rgba(255,70,85,0.45);}
 ::-webkit-scrollbar-thumb:hover{background:var(--r);box-shadow:0 0 6px var(--r);}
+
 #MainMenu,footer,header{visibility:hidden !important;}
 .block-container{padding-top:1.2rem !important;padding-bottom:1.5rem !important;max-width:760px !important;}
 
@@ -506,7 +412,7 @@ section[data-testid="stSidebar"] .stButton>button:hover{background:rgba(255,70,8
 </style>
 """, unsafe_allow_html=True)
 
-# ======================== GROQ ========================
+# ════ GROQ ════
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except KeyError:
@@ -526,7 +432,7 @@ def load_raw():
 data_pc=load_db(); raw_json=load_raw()
 db_loi=len(data_pc.get("loi_he_thong",[])); db_lk=len(data_pc.get("linh_kien_pc",[]))
 
-# SIDEBAR
+# ════ SIDEBAR ════
 with st.sidebar:
     st.markdown("## ⚡ PC Solving")
     st.markdown("---")
@@ -538,6 +444,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("<small>Lê Văn Chung · Lớp 10A4 🎓</small>", unsafe_allow_html=True)
 
+# ════ LVC LOGO ════
 LVC="""<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
 <defs>
   <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff2233"/><stop offset="100%" style="stop-color:#ff4655"/></linearGradient>
@@ -580,15 +487,15 @@ if "pending_query" not in st.session_state: st.session_state.pending_query=None
 
 ALL_S=[
     ("⚠  Màn hình xanh BSOD đột ngột","Máy tính bị màn hình xanh chết đột ngột, phải làm gì?"),
-    ("▪  Màn hình đen không có tín hiệu","Máy lên nguồn nhưng màn hình đen, không có tín hiệu"),
-    ("◈  PC bíp dài khi khởi động","Máy bíp dài liên tục khi bật, không vào được Windows"),
+    ("▪  Màn hình đen không có tín hiệu","Máy lên nguồn nhưng màn hình đen không có tín hiệu"),
+    ("◈  PC bíp dài khi khởi động","Máy bíp dài liên tục khi bật không vào được Windows"),
     ("◉  Windows boot loop liên tục","Máy cứ khởi động lại liên tục không vào được Windows"),
     ("✕  Lỗi 0xc0000005 văng game","Game bị lỗi 0xc0000005 không mở được cách fix?"),
     ("✕  Lỗi 0xc000021a không boot","Máy báo lỗi 0xc000021a không boot được vào Windows"),
     ("⚠  PC tự reboot khi chơi game","PC tự reboot đột ngột trong lúc chơi game nặng"),
     ("▪  Không nhận chuột bàn phím USB","Cắm USB chuột bàn phím vào máy không nhận lỗi gì?"),
     ("◈  SSD NVMe không nhận trong BIOS","BIOS không nhận ổ SSD NVMe sau khi lắp mainboard"),
-    ("◉  No Boot Device Found","Máy báo No Boot Device Found không vào được hệ điều hành"),
+    ("◉  No Boot Device Found","Máy báo No Boot Device Found không vào được Windows"),
     ("🌡  CPU 95°C overheat","CPU nhiệt độ lên đến 95 độ C khi chạy game nguy hiểm không?"),
     ("◆  RAM 8GB đủ cho game 2024?","RAM 8GB có đủ dùng để chơi game hiện đại 2024 không?"),
     ("⚡  Nguồn bao nhiêu W cho RTX 3060?","RTX 3060 cần nguồn bao nhiêu W dùng 500W được không?"),
@@ -621,7 +528,6 @@ st.markdown(f"""
   <div class="valo-bracket bl"></div><div class="valo-bracket br"></div>
   <div class="vg-topline"></div><div class="vg-leftline"></div>
   <div class="vg-cut-h"></div><div class="vg-cut-v"></div>
-  <div class="vg-br-line"></div>
   <div class="vg-smoke-r"></div><div class="vg-smoke-t"></div>
   <div class="valo-vbar"></div>
   <div class="valo-status-row">
@@ -645,9 +551,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Smoke particles on page
 st.markdown("""<div class="smoke-1"></div><div class="smoke-2"></div><div class="smoke-3"></div>""", unsafe_allow_html=True)
-
 st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
 col1,col2=st.columns(2,gap="small")
 for i,(lb,qr) in enumerate(st.session_state.suggestions):
@@ -693,9 +597,9 @@ def dtype(q):
         if w in ql: return "err"
     return "gen"
 
-BR="KHÔNG dùng: 'AI','LLM','Groq','Meta','Llama','trí tuệ nhân tạo'. Đọc KỸ câu hỏi. Trả lời ĐÚNG và ĐỦ."
-PE=f"Bạn là hệ thống chẩn đoán lỗi của Lê Văn Chung 10A4.\n{BR}\nKho:{raw_json}\nQUY TẮC: 1 câu nguyên nhân + ≤4 bước ngắn + 1 tip. Không dài dòng."
-PH=f"Bạn là chuyên gia tư vấn linh kiện PC của Lê Văn Chung 10A4.\n{BR}\nKho:{raw_json}\nQUY TẮC: Thông số quan trọng, so sánh nếu cần, gợi ý combo, kết 1 khuyến nghị. Mở đầu: 'Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4...'"
+BR="KHÔNG dùng: 'AI','LLM','Groq','Meta','Llama','trí tuệ nhân tạo'. Đọc KỸ. Trả lời ĐÚNG và ĐỦ."
+PE=f"Bạn là hệ thống chẩn đoán lỗi của Lê Văn Chung 10A4.\n{BR}\nKho:{raw_json}\nQUY TẮC: 1 câu nguyên nhân + ≤4 bước + 1 tip. Không dài dòng."
+PH=f"Bạn là chuyên gia tư vấn linh kiện của Lê Văn Chung 10A4.\n{BR}\nKho:{raw_json}\nQUY TẮC: Thông số quan trọng, so sánh nếu cần, gợi ý combo, kết 1 khuyến nghị. Mở đầu: 'Dựa trên cơ sở dữ liệu kỹ thuật của tác giả Lê Văn Chung 10A4...'"
 PG=f"Bạn là hệ thống hỗ trợ kỹ thuật của Lê Văn Chung 10A4.\n{BR}\nKho:{raw_json}\nTrả lời tiếng Việt, súc tích."
 
 def ask(uq,ch):
@@ -724,3 +628,25 @@ if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
 if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
     st.session_state.greeted=True; handle(p)
+
+# JS injected AFTER render — forces textarea dark
+st.markdown("""
+<script>
+setTimeout(function(){
+  var style=document.createElement('style');
+  style.innerHTML=`
+    textarea{background:#0e1118!important;background-color:#0e1118!important;color:#ece8e1!important;-webkit-text-fill-color:#ece8e1!important;}
+    [data-testid="stChatInput"] textarea{background:#0e1118!important;background-color:#0e1118!important;color:#ece8e1!important;-webkit-text-fill-color:#ece8e1!important;border-top:2px solid rgba(255,70,85,0.6)!important;}
+  `;
+  document.head.appendChild(style);
+  setInterval(function(){
+    document.querySelectorAll('textarea').forEach(function(el){
+      el.style.setProperty('background','#0e1118','important');
+      el.style.setProperty('background-color','#0e1118','important');
+      el.style.setProperty('color','#ece8e1','important');
+      el.style.setProperty('-webkit-text-fill-color','#ece8e1','important');
+    });
+  },300);
+},100);
+</script>
+""", unsafe_allow_html=True)
