@@ -55,20 +55,21 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
 }
 
 /* ══ SMOKE PARTICLES drifting ══ */
-@keyframes smokeDrift1 { 0%{transform:translate(0,0) scale(1);opacity:.06;} 50%{transform:translate(20px,-30px) scale(1.3);opacity:.1;} 100%{transform:translate(-10px,-60px) scale(1.6);opacity:0;} }
-@keyframes smokeDrift2 { 0%{transform:translate(0,0) scale(1);opacity:.05;} 60%{transform:translate(-25px,-40px) scale(1.4);opacity:.08;} 100%{transform:translate(15px,-80px) scale(1.8);opacity:0;} }
-@keyframes smokeDrift3 { 0%{transform:translate(0,0) scale(1);opacity:.04;} 70%{transform:translate(30px,-50px) scale(1.5);opacity:.07;} 100%{transform:translate(-5px,-90px) scale(2);opacity:0;} }
+/* Smoke — faster, slightly more visible */
+@keyframes smokeDrift1 { 0%{transform:translate(0,0) scale(1);opacity:.09;} 50%{transform:translate(18px,-28px) scale(1.35);opacity:.13;} 100%{transform:translate(-8px,-55px) scale(1.7);opacity:0;} }
+@keyframes smokeDrift2 { 0%{transform:translate(0,0) scale(1);opacity:.08;} 60%{transform:translate(-22px,-36px) scale(1.4);opacity:.11;} 100%{transform:translate(12px,-70px) scale(1.8);opacity:0;} }
+@keyframes smokeDrift3 { 0%{transform:translate(0,0) scale(1);opacity:.06;} 70%{transform:translate(26px,-42px) scale(1.5);opacity:.09;} 100%{transform:translate(-4px,-80px) scale(2);opacity:0;} }
 .smoke-1,.smoke-2,.smoke-3 { position:absolute; border-radius:50%; pointer-events:none; }
-.smoke-1 { width:120px; height:120px; bottom:10%; left:5%; background:radial-gradient(circle,rgba(255,70,85,0.08) 0%,transparent 70%); animation:smokeDrift1 8s ease-in-out infinite; }
-.smoke-2 { width:100px; height:100px; bottom:15%; right:8%; background:radial-gradient(circle,rgba(0,212,191,0.07) 0%,transparent 70%); animation:smokeDrift2 10s ease-in-out infinite 2s; }
-.smoke-3 { width:80px; height:80px; bottom:5%; left:40%; background:radial-gradient(circle,rgba(232,201,122,0.05) 0%,transparent 70%); animation:smokeDrift3 12s ease-in-out infinite 4s; }
+.smoke-1 { width:130px; height:130px; bottom:10%; left:5%; background:radial-gradient(circle,rgba(255,70,85,0.09) 0%,transparent 65%); animation:smokeDrift1 5s ease-in-out infinite; }
+.smoke-2 { width:110px; height:110px; bottom:15%; right:8%; background:radial-gradient(circle,rgba(0,212,191,0.08) 0%,transparent 65%); animation:smokeDrift2 6.5s ease-in-out infinite 1.5s; }
+.smoke-3 { width:90px; height:90px; bottom:5%; left:40%; background:radial-gradient(circle,rgba(232,201,122,0.06) 0%,transparent 65%); animation:smokeDrift3 8s ease-in-out infinite 3s; }
 
-/* ══ SCAN LINE ══ */
-@keyframes scanDown { 0%{top:-40%;opacity:.6} 80%{opacity:.3} 100%{top:130%;opacity:0} }
+/* ══ SCAN LINE — faster ══ */
+@keyframes scanDown { 0%{top:-40%;opacity:.7} 70%{opacity:.4} 100%{top:130%;opacity:0} }
 .scan-wrap { position:relative; overflow:hidden; }
 .scan-wrap::after { content:''; position:absolute; top:-40%; left:0; right:0; height:35%;
-  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.035) 50%,transparent 100%);
-  animation:scanDown 6s linear infinite; pointer-events:none; z-index:2; }
+  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.045) 50%,transparent 100%);
+  animation:scanDown 3.5s linear infinite; pointer-events:none; z-index:2; }
 
 /* ══ HEADER ══ */
 .valo-header { text-align:center; padding:10px 0 2px; position:relative; }
@@ -159,12 +160,12 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
   box-shadow:
     0 0 40px rgba(255,70,85,0.09),
     0 0 80px rgba(0,212,191,0.04),
-    0 8px 40px rgba(0,0,0,0.8);
-  animation:greetBreathe 5s ease-in-out infinite;
+    0 8px 40px rgba(0,0,0,0.85);
+  animation:greetBreathe 2.8s ease-in-out infinite;
 }
 @keyframes greetBreathe {
-  0%,100%{ box-shadow:0 0 40px rgba(255,70,85,0.09),0 8px 40px rgba(0,0,0,0.8); }
-  50%    { box-shadow:0 0 55px rgba(255,70,85,0.14),0 0 80px rgba(0,212,191,0.05),0 8px 40px rgba(0,0,0,0.8); }
+  0%,100%{ box-shadow:0 0 26px rgba(255,70,85,0.07),0 8px 40px rgba(0,0,0,0.85); border-color:rgba(255,70,85,0.2); }
+  50%    { box-shadow:0 0 38px rgba(255,70,85,0.11),0 0 50px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85); border-color:rgba(255,70,85,0.28); }
 }
 
 /* Structural lines inside box */
@@ -184,36 +185,37 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
   background:linear-gradient(90deg,transparent,rgba(255,70,85,0.3)); }
 /* Floating smoke blobs inside box */
 .vg-smoke-r { position:absolute; top:-20px; right:10%; width:180px; height:120px;
-  background:radial-gradient(ellipse,rgba(255,50,60,0.06) 0%,transparent 70%);
-  pointer-events:none; animation:floatSmoke 7s ease-in-out infinite; }
+  background:radial-gradient(ellipse,rgba(255,50,60,0.07) 0%,transparent 65%);
+  pointer-events:none; animation:floatSmoke 4s ease-in-out infinite; }
 .vg-smoke-t { position:absolute; bottom:-20px; left:5%; width:160px; height:100px;
-  background:radial-gradient(ellipse,rgba(0,212,191,0.05) 0%,transparent 70%);
-  pointer-events:none; animation:floatSmoke 9s ease-in-out infinite 3s; }
-@keyframes floatSmoke { 0%,100%{transform:translate(0,0) scale(1);opacity:1;} 50%{transform:translate(10px,-8px) scale(1.08);opacity:.7;} }
+  background:radial-gradient(ellipse,rgba(0,212,191,0.06) 0%,transparent 65%);
+  pointer-events:none; animation:floatSmoke 5.5s ease-in-out infinite 1.5s; }
+@keyframes floatSmoke { 0%,100%{transform:translate(0,0) scale(1);opacity:1;} 50%{transform:translate(12px,-10px) scale(1.12);opacity:.65;} }
 /* Left triple-color bar */
 .valo-vbar { position:absolute; left:2px; top:20px; bottom:0; width:3px;
   background:linear-gradient(180deg,var(--r) 0%,var(--g) 45%,var(--t) 80%,transparent 100%);
-  box-shadow:0 0 8px rgba(255,70,85,0.4); opacity:.8; }
+  box-shadow:0 0 8px rgba(255,70,85,0.35); opacity:.8; }
 
 /* Status row */
 .valo-status-row { display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:12px; }
-/* Animated dot with pulse rings */
-.valo-status-dot-wrap { position:relative; width:16px; height:16px; display:flex; align-items:center; justify-content:center; }
-.valo-status-dot { width:7px; height:7px; background:var(--t); border-radius:50%;
-  box-shadow:0 0 10px var(--t),0 0 4px var(--t2); z-index:1; position:relative; }
+.valo-status-dot-wrap { position:relative; width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
+.valo-status-dot { width:8px; height:8px; background:var(--t); border-radius:50%;
+  box-shadow:0 0 10px var(--t),0 0 4px var(--t2); z-index:1; position:relative;
+  animation:dotBlink 1.2s ease-in-out infinite; }
+@keyframes dotBlink { 0%,100%{opacity:1;box-shadow:0 0 10px var(--t);}50%{opacity:.5;box-shadow:0 0 4px var(--t);} }
 .valo-status-ring { position:absolute; border-radius:50%;
-  border:1px solid rgba(0,212,191,0.4); animation:ringPulse 2s ease-out infinite; }
-.valo-status-ring.r1 { width:12px; height:12px; animation-delay:0s; }
-.valo-status-ring.r2 { width:18px; height:18px; animation-delay:.4s; border-color:rgba(0,212,191,0.2); }
-@keyframes ringPulse { 0%{transform:scale(0.5);opacity:.8;} 100%{transform:scale(1.8);opacity:0;} }
+  border:1px solid rgba(0,212,191,0.45); animation:ringPulse 1.4s ease-out infinite; }
+.valo-status-ring.r1 { width:13px; height:13px; animation-delay:0s; }
+.valo-status-ring.r2 { width:20px; height:20px; animation-delay:.35s; border-color:rgba(0,212,191,0.22); }
+@keyframes ringPulse { 0%{transform:scale(0.5);opacity:.9;} 100%{transform:scale(1.9);opacity:0;} }
 .valo-status-text { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
   letter-spacing:3px; color:var(--t2); text-transform:uppercase;
-  text-shadow:0 0 10px rgba(0,255,231,0.6); }
+  text-shadow:0 0 8px rgba(0,255,231,0.5); }
 
 .valo-greeting-icon { font-size:clamp(28px,5vw,36px); display:block; text-align:center; margin-bottom:10px;
-  filter:drop-shadow(0 0 12px rgba(255,70,85,0.7));
-  animation:iconGlow 3s ease-in-out infinite; }
-@keyframes iconGlow { 0%,100%{filter:drop-shadow(0 0 12px rgba(255,70,85,0.7));} 50%{filter:drop-shadow(0 0 22px rgba(255,130,60,0.9));} }
+  filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));
+  animation:iconGlow 2s ease-in-out infinite; }
+@keyframes iconGlow { 0%,100%{filter:drop-shadow(0 0 10px rgba(255,70,85,0.65));} 50%{filter:drop-shadow(0 0 18px rgba(255,120,50,0.85)) drop-shadow(0 0 6px rgba(255,200,100,0.4));} }
 .valo-greeting-title { font-family:'Rajdhani',sans-serif; font-size:clamp(15px,4vw,22px); font-weight:700;
   color:var(--w); text-align:center; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
 .valo-greeting-sub { font-size:clamp(12px,3vw,13.5px); color:var(--s); text-align:center; line-height:1.7; }
@@ -341,43 +343,132 @@ html,body,.stApp{background:var(--bg) !important;color:var(--c) !important;font-
 
 /* ═══════════════════════════
    CHAT INPUT — FIXED TEXT VISIBILITY
-   Critical: textarea text must be white/cream
+   CHAT INPUT — dark panel, clearly visible text
 ═══════════════════════════ */
-.stChatInput > div {
-  background:linear-gradient(135deg,rgba(14,18,28,0.99),rgba(10,12,22,0.99)) !important;
-  border:1px solid rgba(255,70,85,0.2) !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%) !important;
-  border-radius:0 !important;
-  box-shadow:0 0 18px rgba(255,70,85,0.06),0 4px 18px rgba(0,0,0,0.7) !important;
+
+/* Outer wrapper — Valorant dark panel */
+.stChatInput {
+  position: relative !important;
 }
-/* THE FIX: textarea itself */
+.stChatInput > div {
+  background: linear-gradient(135deg,
+    rgba(8,10,18,0.99) 0%,
+    rgba(12,15,24,0.99) 100%) !important;
+  border: 1px solid rgba(255,70,85,0.28) !important;
+  border-top: 2px solid rgba(255,70,85,0.5) !important;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%) !important;
+  border-radius: 0 !important;
+  box-shadow:
+    0 0 20px rgba(255,70,85,0.07),
+    0 -2px 30px rgba(255,70,85,0.04),
+    0 4px 20px rgba(0,0,0,0.85) !important;
+  animation: inputBreath 4s ease-in-out infinite !important;
+}
+@keyframes inputBreath {
+  0%,100% { box-shadow: 0 0 20px rgba(255,70,85,0.07), 0 4px 20px rgba(0,0,0,0.85); border-top-color: rgba(255,70,85,0.4); }
+  50%      { box-shadow: 0 0 30px rgba(255,70,85,0.11), 0 0 60px rgba(0,212,191,0.03), 0 4px 20px rgba(0,0,0,0.85); border-top-color: rgba(255,70,85,0.7); }
+}
+
+/* Corner bracket TL on input */
+.stChatInput > div::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 4px !important; left: 4px !important;
+  width: 10px !important; height: 10px !important;
+  border-top: 1px solid rgba(0,212,191,0.5) !important;
+  border-left: 1px solid rgba(0,212,191,0.5) !important;
+  pointer-events: none !important;
+}
+
+/* THE ACTUAL FIX — textarea dark bg + cream text */
 .stChatInput textarea {
-  background:transparent !important;
-  color:#ece8e1 !important;             /* cream — clearly visible */
-  -webkit-text-fill-color:#ece8e1 !important;
+  background: rgba(6, 8, 16, 0.96) !important;
+  color: #ece8e1 !important;
+  -webkit-text-fill-color: #ece8e1 !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-bottom: 2px solid rgba(255,70,85,0.35) !important;
+  border-radius: 0 !important;
+  font-family: 'Barlow', sans-serif !important;
+  font-size: clamp(13px,3.5vw,14px) !important;
+  caret-color: var(--r) !important;
+  opacity: 1 !important;
+  transition: all 0.2s ease !important;
+  letter-spacing: 0.3px !important;
+}
+.stChatInput textarea:focus {
+  background: rgba(8, 10, 20, 0.98) !important;
+  color: #f4f0e8 !important;
+  -webkit-text-fill-color: #f4f0e8 !important;
+  border-color: rgba(255,70,85,0.2) !important;
+  border-bottom-color: var(--r) !important;
+  box-shadow: 0 3px 16px rgba(255,70,85,0.1), inset 0 0 20px rgba(255,70,85,0.02) !important;
+  outline: none !important;
+}
+.stChatInput textarea::placeholder {
+  color: rgba(180,176,168,0.35) !important;
+  -webkit-text-fill-color: rgba(180,176,168,0.35) !important;
+  font-style: italic !important;
+  letter-spacing: 0.5px !important;
+}
+/* Catch all child inputs */
+.stChatInput input,
+.stChatInput [contenteditable] {
+  color: #ece8e1 !important;
+  -webkit-text-fill-color: #ece8e1 !important;
+  background: rgba(6,8,16,0.96) !important;
+}
+
+/* ── Streamlit data-testid (actual DOM) ── */
+[data-testid="stChatInput"] {
+  background: linear-gradient(135deg,rgba(8,10,18,0.99),rgba(12,15,24,0.99)) !important;
+  border:1px solid rgba(255,70,85,0.28) !important;
+  border-top:2px solid rgba(255,70,85,0.45) !important;
+  border-radius:0 !important;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%) !important;
+  box-shadow:0 0 20px rgba(255,70,85,0.06),0 4px 20px rgba(0,0,0,0.85) !important;
+}
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInputTextArea"],
+[data-testid="stChatInput"] > div > div > textarea,
+div[class*="stChatInput"] textarea {
+  background: rgba(6,8,16,0.97) !important;
+  background-color: rgba(6,8,16,0.97) !important;
+  color: #ece8e1 !important;
+  -webkit-text-fill-color: #ece8e1 !important;
+  caret-color: #ff4655 !important;
   border:none !important;
-  border-bottom:2px solid rgba(255,70,85,0.28) !important;
+  border-bottom:2px solid rgba(255,70,85,0.32) !important;
   border-radius:0 !important;
   font-family:'Barlow',sans-serif !important;
   font-size:clamp(13px,3.5vw,14px) !important;
-  caret-color:var(--r) !important;
   opacity:1 !important;
 }
-.stChatInput textarea:focus {
-  border-bottom-color:var(--r) !important;
-  box-shadow:0 3px 14px rgba(255,70,85,0.12) !important;
-  color:#ece8e1 !important;
-  -webkit-text-fill-color:#ece8e1 !important;
+[data-testid="stChatInput"] textarea:focus {
+  color:#f4f0e8 !important;
+  -webkit-text-fill-color:#f4f0e8 !important;
+  border-bottom-color:#ff4655 !important;
+  outline:none !important;
+  box-shadow:0 3px 12px rgba(255,70,85,0.1) !important;
 }
-.stChatInput textarea::placeholder {
-  color:rgba(236,232,225,0.28) !important;
-  -webkit-text-fill-color:rgba(236,232,225,0.28) !important;
+[data-testid="stChatInput"] textarea::placeholder {
+  color:rgba(180,176,168,0.35) !important;
+  -webkit-text-fill-color:rgba(180,176,168,0.35) !important;
   font-style:italic !important;
 }
-/* Also target any child text inputs */
-.stChatInput input {
+[data-testid="stChatInput"] button {
+  background:rgba(255,70,85,0.15) !important;
+  border:1px solid rgba(255,70,85,0.3) !important;
+  color:#ff4655 !important; border-radius:2px !important;
+}
+[data-testid="stChatInput"] button:hover {
+  background:rgba(255,70,85,0.28) !important;
+  box-shadow:0 0 12px rgba(255,70,85,0.3) !important;
+}
+/* Nuclear — force all textarea on page */
+textarea {
   color:#ece8e1 !important;
   -webkit-text-fill-color:#ece8e1 !important;
+  background-color:rgba(6,8,16,0.97) !important;
 }
 
 /* ═══════════════════════════
