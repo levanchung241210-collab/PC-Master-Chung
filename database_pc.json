@@ -1,0 +1,32 @@
+{
+  "loi_he_thong": [
+    {
+      "keywords": ["memory", "management", "0x0000001a", "bsod", "xanh", "ram", "bus"],
+      "ten": "Màn hình xanh MEMORY_MANAGEMENT (0x0000001A)",
+      "loai": "Chuyên sâu - Phần cứng RAM",
+      "nguyen_nhan": "Lỗi hệ thống quản lý bộ nhớ do RAM hỏng chip nhớ, bẩn chân cắm hoặc xung đột Bus RAM.",
+      "giai_phap": "Tắt máy, tháo RAM, dùng cục tẩy vệ sinh sạch chân vàng tiếp xúc rồi cắm chặt lại."
+    },
+    {
+      "keywords": ["sập", "nguồn", "tắt", "đột", "ngột", "nhiệt", "nóng", "keo", "quạt"],
+      "ten": "Hiện tượng máy tính ĐỘT NGỘT SẬP NGUỒN HOÀN TOÀN",
+      "loai": "Nghiêm trọng - Quá nhiệt & Nguồn điện",
+      "nguyen_nhan": "CPU bị quá nhiệt (trên 100°C) do khô keo tản nhiệt hoặc nguồn bị sụt áp.",
+      "giai_phap": "Vệ sinh máy, tra lại keo tản nhiệt MX-4, kiểm tra xem quạt CPU có quay không."
+    }
+  ],
+  "linh_kien_pc": [
+    {
+      "keywords": ["i5", "6500", "skylake", "intel"],
+      "ten": "Intel Core i5-6500",
+      "thong_so": "4 nhân 4 luồng, Xung nhịp 3.2 GHz, Socket LGA1151.",
+      "chuyen_gia_tu_van": "Dòng CPU đời cũ mát mẻ, đi với main H110 rất hợp làm máy văn phòng hoặc chơi game phổ thông."
+    },
+    {
+      "keywords": ["i3", "12100f", "alder", "lake"],
+      "ten": "Intel Core i3-12100F",
+      "thong_so": "4 nhân 8 luồng, Xung nhịp 4.3 GHz, Socket LGA1700, Không GPU tích hợp.",
+      "chuyen_gia_tu_van": "Chip quốc dân giá rẻ siêu mạnh, bắt buộc phải có card màn hình rời (VGA) mới xuất hình được."
+    }
+  ]
+}
