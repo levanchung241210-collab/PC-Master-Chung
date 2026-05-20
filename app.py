@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json, re, os, random
+import base64
 from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
@@ -278,6 +279,18 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 }
 textarea{background:#0b0e16 !important;background-color:#0b0e16 !important;color:#ece8e1 !important;-webkit-text-fill-color:#ece8e1 !important;caret-color:#ff4655 !important;}
 
+/* Custom styles for compact integrated media row */
+.compact-upload-box section {
+  padding: 0px !important;
+  min-height: 44px !important;
+  border: 1px dashed rgba(0,212,191,0.4) !important;
+  background: #0b0e16 !important;
+}
+.compact-upload-box div[data-testid="stMarkdownContainer"] p {
+  font-size: 11px !important;
+  color: var(--t) !important;
+}
+
 /* ══ SIDEBAR ══ */
 section[data-testid="stSidebar"]{background:linear-gradient(180deg,#08090e,#0b0d16) !important;border-right:1px solid rgba(255,70,85,0.16) !important;}
 section[data-testid="stSidebar"] p,section[data-testid="stSidebar"] span,section[data-testid="stSidebar"] div,section[data-testid="stSidebar"] small{color:#60625e !important;font-size:13px !important;}
@@ -409,7 +422,10 @@ for i,(lb,qr) in enumerate(st.session_state.suggestions):
             st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]): st.markdown(msg["content"])
+    with st.chat_message(msg["role"]): 
+        st.markdown(msg["content"])
+        if "image_data" in msg:
+            st.image(msg["image_data"], caption="Hình ảnh linh kiện/mã lỗi đính kèm", width=300)
 
 # ════ DATABASE SEARCH ════
 def calc_score(item,qc,un):
@@ -465,15 +481,33 @@ QUY TẮC TRẢ LỜI — QUAN TRỌNG:
 
 Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng."""
 
-def ask(uq, ch):
+def ask(uq, ch, img_bytes=None):
     msgs = [{"role":"system","content":SYSTEM_PROMPT}]
     # Chỉ lấy 8 tin gần nhất để không waste context
     for m in ch[-8:]:
         msgs.append({"role":m["role"],"content":m["content"]})
-    msgs.append({"role":"user","content":uq})
+    
+    # Định cấu hình nội dung người dùng dựa trên việc có đính kèm ảnh hay không
+    if img_bytes:
+        base64_image = base64.b64encode(img_bytes).decode('utf-8')
+        model_name = "llama-3.2-11b-vision-preview" # Model phân tích hình ảnh của Groq
+        user_content = [
+            {"type": "text", "text": uq if uq else "Phân tích linh kiện/mã lỗi xuất hiện trong bức ảnh này."},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image}"
+                }
+            }
+        ]
+    else:
+        model_name = "llama-3.3-70b-versatile" # Model text chuẩn
+        user_content = uq
+
+    msgs.append({"role":"user","content":user_content})
 
     # Chọn max_tokens dựa trên loại câu hỏi
-    q = uq.lower()
+    q = (uq or "").lower()
     hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
     err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
     
@@ -485,195 +519,69 @@ def ask(uq, ch):
         max_tok = 580
 
     r = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=model_name,
         messages=msgs,
         max_tokens=max_tok,
         temperature=0.45  # ổn định, không lan man
     )
     return r.choices[0].message.content
 
-import base64
-from PIL import Image
-import io
-
-# ════ VISION — phân tích ảnh ════
-def img_to_base64(img_bytes):
-    return base64.b64encode(img_bytes).decode("utf-8")
-
-def ask_vision(img_b64, caption, chat_history):
-    """Gửi ảnh lên Groq vision để phân tích lỗi PC"""
-    user_text = caption.strip() if caption.strip() else "Hãy phân tích ảnh này. Đây là màn hình/linh kiện/lỗi PC. Cho tôi biết đây là lỗi gì và cách khắc phục."
-    msgs = [
-        {"role": "system", "content": """Bạn là chuyên gia phần cứng máy tính. Khi nhận được ảnh:
-1. Xác định đây là loại lỗi gì / linh kiện gì / màn hình lỗi gì
-2. Nếu là màn hình lỗi (BSOD, error code, màn hình đen...): đọc mã lỗi và giải thích + cách fix
-3. Nếu là linh kiện: nhận dạng và cho thông số / tư vấn
-4. Nếu là cài đặt/giao diện PC: hướng dẫn bấm vào đâu, làm gì tiếp theo
-Trả lời bằng tiếng Việt, ngắn gọn, đúng trọng tâm. KHÔNG nhắc "AI" hay "mô hình"."""},
-        {"role": "user", "content": [
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}},
-            {"type": "text",      "text": user_text}
-        ]}
-    ]
-    r = client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
-        messages=msgs,
-        max_tokens=600,
-        temperature=0.3
-    )
-    return r.choices[0].message.content
-
-# ════ IMAGE INPUT — always visible above chat ════
-st.markdown("""
-<style>
-/* ── Vision bar styling ── */
-.vision-bar-label{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-  color:#bd93f9;text-shadow:0 0 8px rgba(189,147,249,0.6);
-  display:flex;align-items:center;gap:8px;margin-bottom:6px;
-}
-.vision-bar-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(189,147,249,0.4));}
-.vision-bar-label::after {content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(189,147,249,0.4),transparent);}
-
-/* Tab bar */
-[data-testid="stTabs"] [data-baseweb="tab-list"]{
-  background:transparent !important;
-  border-bottom:1px solid rgba(189,147,249,0.18) !important;
-  gap:2px !important;
-}
-[data-testid="stTabs"] [data-testid="stTab"]{
-  font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:700 !important;letter-spacing:1px !important;
-  color:#64748b !important;font-size:12px !important;
-  border-radius:0 !important;padding:6px 14px !important;
-  clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%) !important;
-  transition:all .15s ease !important;
-}
-[data-testid="stTabs"] [data-testid="stTab"][aria-selected="true"]{
-  color:#bd93f9 !important;
-  background:rgba(189,147,249,0.08) !important;
-  text-shadow:0 0 8px rgba(189,147,249,0.5) !important;
-}
-[data-testid="stTabs"] [data-baseweb="tab-highlight"]{
-  background:rgba(189,147,249,0.6) !important;
-}
-
-/* File uploader — compact */
-[data-testid="stFileUploaderDropzone"]{
-  background:rgba(10,12,22,0.92) !important;
-  border:1px dashed rgba(189,147,249,0.38) !important;
-  border-radius:0 !important;padding:10px !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%) !important;
-}
-[data-testid="stFileUploaderDropzoneInstructions"]{color:#64748b !important;font-size:12px !important;}
-[data-testid="stFileUploaderDropzoneInstructions"] small{color:#4a5568 !important;}
-
-/* Camera */
-[data-testid="stCameraInput"]>div{
-  background:rgba(10,12,22,0.92) !important;
-  border:1px solid rgba(189,147,249,0.3) !important;border-radius:0 !important;
-}
-[data-testid="stCameraInput"] button{
-  background:linear-gradient(90deg,rgba(189,147,249,0.2),rgba(100,70,200,0.15)) !important;
-  border:1px solid rgba(189,147,249,0.4) !important;border-radius:0 !important;
-  color:#bd93f9 !important;font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:700 !important;letter-spacing:1px !important;
-  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%) !important;
-}
-
-/* Analyse button — purple Valorant */
-[key="vision_btn"] button,
-div[data-testid="stButton"]:has(button[kind="secondary"]){
-  background:linear-gradient(90deg,rgba(150,80,240,0.85),rgba(100,50,200,0.8)) !important;
-  border:1px solid rgba(189,147,249,0.5) !important;
-  border-top:2px solid rgba(200,160,255,0.7) !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%) !important;
-  border-radius:0 !important;
-  color:#fff !important;font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:800 !important;letter-spacing:2px !important;font-size:13px !important;
-  box-shadow:0 0 16px rgba(189,147,249,0.3),0 4px 16px rgba(0,0,0,0.6) !important;
-  text-shadow:0 0 8px rgba(220,200,255,0.4) !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ── Vision divider label ──
-st.markdown('<div class="vision-bar-label">📷 PHÂN TÍCH ẢNH / CHỤP LỖI PC</div>', unsafe_allow_html=True)
-
-tab1, tab2 = st.tabs(["📁  TẢI ẢNH LÊN", "📷  CHỤP CAMERA"])
-img_data = None
-
-with tab1:
-    uploaded = st.file_uploader(
-        "Chọn ảnh màn hình lỗi, linh kiện...",
-        type=["jpg","jpeg","png","webp"],
-        label_visibility="collapsed",
-        key="img_upload"
-    )
-    if uploaded:
-        img = Image.open(uploaded).convert("RGB")
-        buf = io.BytesIO(); img.save(buf, format="JPEG", quality=85)
-        img_data = buf.getvalue()
-        st.image(img, use_container_width=True)
-
-with tab2:
-    cam = st.camera_input(
-        "Hướng camera vào màn hình lỗi hoặc linh kiện",
-        label_visibility="collapsed",
-        key="img_camera"
-    )
-    if cam:
-        img = Image.open(cam).convert("RGB")
-        buf = io.BytesIO(); img.save(buf, format="JPEG", quality=85)
-        img_data = buf.getvalue()
-
-if img_data:
-    col_cap, col_btn = st.columns([3,1])
-    with col_cap:
-        caption = st.text_input(
-            "Mô tả thêm:",
-            placeholder="Màn hình này báo lỗi gì? Làm gì tiếp theo?",
-            label_visibility="collapsed",
-            key="vision_caption"
-        )
-    with col_btn:
-        analyse = st.button("⚡ PHÂN TÍCH", use_container_width=True, key="vision_btn")
-
-    if analyse:
-        st.session_state.greeted = True
-        cap = caption.strip() if caption else ""
-        q_text = f"📷 **Ảnh gửi lên** — {cap}" if cap else "📷 **Ảnh gửi lên** — Phân tích lỗi PC trong ảnh"
-        st.session_state.messages.append({"role":"user","content":q_text})
-        with st.chat_message("user"):
-            st.markdown(q_text)
-        with st.chat_message("assistant"):
-            with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
-                try:
-                    b64 = img_to_base64(img_data)
-                    ans = ask_vision(b64, cap, st.session_state.messages)
-                    st.markdown(ans)
-                    st.session_state.messages.append({"role":"assistant","content":ans})
-                except Exception as e:
-                    st.error(f"❌ Lỗi phân tích ảnh: {str(e)}")
-        st.rerun()
-
-st.divider()
-
-# ════ TEXT HANDLER ════
-def handle(p):
-    st.session_state.messages.append({"role":"user","content":p})
-    with st.chat_message("user"): st.markdown(p)
+def handle(p, img_bytes=None):
+    msg_entry = {"role":"user","content": p if p else "Đã gửi một hình ảnh phân tích"}
+    if img_bytes:
+        msg_entry["image_data"] = img_bytes
+        
+    st.session_state.messages.append(msg_entry)
+    
+    with st.chat_message("user"): 
+        st.markdown(msg_entry["content"])
+        if img_bytes:
+            st.image(img_bytes, caption="Ảnh đính kèm", width=250)
+            
     with st.chat_message("assistant"):
         with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
             try:
-                a = search_db(p) or ask(p, st.session_state.messages)
+                # Nếu có ảnh, bỏ qua DB local chạy thẳng vào AI Vision Engine
+                if img_bytes:
+                    a = ask(p, st.session_state.messages[:-1], img_bytes)
+                else:
+                    a = search_db(p) or ask(p, st.session_state.messages[:-1])
+                    
                 st.markdown(a)
                 st.session_state.messages.append({"role":"assistant","content":a})
             except Exception as e:
                 st.error(f"❌ {str(e)}")
 
+# ════ TÍCH HỢP THANH INPUT VÀ MULTIMEDIA CÂN ĐỐI ════
+st.markdown('<div class="compact-upload-box">', unsafe_allow_html=True)
+col_file, col_cam, col_void = st.columns([3, 2, 5])
+
+with col_file:
+    # Trình tải ảnh hỗ trợ thả file, duyệt file và nhấn Click rồi bấm Ctrl+V để Paste ảnh trực tiếp cực kỳ tiện lợi trên PC
+    uploaded_file = st.file_uploader("Đính kèm", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="file_up")
+with col_cam:
+    with st.popover("📸 CAMERA"):
+        cam_file = st.camera_input("Chụp ảnh phần cứng lỗi", label_visibility="collapsed", key="cam_up")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Lấy dữ liệu ảnh nếu có kích hoạt
+active_img = None
+if uploaded_file:
+    active_img = uploaded_file.getvalue()
+elif cam_file:
+    active_img = cam_file.getvalue()
+
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
-if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    st.session_state.greeted=True; handle(p)
+
+# Thanh chat input chuẩn đặt ở dưới cùng
+p = st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích...")
+
+if p:
+    st.session_state.greeted=True
+    handle(p, active_img)
+elif active_img and not st.session_state.greeted:
+    # Tạo nút phụ gửi ảnh động trong trường hợp người dùng chỉ paste/upload ảnh mà không gõ chữ
+    if st.button("🚀 PHÂN TÍCH HÌNH ẢNH ĐÃ CHỌN", use_container_width=True):
+        st.session_state.greeted=True
+        handle("", active_img)
