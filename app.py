@@ -5,7 +5,11 @@ from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
-# ══ INJECT DARK INPUT & PASTE HANDLER via components — bypasses Streamlit shadow DOM ══
+# ══ Khởi tạo Dynamic Key cho uploader để xóa ảnh sau khi gửi ══
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0
+
+# ══ INJECT DARK INPUT & PASTE HANDLER via components ══
 components.html("""
 <style>
   /* Target parent frames */
@@ -46,7 +50,7 @@ components.html("""
   setInterval(fix, 100);
   new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true});
 
-  // ══ XỬ LÝ LẮNG NGHE SỰ KIỆN COPPY PASTE ẢNH TỪ BÀN PHÍM PC ══
+  // ══ XỬ LÝ SỰ KIỆN COPY PASTE (CTRL+V) TRÊN MÁY TÍNH ══
   function initPasteHandler() {
     try {
       var p = window.parent || window;
@@ -91,28 +95,11 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 .stApp::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    /* V-SHAPE red light from top-center */
-    conic-gradient(from 180deg at 50% -18%,
-      transparent 60deg, rgba(255,55,65,0.10) 76deg,
-      rgba(255,70,85,0.18) 90deg,
-      rgba(255,55,65,0.10) 104deg, transparent 120deg),
-    /* Left red zone */
+    conic-gradient(from 180deg at 50% -18%, transparent 60deg, rgba(255,55,65,0.10) 76deg, rgba(255,70,85,0.18) 90deg, rgba(255,55,65,0.10) 104deg, transparent 120deg),
     radial-gradient(ellipse 50% 70% at -5% 20%, rgba(255,40,55,0.13) 0%,transparent 58%),
-    /* Right teal zone */
     radial-gradient(ellipse 50% 70% at 105% 80%, rgba(0,212,191,0.10) 0%,transparent 58%),
-    /* DIAGONAL RED SLASHES — bright enough to see */
-    repeating-linear-gradient(-52deg,
-      transparent 0, transparent 54px,
-      rgba(255,70,85,0.13) 54px, rgba(255,70,85,0.13) 55.5px,
-      rgba(255,70,85,0.05) 55.5px, rgba(255,70,85,0.05) 57px,
-      transparent 57px),
-    /* DIAGONAL TEAL SLASHES */
-    repeating-linear-gradient(38deg,
-      transparent 0, transparent 84px,
-      rgba(0,212,191,0.10) 84px, rgba(0,212,191,0.10) 85.5px,
-      rgba(0,212,191,0.04) 85.5px, rgba(0,212,191,0.04) 87px,
-      transparent 87px),
-    /* HUD GRID */
+    repeating-linear-gradient(-52deg, transparent 0, transparent 54px, rgba(255,70,85,0.13) 54px, rgba(255,70,85,0.13) 55.5px, rgba(255,70,85,0.05) 55.5px, rgba(255,70,85,0.05) 57px, transparent 57px),
+    repeating-linear-gradient(38deg, transparent 0, transparent 84px, rgba(0,212,191,0.10) 84px, rgba(0,212,191,0.10) 85.5px, rgba(0,212,191,0.04) 85.5px, rgba(0,212,191,0.04) 87px, transparent 87px),
     linear-gradient(rgba(255,70,85,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,70,85,0.07) 1px, transparent 1px);
   background-size: auto,auto,auto,auto,auto,38px 38px,38px 38px;
@@ -305,43 +292,26 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 }
 textarea{background:#0b0e16 !important;background-color:#0b0e16 !important;color:#ece8e1 !important;-webkit-text-fill-color:#ece8e1 !important;caret-color:#ff4655 !important;}
 
-/* ══ THIẾT KẾ ĐỒNG BỘ NÚT CAMERA / TẢI ẢNH NAM KẾ BÊN INPUT BAR ══ */
-[data-testid="stFileUploader"] {
-  position: fixed !important;
-  bottom: 20px !important;
-  left: calc(50% - 370px) !important;
-  width: 48px !important;
-  height: 48px !important;
-  z-index: 100000 !important;
+/* ══ ĐƯA FILE UPLOADER VÀO KHOẢNG TRỐNG DƯỚI THANH CHAT INPUT ══ */
+div[data-testid="stFileUploader"] {
+    position: fixed !important;
+    bottom: 2px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 760px !important;
+    z-index: 99999 !important;
+    background: transparent !important;
 }
-[data-testid="stFileUploader"] section {
-  padding: 0 !important;
-  border: 1px solid rgba(255,70,85,0.4) !important;
-  background: #0b0e16 !important;
-  border-radius: 0 !important;
-  width: 48px !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%) !important;
-  box-shadow: 0 0 10px rgba(255,70,85,0.2) !important;
+div[data-testid="stFileUploader"] section {
+    background: #08090f !important;
+    border: 1px dashed rgba(255,70,85,0.4) !important;
+    padding: 3px !important;
+    border-radius: 0 !important;
 }
-[data-testid="stFileUploader"] section > div { display: none !important; }
-[data-testid="stFileUploader"] button {
-  background: transparent !important; border: none !important; color: #00d4bf !important;
-  width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important;
-  display: flex !important; align-items: center !important; justify-content: center !important;
-}
-[data-testid="stFileUploader"] button::before { content: '📷' !important; font-size: 18px !important; }
-[data-testid="stFileUploader"] button div { display: none !important; }
-[data-testid="stFileUploader"] ul, [data-testid="stFileUploader"] div[data-testid="stFileUploaderFile"] { display: none !important; }
-div[data-testid="stBottom"] > div { padding-left: 60px !important; }
-
-@media (max-width: 760px) {
-  [data-testid="stFileUploader"] { left: 10px !important; bottom: 16px !important; }
-  div[data-testid="stBottom"] > div { padding-left: 55px !important; }
+div[data-testid="stFileUploader"] small { display: none !important; }
+div[data-testid="stBottom"] {
+    padding-bottom: 55px !important;
 }
 
 /* ══ SIDEBAR ══ */
@@ -474,14 +444,12 @@ for i,(lb,qr) in enumerate(st.session_state.suggestions):
         if st.button(lb,key=f"s{i}"):
             st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
-# ══ RE-RENDER CHAT BUBBLES WITH IMAGE HISTORY ══
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
+    with st.chat_message(msg["role"]): 
         st.markdown(msg["content"])
-        if "image" in msg and msg["image"]:
+        if msg.get("image"):
             st.image(base64.b64decode(msg["image"]), width=280)
 
-# ════ DATABASE SEARCH ════
 def calc_score(item,qc,un):
     sc=0; kws=[str(k).lower().strip() for k in item.get("keywords",[])]; uw=qc.split()
     for k in kws:
@@ -507,7 +475,6 @@ def search_db(uq):
         else: return f"### ◆  {bm['ten']}\n*— Lê Văn Chung 10A4*\n\n**⚙ Thông số:** {bm.get('thong_so','')}\n\n**◉ Socket:** `{bm.get('socket','')}`\n\n**▶ Tư vấn:** {bm.get('chuyen_gia_tu_van','')}"
     return None
 
-# ════ SMART AI ENGINE — no template, full knowledge ════
 SYSTEM_PROMPT = """Bạn là chuyên gia phần cứng máy tính và điện tử hàng đầu, với kiến thức cực kỳ sâu rộng và cập nhật đến 2025.
 
 KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
@@ -533,30 +500,15 @@ QUY TẮC TRẢ LỜI — QUAN TRỌNG:
 7. TUYỆT ĐỐI KHÔNG nhắc "AI", "LLM", "Groq", "ngôn ngữ lớn"
 8. Với câu hỏi về linh kiện mới (RTX 5090, Ryzen 9000, chip mobile 2024-2025): dùng kiến thức chuyên môn của bạn để trả lời, không nói "không biết"
 
-Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng."""
+Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng. Nếu người dùng đính kèm ảnh (ảnh sẽ hiển thị trên UI nhưng AI chỉ nhận văn bản), hãy trả lời dựa trên văn bản mô tả của họ."""
 
+# CHỈ SỬ DỤNG DUY NHẤT LLAMA-3.3-70B-VERSATILE NHƯ BẠN YÊU CẦU ĐỂ TRÁNH LỖI 404
 def ask(uq, ch):
-    # Kiểm tra xem tin nhắn hiện tại có chứa hình ảnh mã hóa base64 không
-    current_has_img = ch[-1].get("image") is not None if ch else False
-    model_to_use = "llama-3.2-11b-vision-preview" if current_has_img else "llama-3.3-70b-versatile"
-    
     msgs = [{"role":"system","content":SYSTEM_PROMPT}]
-    
-    for m in ch[-6:]:
-        if model_to_use == "llama-3.2-11b-vision-preview":
-            if m.get("image"):
-                msgs.append({
-                    "role": m["role"],
-                    "content": [
-                        {"type": "text", "text": m["content"]},
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{m['image']}"}}
-                    ]
-                })
-            else:
-                msgs.append({"role": m["role"], "content": m["content"]})
-        else:
-            # Đối với model thuần văn bản, chỉ gửi dạng chuỗi thuần để tránh lỗi cấu trúc API
-            msgs.append({"role": m["role"], "content": m["content"]})
+    for m in ch[-8:]:
+        # API chỉ nhận text cho model versatile
+        msgs.append({"role":m["role"],"content":m["content"]})
+    msgs.append({"role":"user","content":uq})
 
     q = uq.lower()
     hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
@@ -570,63 +522,52 @@ def ask(uq, ch):
         max_tok = 580
 
     r = client.chat.completions.create(
-        model=model_to_use,
+        model="llama-3.3-70b-versatile",
         messages=msgs,
         max_tokens=max_tok,
         temperature=0.45
     )
     return r.choices[0].message.content
 
-def handle(p, uploaded_file=None):
-    st.session_state.greeted = True
+def handle(p, img_file=None):
     img_b64 = None
-    if uploaded_file:
-        img_b64 = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
-        st.session_state.messages.append({"role": "user", "content": p, "image": img_b64})
+    if img_file:
+        img_b64 = base64.b64encode(img_file.getvalue()).decode("utf-8")
+        st.session_state.messages.append({"role":"user","content":p,"image":img_b64})
     else:
-        st.session_state.messages.append({"role": "user", "content": p})
+        st.session_state.messages.append({"role":"user","content":p})
         
-    with st.chat_message("user"):
+    with st.chat_message("user"): 
         st.markdown(p)
-        if uploaded_file:
-            st.image(uploaded_file, width=280)
+        if img_file:
+            st.image(img_file, width=280)
             
     with st.chat_message("assistant"):
         with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
             try:
-                # Nếu có ảnh đính kèm thì bắt buộc chạy qua AI Vision, không tra cứu database text thô
-                a = search_db(p) if not img_b64 else None
+                a = search_db(p)
                 if not a:
-                    a = ask(p, st.session_state.messages)
+                    a = ask(p, st.session_state.messages[:-1])
                 st.markdown(a)
                 st.session_state.messages.append({"role":"assistant","content":a})
             except Exception as e:
                 st.error(f"❌ {str(e)}")
                 
-    # Xóa ảnh trong uploader sau khi gửi thành công để tránh gửi lặp ở câu sau
-    if uploaded_file:
-        if "image_uploader" in st.session_state:
-            st.session_state.image_uploader = None
-        st.rerun()
-
-# ══ KHỞI TẠO TIỆN ÍCH FILE UPLOADER GHIM CỐ ĐỊNH KẾ BÊN CHAT INPUT ══
-uploaded_file = st.file_uploader("", type=["png", "jpg", "jpeg"], key="image_uploader", label_visibility="collapsed")
-
-# Hiển thị biểu tượng trạng thái góc dưới khi đã nhận file thành công (từ Paste hoặc Chọn file)
-if uploaded_file:
-    st.markdown(f"""
-    <div style="position: fixed; bottom: 82px; left: calc(50% - 370px); z-index: 100000; background: #0b0e16; border: 1px solid #00d4bf; padding: 6px 12px; display: flex; align-items: center; gap: 10px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%); box-shadow: 0 0 15px rgba(0,212,191,0.25);">
-        <span style="color: #00d4bf; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">✓ ĐÃ ĐÍNH KÈM ẢNH</span>
-    </div>
-    <style>
-    @media (max-width: 760px) {{
-        div[style*="position: fixed; bottom: 82px"] {{ left: 10px !important; }}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+    # Increment key để xóa trắng ảnh sau khi gửi
+    st.session_state.uploader_key += 1
+    st.rerun()
 
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
-    
+
+# ════ TÍCH HỢP TẢI ẢNH VÀO KHOẢNG TRỐNG DƯỚI THANH INPUT ════
+uploaded_img = st.file_uploader(
+    "Đính kèm ảnh (Hỗ trợ Ctrl+V)", 
+    type=["png", "jpg", "jpeg"], 
+    key=f"img_uploader_{st.session_state.uploader_key}", 
+    label_visibility="collapsed"
+)
+
 if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    handle(p, uploaded_file)
+    st.session_state.greeted=True
+    handle(p, uploaded_img)
