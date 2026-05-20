@@ -1,11 +1,11 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import json, re, os, random
+import json, re, os, random, base64
 from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
-# ══ INJECT DARK INPUT via components — bypasses Streamlit shadow DOM ══
+# ══ INJECT DARK INPUT & PASTE HANDLER via components — bypasses Streamlit shadow DOM ══
 components.html("""
 <style>
   /* Target parent frames */
@@ -23,7 +23,6 @@ components.html("""
   document.head.appendChild(styleEl);
 
   function fix(){
-    // Walk up from current window to find parent Streamlit frame
     try {
       var w = window.parent || window;
       var frames = w.document ? [w] : [];
@@ -46,6 +45,34 @@ components.html("""
   fix();
   setInterval(fix, 100);
   new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true});
+
+  // ══ XỬ LÝ LẮNG NGHE SỰ KIỆN COPPY PASTE ẢNH TỪ BÀN PHÍM PC ══
+  function initPasteHandler() {
+    try {
+      var p = window.parent || window;
+      var ta = p.document.querySelector('[data-testid="stChatInput"] textarea');
+      if (ta && !ta.dataset.pasteAttached) {
+        ta.dataset.pasteAttached = "true";
+        ta.addEventListener('paste', function(e) {
+          var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+              var blob = items[i].getAsFile();
+              var fileInput = p.document.querySelector('[data-testid="stFileUploader"] input[type="file"]');
+              if (fileInput) {
+                var dataTransfer = new DataTransfer();
+                var file = new File([blob], "pasted_image.png", { type: blob.type });
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+          }
+        });
+      }
+    } catch(e){}
+  }
+  setInterval(initPasteHandler, 500);
 })();
 </script>
 """, height=0)
@@ -278,6 +305,45 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 }
 textarea{background:#0b0e16 !important;background-color:#0b0e16 !important;color:#ece8e1 !important;-webkit-text-fill-color:#ece8e1 !important;caret-color:#ff4655 !important;}
 
+/* ══ THIẾT KẾ ĐỒNG BỘ NÚT CAMERA / TẢI ẢNH NAM KẾ BÊN INPUT BAR ══ */
+[data-testid="stFileUploader"] {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: calc(50% - 370px) !important;
+  width: 48px !important;
+  height: 48px !important;
+  z-index: 100000 !important;
+}
+[data-testid="stFileUploader"] section {
+  padding: 0 !important;
+  border: 1px solid rgba(255,70,85,0.4) !important;
+  background: #0b0e16 !important;
+  border-radius: 0 !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%) !important;
+  box-shadow: 0 0 10px rgba(255,70,85,0.2) !important;
+}
+[data-testid="stFileUploader"] section > div { display: none !important; }
+[data-testid="stFileUploader"] button {
+  background: transparent !important; border: none !important; color: #00d4bf !important;
+  width: 100% !important; height: 100% !important; padding: 0 !important; margin: 0 !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+}
+[data-testid="stFileUploader"] button::before { content: '📷' !important; font-size: 18px !important; }
+[data-testid="stFileUploader"] button div { display: none !important; }
+[data-testid="stFileUploader"] ul, [data-testid="stFileUploader"] div[data-testid="stFileUploaderFile"] { display: none !important; }
+div[data-testid="stBottom"] > div { padding-left: 60px !important; }
+
+@media (max-width: 760px) {
+  [data-testid="stFileUploader"] { left: 10px !important; bottom: 16px !important; }
+  div[data-testid="stBottom"] > div { padding-left: 55px !important; }
+}
+
 /* ══ SIDEBAR ══ */
 section[data-testid="stSidebar"]{background:linear-gradient(180deg,#08090e,#0b0d16) !important;border-right:1px solid rgba(255,70,85,0.16) !important;}
 section[data-testid="stSidebar"] p,section[data-testid="stSidebar"] span,section[data-testid="stSidebar"] div,section[data-testid="stSidebar"] small{color:#60625e !important;font-size:13px !important;}
@@ -408,8 +474,12 @@ for i,(lb,qr) in enumerate(st.session_state.suggestions):
         if st.button(lb,key=f"s{i}"):
             st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
+# ══ RE-RENDER CHAT BUBBLES WITH IMAGE HISTORY ══
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]): st.markdown(msg["content"])
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if "image" in msg and msg["image"]:
+            st.image(base64.b64decode(msg["image"]), width=280)
 
 # ════ DATABASE SEARCH ════
 def calc_score(item,qc,un):
@@ -466,45 +536,97 @@ QUY TẮC TRẢ LỜI — QUAN TRỌNG:
 Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng."""
 
 def ask(uq, ch):
+    # Kiểm tra xem tin nhắn hiện tại có chứa hình ảnh mã hóa base64 không
+    current_has_img = ch[-1].get("image") is not None if ch else False
+    model_to_use = "llama-3.2-11b-vision-preview" if current_has_img else "llama-3.3-70b-versatile"
+    
     msgs = [{"role":"system","content":SYSTEM_PROMPT}]
-    # Chỉ lấy 8 tin gần nhất để không waste context
-    for m in ch[-8:]:
-        msgs.append({"role":m["role"],"content":m["content"]})
-    msgs.append({"role":"user","content":uq})
+    
+    for m in ch[-6:]:
+        if model_to_use == "llama-3.2-11b-vision-preview":
+            if m.get("image"):
+                msgs.append({
+                    "role": m["role"],
+                    "content": [
+                        {"type": "text", "text": m["content"]},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{m['image']}"}}
+                    ]
+                })
+            else:
+                msgs.append({"role": m["role"], "content": m["content"]})
+        else:
+            # Đối với model thuần văn bản, chỉ gửi dạng chuỗi thuần để tránh lỗi cấu trúc API
+            msgs.append({"role": m["role"], "content": m["content"]})
 
-    # Chọn max_tokens dựa trên loại câu hỏi
     q = uq.lower()
     hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
     err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
     
     if any(w in q for w in err_words):
-        max_tok = 480  # lỗi → ngắn gọn
+        max_tok = 480
     elif any(w in q for w in hw_words):
-        max_tok = 750  # linh kiện → đủ chi tiết
+        max_tok = 750
     else:
         max_tok = 580
 
     r = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=model_to_use,
         messages=msgs,
         max_tokens=max_tok,
-        temperature=0.45  # ổn định, không lan man
+        temperature=0.45
     )
     return r.choices[0].message.content
 
-def handle(p):
-    st.session_state.messages.append({"role":"user","content":p})
-    with st.chat_message("user"): st.markdown(p)
+def handle(p, uploaded_file=None):
+    st.session_state.greeted = True
+    img_b64 = None
+    if uploaded_file:
+        img_b64 = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
+        st.session_state.messages.append({"role": "user", "content": p, "image": img_b64})
+    else:
+        st.session_state.messages.append({"role": "user", "content": p})
+        
+    with st.chat_message("user"):
+        st.markdown(p)
+        if uploaded_file:
+            st.image(uploaded_file, width=280)
+            
     with st.chat_message("assistant"):
         with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
             try:
-                a = search_db(p) or ask(p, st.session_state.messages)
+                # Nếu có ảnh đính kèm thì bắt buộc chạy qua AI Vision, không tra cứu database text thô
+                a = search_db(p) if not img_b64 else None
+                if not a:
+                    a = ask(p, st.session_state.messages)
                 st.markdown(a)
                 st.session_state.messages.append({"role":"assistant","content":a})
             except Exception as e:
                 st.error(f"❌ {str(e)}")
+                
+    # Xóa ảnh trong uploader sau khi gửi thành công để tránh gửi lặp ở câu sau
+    if uploaded_file:
+        if "image_uploader" in st.session_state:
+            st.session_state.image_uploader = None
+        st.rerun()
+
+# ══ KHỞI TẠO TIỆN ÍCH FILE UPLOADER GHIM CỐ ĐỊNH KẾ BÊN CHAT INPUT ══
+uploaded_file = st.file_uploader("", type=["png", "jpg", "jpeg"], key="image_uploader", label_visibility="collapsed")
+
+# Hiển thị biểu tượng trạng thái góc dưới khi đã nhận file thành công (từ Paste hoặc Chọn file)
+if uploaded_file:
+    st.markdown(f"""
+    <div style="position: fixed; bottom: 82px; left: calc(50% - 370px); z-index: 100000; background: #0b0e16; border: 1px solid #00d4bf; padding: 6px 12px; display: flex; align-items: center; gap: 10px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%); box-shadow: 0 0 15px rgba(0,212,191,0.25);">
+        <span style="color: #00d4bf; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">✓ ĐÃ ĐÍNH KÈM ẢNH</span>
+    </div>
+    <style>
+    @media (max-width: 760px) {{
+        div[style*="position: fixed; bottom: 82px"] {{ left: 10px !important; }}
+    }}
+    </style>
+    """, unsafe_allow_html=True)
 
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
+    
 if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
-    st.session_state.greeted=True; handle(p)
+    handle(p, uploaded_file)
