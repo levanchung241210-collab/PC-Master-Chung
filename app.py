@@ -523,142 +523,111 @@ Trả lời bằng tiếng Việt, ngắn gọn, đúng trọng tâm. KHÔNG nh�
     )
     return r.choices[0].message.content
 
-# ════ IMAGE INPUT — always visible above chat ════
+# ════ UPLOAD IMAGE — inline with chat ════
 st.markdown("""
 <style>
-/* ── Vision bar styling ── */
-.vision-bar-label{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-  color:#bd93f9;text-shadow:0 0 8px rgba(189,147,249,0.6);
-  display:flex;align-items:center;gap:8px;margin-bottom:6px;
-}
-.vision-bar-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(189,147,249,0.4));}
-.vision-bar-label::after {content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(189,147,249,0.4),transparent);}
-
-/* Tab bar */
-[data-testid="stTabs"] [data-baseweb="tab-list"]{
-  background:transparent !important;
-  border-bottom:1px solid rgba(189,147,249,0.18) !important;
-  gap:2px !important;
-}
-[data-testid="stTabs"] [data-testid="stTab"]{
-  font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:700 !important;letter-spacing:1px !important;
-  color:#64748b !important;font-size:12px !important;
-  border-radius:0 !important;padding:6px 14px !important;
-  clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%) !important;
-  transition:all .15s ease !important;
-}
-[data-testid="stTabs"] [data-testid="stTab"][aria-selected="true"]{
-  color:#bd93f9 !important;
-  background:rgba(189,147,249,0.08) !important;
-  text-shadow:0 0 8px rgba(189,147,249,0.5) !important;
-}
-[data-testid="stTabs"] [data-baseweb="tab-highlight"]{
-  background:rgba(189,147,249,0.6) !important;
-}
-
-/* File uploader — compact */
-[data-testid="stFileUploaderDropzone"]{
-  background:rgba(10,12,22,0.92) !important;
-  border:1px dashed rgba(189,147,249,0.38) !important;
-  border-radius:0 !important;padding:10px !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%) !important;
-}
-[data-testid="stFileUploaderDropzoneInstructions"]{color:#64748b !important;font-size:12px !important;}
-[data-testid="stFileUploaderDropzoneInstructions"] small{color:#4a5568 !important;}
-
-/* Camera */
-[data-testid="stCameraInput"]>div{
-  background:rgba(10,12,22,0.92) !important;
-  border:1px solid rgba(189,147,249,0.3) !important;border-radius:0 !important;
-}
-[data-testid="stCameraInput"] button{
-  background:linear-gradient(90deg,rgba(189,147,249,0.2),rgba(100,70,200,0.15)) !important;
-  border:1px solid rgba(189,147,249,0.4) !important;border-radius:0 !important;
-  color:#bd93f9 !important;font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:700 !important;letter-spacing:1px !important;
-  clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%) !important;
-}
-
-/* Analyse button — purple Valorant */
-[key="vision_btn"] button,
-div[data-testid="stButton"]:has(button[kind="secondary"]){
-  background:linear-gradient(90deg,rgba(150,80,240,0.85),rgba(100,50,200,0.8)) !important;
-  border:1px solid rgba(189,147,249,0.5) !important;
-  border-top:2px solid rgba(200,160,255,0.7) !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%) !important;
+/* ── Fix suggestion buttons back to original teal ── */
+.stButton>button{
+  background:linear-gradient(110deg,rgba(0,58,52,0.92) 0%,rgba(0,32,28,0.88) 40%,rgba(5,10,20,0.95) 100%) !important;
+  color:#d8f8f4 !important;
+  border:1px solid rgba(0,212,191,0.28) !important;
+  border-left:3px solid #00d4bf !important;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%) !important;
   border-radius:0 !important;
-  color:#fff !important;font-family:'Barlow Condensed',sans-serif !important;
-  font-weight:800 !important;letter-spacing:2px !important;font-size:13px !important;
-  box-shadow:0 0 16px rgba(189,147,249,0.3),0 4px 16px rgba(0,0,0,0.6) !important;
+  font-family:'Barlow Condensed',sans-serif !important;
+  font-size:clamp(12px,3.2vw,14px) !important;font-weight:700 !important;letter-spacing:.8px !important;
+  padding:13px 16px !important;width:100% !important;text-align:left !important;
+  white-space:normal !important;min-height:52px !important;line-height:1.45 !important;
+  transition:all .12s ease !important;
+  text-shadow:0 1px 6px rgba(0,0,0,0.7) !important;
+}
+.stButton>button:hover{
+  background:linear-gradient(110deg,rgba(0,212,191,0.18) 0%,rgba(0,130,120,0.12) 40%,rgba(255,70,85,0.10) 100%) !important;
+  border-left-color:#ff4655 !important;border-color:rgba(0,212,191,0.48) !important;
+  color:#ffffff !important;transform:translateX(6px) !important;
+  box-shadow:0 0 26px rgba(0,212,191,0.45),0 0 52px rgba(0,212,191,0.15) !important;
+}
+
+/* ── Upload button — small icon-style beside chat input ── */
+[data-testid="stFileUploaderDropzone"]{
+  background:#0b0e16 !important;
+  border:1px solid rgba(189,147,249,0.35) !important;
+  border-top:2px solid rgba(189,147,249,0.55) !important;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%) !important;
+  border-radius:0 !important;
+  padding:8px 10px !important;
+}
+[data-testid="stFileUploaderDropzoneInstructions"] p{
+  color:#64748b !important;font-size:11px !important;
+  font-family:'Barlow Condensed',sans-serif !important;letter-spacing:1px !important;
+}
+[data-testid="stFileUploaderDropzoneInstructions"] small{color:#374151 !important;}
+[data-testid="stFileUploadDeleteBtn"]{color:#bd93f9 !important;}
+
+/* Preview image small */
+.upload-preview img{
+  border:1px solid rgba(189,147,249,0.3) !important;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
+  max-height:160px;object-fit:contain;
+}
+
+/* Analyse button — purple, only for vision_btn key */
+div[data-testid="stVerticalBlock"] div[data-testid="stButton"]:last-child .stButton>button,
+.vision-analyse-btn .stButton>button{
+  background:linear-gradient(90deg,rgba(130,60,220,0.88),rgba(90,40,180,0.82)) !important;
+  border:1px solid rgba(189,147,249,0.45) !important;
+  border-top:2px solid rgba(200,160,255,0.65) !important;
+  border-left:3px solid rgba(189,147,249,0.6) !important;
+  color:#ffffff !important;
   text-shadow:0 0 8px rgba(220,200,255,0.4) !important;
+  box-shadow:0 0 14px rgba(189,147,249,0.25),0 4px 14px rgba(0,0,0,0.6) !important;
+  letter-spacing:2px !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Vision divider label ──
-st.markdown('<div class="vision-bar-label">📷 PHÂN TÍCH ẢNH / CHỤP LỖI PC</div>', unsafe_allow_html=True)
-
-tab1, tab2 = st.tabs(["📁  TẢI ẢNH LÊN", "📷  CHỤP CAMERA"])
+# ── Layout: upload col + chat input col ──
 img_data = None
+col_upload, col_preview = st.columns([1, 2], gap="small")
 
-with tab1:
+with col_upload:
     uploaded = st.file_uploader(
-        "Chọn ảnh màn hình lỗi, linh kiện...",
+        "📷 Tải ảnh lỗi",
         type=["jpg","jpeg","png","webp"],
-        label_visibility="collapsed",
+        label_visibility="visible",
         key="img_upload"
     )
     if uploaded:
         img = Image.open(uploaded).convert("RGB")
         buf = io.BytesIO(); img.save(buf, format="JPEG", quality=85)
         img_data = buf.getvalue()
-        st.image(img, use_container_width=True)
 
-with tab2:
-    cam = st.camera_input(
-        "Hướng camera vào màn hình lỗi hoặc linh kiện",
-        label_visibility="collapsed",
-        key="img_camera"
-    )
-    if cam:
-        img = Image.open(cam).convert("RGB")
-        buf = io.BytesIO(); img.save(buf, format="JPEG", quality=85)
-        img_data = buf.getvalue()
-
-if img_data:
-    col_cap, col_btn = st.columns([3,1])
-    with col_cap:
+with col_preview:
+    if img_data:
+        st.image(Image.open(io.BytesIO(img_data)), use_container_width=True)
         caption = st.text_input(
-            "Mô tả thêm:",
-            placeholder="Màn hình này báo lỗi gì? Làm gì tiếp theo?",
-            label_visibility="collapsed",
+            "Hỏi về ảnh:",
+            placeholder="Lỗi gì? Làm gì tiếp?",
+            label_visibility="visible",
             key="vision_caption"
         )
-    with col_btn:
-        analyse = st.button("⚡ PHÂN TÍCH", use_container_width=True, key="vision_btn")
-
-    if analyse:
-        st.session_state.greeted = True
-        cap = caption.strip() if caption else ""
-        q_text = f"📷 **Ảnh gửi lên** — {cap}" if cap else "📷 **Ảnh gửi lên** — Phân tích lỗi PC trong ảnh"
-        st.session_state.messages.append({"role":"user","content":q_text})
-        with st.chat_message("user"):
-            st.markdown(q_text)
-        with st.chat_message("assistant"):
-            with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
-                try:
-                    b64 = img_to_base64(img_data)
-                    ans = ask_vision(b64, cap, st.session_state.messages)
-                    st.markdown(ans)
-                    st.session_state.messages.append({"role":"assistant","content":ans})
-                except Exception as e:
-                    st.error(f"❌ Lỗi phân tích ảnh: {str(e)}")
-        st.rerun()
-
-st.divider()
+        if st.button("⚡ PHÂN TÍCH ẢNH", use_container_width=True, key="vision_btn"):
+            st.session_state.greeted = True
+            cap = caption.strip() if caption else ""
+            q_text = f"📷 **Ảnh lỗi PC** — {cap}" if cap else "📷 **Ảnh lỗi PC** — phân tích giúp tôi"
+            st.session_state.messages.append({"role":"user","content":q_text})
+            with st.chat_message("user"):
+                st.markdown(q_text)
+            with st.chat_message("assistant"):
+                with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
+                    try:
+                        b64 = img_to_base64(img_data)
+                        ans = ask_vision(b64, cap, st.session_state.messages)
+                        st.markdown(ans)
+                        st.session_state.messages.append({"role":"assistant","content":ans})
+                    except Exception as e:
+                        st.error(f"❌ {str(e)}")
+            st.rerun()
 
 # ════ TEXT HANDLER ════
 def handle(p):
