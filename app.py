@@ -4,36 +4,30 @@ from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
-# JS injection to force dark textarea
+# ══════════════════════════════════════════
+#  JAVASCRIPT — fixes Streamlit chat input
+#  by directly targeting the real DOM node
+# ══════════════════════════════════════════
 st.markdown("""
 <script>
-(function(){
-  function killWhite(){
-    // Force dark on ALL possible containers
-    var dark='#0e1118';
-    var cream='#ece8e1';
-    // Every div/section that might be white
-    document.querySelectorAll('[data-testid="stChatInput"],[data-testid="stChatInput"]>*,[data-testid="stChatInput"]>*>*,[data-testid="stChatInput"]>*>*>*').forEach(function(el){
-      el.style.setProperty('background',dark,'important');
-      el.style.setProperty('background-color',dark,'important');
+(function fixInput(){
+  const apply = () => {
+    // target every textarea on page
+    document.querySelectorAll('textarea').forEach(el => {
+      el.style.setProperty('color',           '#ece8e1', 'important');
+      el.style.setProperty('background',      '#08090f', 'important');
+      el.style.setProperty('background-color','#08090f', 'important');
+      el.style.setProperty('caret-color',     '#ff4655', 'important');
+      el.style.setProperty('-webkit-text-fill-color','#ece8e1','important');
     });
-    // Specifically the bottom fixed bar
-    document.querySelectorAll('.stBottom,.stBottom>*,.stBottom>*>*').forEach(function(el){
-      el.style.setProperty('background',dark,'important');
-      el.style.setProperty('background-color',dark,'important');
+    // also parent containers
+    document.querySelectorAll('[data-testid="stChatInput"]').forEach(el=>{
+      el.style.setProperty('background','#08090f','important');
     });
-    // All textareas
-    document.querySelectorAll('textarea').forEach(function(el){
-      el.style.setProperty('background',dark,'important');
-      el.style.setProperty('background-color',dark,'important');
-      el.style.setProperty('color',cream,'important');
-      el.style.setProperty('-webkit-text-fill-color',cream,'important');
-      el.style.setProperty('caret-color','#ff4655','important');
-    });
-  }
-  killWhite();
-  new MutationObserver(killWhite).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:false});
-  setInterval(killWhite,200);
+  };
+  // run immediately + observe for Streamlit re-renders
+  apply();
+  new MutationObserver(apply).observe(document.body,{subtree:true,childList:true,attributes:true});
 })();
 </script>
 """, unsafe_allow_html=True)
@@ -65,17 +59,11 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
     radial-gradient(ellipse 55% 65% at -8% 25%,rgba(255,40,55,0.11) 0%,transparent 60%),
     radial-gradient(ellipse 55% 65% at 108% 75%,rgba(0,212,191,0.09) 0%,transparent 60%),
     radial-gradient(ellipse 35% 25% at 100% 0%,rgba(189,147,249,0.06) 0%,transparent 55%),
-    /* VISIBLE HUD grid */
-    linear-gradient(rgba(255,70,85,0.06) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,70,85,0.06) 1px,transparent 1px),
-    /* BOLD slash lines with glow effect */
-    repeating-linear-gradient(-52deg,transparent 0,transparent 78px,
-      rgba(255,70,85,0.055) 78px,rgba(255,70,85,0.055) 79px,
-      rgba(255,70,85,0.025) 79px,rgba(255,70,85,0.025) 80px),
-    repeating-linear-gradient(38deg,transparent 0,transparent 108px,
-      rgba(0,212,191,0.04) 108px,rgba(0,212,191,0.04) 109px,
-      rgba(0,212,191,0.015) 109px,rgba(0,212,191,0.015) 110px);
-  background-size:auto,auto,auto,auto,40px 40px,40px 40px,auto,auto;
+    linear-gradient(rgba(255,70,85,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,70,85,0.025) 1px,transparent 1px),
+    repeating-linear-gradient(-52deg,transparent 0,transparent 80px,rgba(255,70,85,0.018) 80px,rgba(255,70,85,0.018) 81px),
+    repeating-linear-gradient(38deg,transparent 0,transparent 110px,rgba(0,212,191,0.012) 110px,rgba(0,212,191,0.012) 111px);
+  background-size:auto,auto,auto,auto,44px 44px,44px 44px,auto,auto;
 }
 /* ─── 2. TOP BAR ─── */
 .stApp::after{
@@ -89,17 +77,16 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 @keyframes sd2{0%{transform:translate(0,0)scale(1);opacity:.08;}60%{transform:translate(-22px,-36px)scale(1.4);opacity:.12;}100%{transform:translate(12px,-70px)scale(1.8);opacity:0;}}
 @keyframes sd3{0%{transform:translate(0,0)scale(1);opacity:.07;}70%{transform:translate(26px,-42px)scale(1.5);opacity:.10;}100%{transform:translate(-4px,-80px)scale(2);opacity:0;}}
 .smoke-1,.smoke-2,.smoke-3{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
-.smoke-1{width:200px;height:200px;bottom:8%;left:2%;background:radial-gradient(circle,rgba(255,70,85,0.14) 0%,rgba(255,40,55,0.06) 50%,transparent 70%);animation:sd1 3.5s ease-in-out infinite;filter:blur(2px);}
-.smoke-2{width:180px;height:180px;bottom:12%;right:3%;background:radial-gradient(circle,rgba(0,212,191,0.13) 0%,rgba(0,180,165,0.05) 50%,transparent 70%);animation:sd2 4.5s ease-in-out infinite 1s;filter:blur(2px);}
-.smoke-3{width:150px;height:150px;bottom:3%;left:35%;background:radial-gradient(circle,rgba(232,201,122,0.10) 0%,rgba(200,170,80,0.04) 50%,transparent 70%);animation:sd3 5.5s ease-in-out infinite 2s;filter:blur(2px);}
+.smoke-1{width:140px;height:140px;bottom:8%;left:4%;background:radial-gradient(circle,rgba(255,70,85,0.10) 0%,transparent 65%);animation:sd1 5s ease-in-out infinite;}
+.smoke-2{width:120px;height:120px;bottom:14%;right:6%;background:radial-gradient(circle,rgba(0,212,191,0.09) 0%,transparent 65%);animation:sd2 6.5s ease-in-out infinite 1.5s;}
+.smoke-3{width:100px;height:100px;bottom:4%;left:38%;background:radial-gradient(circle,rgba(232,201,122,0.07) 0%,transparent 65%);animation:sd3 8s ease-in-out infinite 3s;}
 
 /* ─── 4. SCAN LINE ─── */
-@keyframes scan{0%{top:-40%;opacity:.9}60%{opacity:.5}100%{top:130%;opacity:0}}
+@keyframes scan{0%{top:-40%;opacity:.7}80%{opacity:.35}100%{top:130%;opacity:0}}
 .scan-wrap{position:relative;overflow:hidden;}
-.scan-wrap::after{content:'';position:absolute;top:-40%;left:0;right:0;height:30%;
-  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.07) 40%,rgba(0,212,191,0.07) 60%,transparent 100%);
-  box-shadow:0 0 20px rgba(0,212,191,0.05);
-  animation:scan 2.5s linear infinite;pointer-events:none;z-index:2;}
+.scan-wrap::after{content:'';position:absolute;top:-40%;left:0;right:0;height:35%;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,212,191,0.04) 50%,transparent 100%);
+  animation:scan 3.5s linear infinite;pointer-events:none;z-index:2;}
 
 /* ─── 5. HEADER ─── */
 .valo-header{text-align:center;padding:10px 0 2px;position:relative;}
@@ -176,17 +163,11 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
   margin:4px 0 14px;overflow:hidden;
   border:1px solid rgba(255,70,85,0.22);
   box-shadow:0 0 28px rgba(255,70,85,0.07),0 0 60px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85);
-  animation:greetBreathe 2s ease-in-out infinite;
+  animation:greetBreathe 2.8s ease-in-out infinite;
 }
 @keyframes greetBreathe{
-  0%,100%{
-    box-shadow:0 0 30px rgba(255,70,85,0.09),0 8px 40px rgba(0,0,0,0.85);
-    border-color:rgba(255,70,85,0.22);
-  }
-  50%    {
-    box-shadow:0 0 50px rgba(255,70,85,0.15),0 0 80px rgba(0,212,191,0.06),0 8px 40px rgba(0,0,0,0.85);
-    border-color:rgba(255,70,85,0.35);
-  }
+  0%,100%{box-shadow:0 0 28px rgba(255,70,85,0.07),0 8px 40px rgba(0,0,0,0.85);}
+  50%    {box-shadow:0 0 40px rgba(255,70,85,0.11),0 0 60px rgba(0,212,191,0.04),0 8px 40px rgba(0,0,0,0.85);}
 }
 .vg-topline{position:absolute;top:0;left:20px;right:0;height:2px;background:linear-gradient(90deg,var(--r),rgba(255,70,85,0.2));box-shadow:0 0 10px rgba(255,70,85,0.6);}
 .vg-leftline{position:absolute;left:0;top:20px;bottom:0;width:2px;background:linear-gradient(180deg,var(--r),rgba(0,212,191,0.2));box-shadow:0 0 8px rgba(255,70,85,0.4);}
@@ -399,25 +380,6 @@ textarea{
   color:#ece8e1 !important;
   -webkit-text-fill-color:#ece8e1 !important;
   background-color:#0e1118 !important;
-}
-
-/* ─── BOTTOM BAR — kill white ─── */
-.stBottom,.stBottom>*,.stBottom>div,.stBottom section,
-[data-testid="stBottom"],[data-testid="stBottom"]>*{
-  background:#0e1118 !important;
-  background-color:#0e1118 !important;
-  border-top:2px solid rgba(255,70,85,0.45) !important;
-  box-shadow:0 -4px 30px rgba(255,70,85,0.08),0 -2px 60px rgba(0,212,191,0.04) !important;
-}
-/* Kill ANY white element inside bottom */
-.stBottom *{
-  background-color:transparent !important;
-}
-.stBottom textarea{
-  background:#0e1118 !important;
-  background-color:#0e1118 !important;
-  color:#ece8e1 !important;
-  -webkit-text-fill-color:#ece8e1 !important;
 }
 
 /* ─── 17. SIDEBAR ─── */
@@ -667,36 +629,24 @@ if st.session_state.pending_query:
 if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
     st.session_state.greeted=True; handle(p)
 
-# JS injected AFTER render
+# JS injected AFTER render — forces textarea dark
 st.markdown("""
 <script>
-(function(){
-  var DARK='#0e1118';
-  var CREAM='#ece8e1';
-  // inject <style> tag for max priority
-  var s=document.createElement('style');
-  s.innerHTML=`
-    .stBottom,.stBottom *:not(textarea):not(button):not(svg):not(path){background:${DARK}!important;background-color:${DARK}!important;}
-    .stBottom textarea{background:${DARK}!important;background-color:${DARK}!important;color:${CREAM}!important;-webkit-text-fill-color:${CREAM}!important;}
-    textarea{background:${DARK}!important;background-color:${DARK}!important;color:${CREAM}!important;-webkit-text-fill-color:${CREAM}!important;caret-color:#ff4655!important;}
-    [data-testid="stChatInput"],[data-testid="stChatInput"]>div{background:${DARK}!important;}
-    [data-testid="stBottom"],[data-testid="stBottom"]>*{background:${DARK}!important;}
-  `.replace(/\${DARK}/g,DARK).replace(/\${CREAM}/g,CREAM);
-  document.head.appendChild(s);
-
-  // also inline style every 150ms
+setTimeout(function(){
+  var style=document.createElement('style');
+  style.innerHTML=`
+    textarea{background:#0e1118!important;background-color:#0e1118!important;color:#ece8e1!important;-webkit-text-fill-color:#ece8e1!important;}
+    [data-testid="stChatInput"] textarea{background:#0e1118!important;background-color:#0e1118!important;color:#ece8e1!important;-webkit-text-fill-color:#ece8e1!important;border-top:2px solid rgba(255,70,85,0.6)!important;}
+  `;
+  document.head.appendChild(style);
   setInterval(function(){
-    document.querySelectorAll('.stBottom,.stBottom>div,.stBottom>div>div,[data-testid="stBottom"],[data-testid="stChatInput"],[data-testid="stChatInput"]>div').forEach(function(el){
-      el.style.setProperty('background',DARK,'important');
-      el.style.setProperty('background-color',DARK,'important');
-    });
     document.querySelectorAll('textarea').forEach(function(el){
-      el.style.setProperty('background',DARK,'important');
-      el.style.setProperty('background-color',DARK,'important');
-      el.style.setProperty('color',CREAM,'important');
-      el.style.setProperty('-webkit-text-fill-color',CREAM,'important');
+      el.style.setProperty('background','#0e1118','important');
+      el.style.setProperty('background-color','#0e1118','important');
+      el.style.setProperty('color','#ece8e1','important');
+      el.style.setProperty('-webkit-text-fill-color','#ece8e1','important');
     });
-  },150);
-})();
+  },300);
+},100);
 </script>
 """, unsafe_allow_html=True)
