@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import json, re, os, random, base64
+import json, re, os, random
 from groq import Groq
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
@@ -23,6 +23,7 @@ components.html("""
   document.head.appendChild(styleEl);
 
   function fix(){
+    // Walk up from current window to find parent Streamlit frame
     try {
       var w = window.parent || window;
       var frames = w.document ? [w] : [];
@@ -374,52 +375,41 @@ ALL_S=[
 if not st.session_state.suggestions:
     st.session_state.suggestions=random.sample(ALL_S,4)
 
-if not st.session_state.greeted:
-    st.markdown(f"""
-    <div class="valo-greeting scan-wrap">
-      <div class="valo-bracket tl"></div><div class="valo-bracket tr"></div>
-      <div class="valo-bracket bl"></div><div class="valo-bracket br"></div>
-      <div class="vg-topline"></div><div class="vg-leftline"></div>
-      <div class="vg-cut-h"></div><div class="vg-cut-v"></div>
-      <div class="vg-smoke-r"></div><div class="vg-smoke-t"></div>
-      <div class="valo-vbar"></div>
-      <div class="valo-status-row">
-        <div class="valo-status-dot-wrap"><div class="valo-status-ring r1"></div><div class="valo-status-ring r2"></div><div class="valo-status-dot"></div></div>
-        <div class="valo-status-text">Hệ thống sẵn sàng</div>
-      </div>
-      <span class="valo-greeting-icon">⚡</span>
-      <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
-      <div class="valo-greeting-sub">Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi.<br>Hỗ trợ up ảnh/paste ảnh trực tiếp qua biểu tượng đính kèm trên thanh Chat.</div>
-      <div class="valo-stats">
-        <div class="valo-stat"><span class="valo-stat-num">{db_loi}</span><span class="valo-stat-label">Lỗi hệ thống</span></div>
-        <div class="valo-stat-div"></div>
-        <div class="valo-stat"><span class="valo-stat-num">{db_lk}</span><span class="valo-stat-label">Linh kiện PC</span></div>
-        <div class="valo-stat-div"></div>
-        <div class="valo-stat"><span class="valo-stat-num" style="color:var(--t);text-shadow:0 0 14px rgba(0,212,191,0.7)">24/7</span><span class="valo-stat-label">Hỗ trợ</span></div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown(f"""
+<div class="valo-greeting scan-wrap">
+  <div class="valo-bracket tl"></div><div class="valo-bracket tr"></div>
+  <div class="valo-bracket bl"></div><div class="valo-bracket br"></div>
+  <div class="vg-topline"></div><div class="vg-leftline"></div>
+  <div class="vg-cut-h"></div><div class="vg-cut-v"></div>
+  <div class="vg-smoke-r"></div><div class="vg-smoke-t"></div>
+  <div class="valo-vbar"></div>
+  <div class="valo-status-row">
+    <div class="valo-status-dot-wrap"><div class="valo-status-ring r1"></div><div class="valo-status-ring r2"></div><div class="valo-status-dot"></div></div>
+    <div class="valo-status-text">Hệ thống sẵn sàng</div>
+  </div>
+  <span class="valo-greeting-icon">⚡</span>
+  <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
+  <div class="valo-greeting-sub">Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi.<br>Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.</div>
+  <div class="valo-stats">
+    <div class="valo-stat"><span class="valo-stat-num">{db_loi}</span><span class="valo-stat-label">Lỗi hệ thống</span></div>
+    <div class="valo-stat-div"></div>
+    <div class="valo-stat"><span class="valo-stat-num">{db_lk}</span><span class="valo-stat-label">Linh kiện PC</span></div>
+    <div class="valo-stat-div"></div>
+    <div class="valo-stat"><span class="valo-stat-num" style="color:var(--t);text-shadow:0 0 14px rgba(0,212,191,0.7)">24/7</span><span class="valo-stat-label">Hỗ trợ</span></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("""<div class="smoke-1"></div><div class="smoke-2"></div>""", unsafe_allow_html=True)
-    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
-    col1,col2=st.columns(2,gap="small")
-    for i,(lb,qr) in enumerate(st.session_state.suggestions):
-        with (col1 if i%2==0 else col2):
-            if st.button(lb,key=f"s{i}"):
-                st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
+st.markdown("""<div class="smoke-1"></div><div class="smoke-2"></div>""", unsafe_allow_html=True)
+st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
+col1,col2=st.columns(2,gap="small")
+for i,(lb,qr) in enumerate(st.session_state.suggestions):
+    with (col1 if i%2==0 else col2):
+        if st.button(lb,key=f"s{i}"):
+            st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
-# Render Lịch Sử Hội Thoại
-import base64
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        if isinstance(msg["content"], list):
-            for item in msg["content"]:
-                if item["type"] == "text":
-                    st.markdown(item["text"])
-                elif item["type"] == "image_url":
-                    st.image(item["image_url"]["url"], width=300)
-        else:
-            st.markdown(msg["content"])
+    with st.chat_message(msg["role"]): st.markdown(msg["content"])
 
 # ════ DATABASE SEARCH ════
 def calc_score(item,qc,un):
@@ -447,7 +437,7 @@ def search_db(uq):
         else: return f"### ◆  {bm['ten']}\n*— Lê Văn Chung 10A4*\n\n**⚙ Thông số:** {bm.get('thong_so','')}\n\n**◉ Socket:** `{bm.get('socket','')}`\n\n**▶ Tư vấn:** {bm.get('chuyen_gia_tu_van','')}"
     return None
 
-# ════ SMART AI ENGINE ════
+# ════ SMART AI ENGINE — no template, full knowledge ════
 SYSTEM_PROMPT = """Bạn là chuyên gia phần cứng máy tính và điện tử hàng đầu, với kiến thức cực kỳ sâu rộng và cập nhật đến 2025.
 
 KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
@@ -466,115 +456,55 @@ KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
 QUY TẮC TRẢ LỜI — QUAN TRỌNG:
 1. Đọc KỸ câu hỏi, trả lời ĐÚNG nội dung được hỏi — không trả lời template
 2. Nếu hỏi về linh kiện cụ thể: nêu thông số thực tế, so sánh, ưu nhược, giá tham khảo
-3. Nếu hỏi lỗi (Màn hình/Hình ảnh đính kèm): phân tích ảnh, đọc mã lỗi, nêu nguyên nhân + cách fix
-4. Không mở đầu bằng "Xin chào", không lặp câu hỏi, không giải thích thừa
-5. Trả lời bằng tiếng Việt, súc tích, đúng trọng tâm
-6. TUYỆT ĐỐI KHÔNG nhắc "AI", "LLM", "Groq"
+3. Nếu hỏi lỗi: nguyên nhân chính (1 câu) + bước fix (≤4 bước ngắn) + 1 tip
+4. Nếu hỏi so sánh: phân tích khách quan từng mặt, kết luận rõ ràng
+5. Không mở đầu bằng "Xin chào", không lặp câu hỏi, không giải thích thừa
+6. Trả lời bằng tiếng Việt, súc tích, đúng trọng tâm
+7. TUYỆT ĐỐI KHÔNG nhắc "AI", "LLM", "Groq", "ngôn ngữ lớn"
+8. Với câu hỏi về linh kiện mới (RTX 5090, Ryzen 9000, chip mobile 2024-2025): dùng kiến thức chuyên môn của bạn để trả lời, không nói "không biết"
 
-Tự xưng là "hệ thống chuyên gia" khi cần."""
+Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng."""
 
-def process_input(text_input, files_input=None):
-    if files_input is None:
-        files_input = []
-        
-    # Tạo cụm content hiển thị phía người dùng
-    display_content = []
-    if text_input:
-        display_content.append({"type": "text", "text": text_input})
-        
-    for file in files_input:
-        b64 = base64.b64encode(file.getvalue()).decode()
-        display_content.append({"type": "image_url", "image_url": {"url": f"data:{file.type};base64,{b64}"}})
-        
-    if not display_content:
-        return
-        
-    # Lưu vào lịch sử và Render ra màn hình User
-    st.session_state.messages.append({"role": "user", "content": display_content})
-    with st.chat_message("user"):
-        for f in files_input: st.image(f, width=300)
-        if text_input: st.markdown(text_input)
-            
-    # Bắt đầu xử lý với Bot
+def ask(uq, ch):
+    msgs = [{"role":"system","content":SYSTEM_PROMPT}]
+    # Chỉ lấy 8 tin gần nhất để không waste context
+    for m in ch[-8:]:
+        msgs.append({"role":m["role"],"content":m["content"]})
+    msgs.append({"role":"user","content":uq})
+
+    # Chọn max_tokens dựa trên loại câu hỏi
+    q = uq.lower()
+    hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
+    err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
+    
+    if any(w in q for w in err_words):
+        max_tok = 480  # lỗi → ngắn gọn
+    elif any(w in q for w in hw_words):
+        max_tok = 750  # linh kiện → đủ chi tiết
+    else:
+        max_tok = 580
+
+    r = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=msgs,
+        max_tokens=max_tok,
+        temperature=0.45  # ổn định, không lan man
+    )
+    return r.choices[0].message.content
+
+def handle(p):
+    st.session_state.messages.append({"role":"user","content":p})
+    with st.chat_message("user"): st.markdown(p)
     with st.chat_message("assistant"):
         with st.spinner("ĐANG PHÂN TÍCH DỮ LIỆU..."):
             try:
-                # Kiểm tra DB nội bộ nếu chỉ là Text
-                db_ans = None
-                if not files_input and text_input:
-                    db_ans = search_db(text_input)
-                    
-                if db_ans:
-                    ans = db_ans
-                else:
-                    # 1. Trích xuất History an toàn (Loại bỏ ảnh khỏi history nếu model đang gọi là Text Model)
-                    api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-                    for m in st.session_state.messages[-8:]:
-                        if m["role"] == "assistant":
-                            api_messages.append({"role": "assistant", "content": str(m["content"])})
-                        else:
-                            if isinstance(m["content"], list):
-                                if files_input: 
-                                    # Nếu đang up ảnh, giữ nguyên ảnh trong history cho model Vision
-                                    api_messages.append({"role": "user", "content": m["content"]})
-                                else:
-                                    # Lọc bỏ ảnh để ném vào Model Text
-                                    txt_only = "\n".join([item["text"] for item in m["content"] if item["type"] == "text"])
-                                    api_messages.append({"role": "user", "content": txt_only})
-                            else:
-                                api_messages.append({"role": "user", "content": str(m["content"])})
-                                
-                    # 2. Định tuyến Model và cấu hình Tokens (Có ảnh gọi Vision, không ảnh gọi Versatile)
-                    model_name = "llama-3.2-90b-vision-preview" if files_input else "llama-3.3-70b-versatile"
-                    q_lower = text_input.lower()
-                    err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
-                    hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone"]
-                    
-                    max_tok = 580
-                    if any(w in q_lower for w in err_words): max_tok = 480
-                    elif any(w in q_lower for w in hw_words): max_tok = 750
-                    
-                    # 3. Request API
-                    r = client.chat.completions.create(
-                        model=model_name,
-                        messages=api_messages,
-                        max_tokens=max_tok,
-                        temperature=0.45
-                    )
-                    ans = r.choices[0].message.content
-                    
-                st.markdown(ans)
-                st.session_state.messages.append({"role": "assistant", "content": ans})
+                a = search_db(p) or ask(p, st.session_state.messages)
+                st.markdown(a)
+                st.session_state.messages.append({"role":"assistant","content":a})
             except Exception as e:
                 st.error(f"❌ {str(e)}")
-    st.rerun()
 
-# Gửi Suggestion Button Trigger
 if st.session_state.pending_query:
-    q = st.session_state.pending_query
-    st.session_state.pending_query = None
-    process_input(q, [])
-
-# Khung Input chuẩn Gemini của Streamlit (Hỗ trợ Up file & Paste tự động xóa)
-try:
-    # Bản Streamlit mới nhất sẽ nhận tham số này để mở icon Đính kèm
-    prompt_data = st.chat_input("Nhập mã lỗi, linh kiện hoặc đính kèm ảnh (Hỗ trợ Paste)...", accept_file=["png", "jpg", "jpeg", "webp", "heic"])
-except TypeError:
-    prompt_data = st.chat_input("Nhập mã lỗi, linh kiện hoặc đính kèm ảnh...")
-
-if prompt_data:
-    st.session_state.greeted = True
-    p_text = ""
-    p_files = []
-    
-    # Giải nén object trả về từ chat_input mới
-    if hasattr(prompt_data, 'text') and hasattr(prompt_data, 'files'):
-        p_text = prompt_data.text
-        p_files = prompt_data.files
-    elif isinstance(prompt_data, dict):
-        p_text = prompt_data.get('text', '')
-        p_files = prompt_data.get('files', [])
-    else:
-        p_text = str(prompt_data)
-        
-    process_input(p_text, p_files)
+    q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
+if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
+    st.session_state.greeted=True; handle(p)
