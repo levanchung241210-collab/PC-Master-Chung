@@ -358,7 +358,7 @@ ALL_S=[
     ("📱  Snapdragon 8 Gen 4 mạnh cỡ nào?","Chip Snapdragon 8 Elite (Gen 4) hiệu năng thế nào?"),
     ("📱  Dimensity 9300+ vs Snap 8 Gen 3","So sánh Dimensity 9300+ với Snapdragon 8 Gen 3?"),
     ("📱  iPhone 16 Pro chip A18 Pro?","Chip Apple A18 Pro trong iPhone 16 Pro mạnh đến đâu?"),
-    ("⚡  Build PC gaming 15 triệu 2024","Gợi ý cấu hình PC gaming 15 triệu tốt nhất 2024"),
+    ("⚡  Build PC gaming 15 triệu 2026","Gợi ý cấu hình PC gaming 15 triệu tốt nhất 2026"),
     ("◆  Ryzen 7 9800X3D có đáng mua?","Ryzen 7 9800X3D với 3D V-Cache có xứng đáng mua không?"),
     ("▶  SSD Gen 5 vs Gen 4 NVMe?","SSD PCIe Gen 5 có đáng nâng cấp từ Gen 4 không?"),
     ("◈  B550 dùng được Ryzen 5 5600X?","Mainboard B550 có tương thích Ryzen 5 5600X không?"),
