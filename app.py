@@ -492,6 +492,323 @@ def ask(uq, ch):
     )
     return r.choices[0].message.content
 
+import base64
+from PIL import Image
+import io
+
+# ════ VISION — phân tích ảnh ════
+def img_to_base64(img_bytes):
+    return base64.b64encode(img_bytes).decode("utf-8")
+
+def ask_vision(img_b64, caption, chat_history):
+    """Gửi ảnh lên Groq vision để phân tích lỗi PC"""
+    user_text = caption.strip() if caption.strip() else "Hãy phân tích ảnh này. Đây là màn hình/linh kiện/lỗi PC. Cho tôi biết đây là lỗi gì và cách khắc phục."
+    msgs = [
+        {"role": "system", "content": """Bạn là chuyên gia phần cứng máy tính. Khi nhận được ảnh:
+1. Xác định đây là loại lỗi gì / linh kiện gì / màn hình lỗi gì
+2. Nếu là màn hình lỗi (BSOD, error code, màn hình đen...): đọc mã lỗi và giải thích + cách fix
+3. Nếu là linh kiện: nhận dạng và cho thông số / tư vấn
+4. Nếu là cài đặt/giao diện PC: hướng dẫn bấm vào đâu, làm gì tiếp theo
+Trả lời bằng tiếng Việt, ngắn gọn, đúng trọng tâm. KHÔNG nhắc "AI" hay "mô hình"."""},
+        {"role": "user", "content": [
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}},
+            {"type": "text",      "text": user_text}
+        ]}
+    ]
+    r = client.chat.completions.create(
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        messages=msgs,
+        max_tokens=600,
+        temperature=0.3
+    )
+    return r.choices[0].message.content
+
+# ════ IMAGE + CHAT INPUT — camera icon inside input row ════
+st.markdown("""
+<style>
+/* ── Restore teal suggestion buttons ── */
+.stButton>button{
+  background:linear-gradient(110deg,rgba(0,58,52,0.92) 0%,rgba(0,32,28,0.88) 40%,rgba(5,10,20,0.95) 100%) !important;
+  color:#d8f8f4 !important;
+  border:1px solid rgba(0,212,191,0.28) !important;
+  border-left:3px solid #00d4bf !important;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%) !important;
+  border-radius:0 !important;
+  font-family:'Barlow Condensed',sans-serif !important;
+  font-size:clamp(12px,3.2vw,14px) !important;font-weight:700 !important;letter-spacing:.8px !important;
+  padding:13px 16px !important;width:100% !important;text-align:left !important;
+  white-space:normal !important;min-height:52px !important;line-height:1.45 !important;
+  transition:all .12s ease !important;
+  text-shadow:0 1px 6px rgba(0,0,0,0.7) !important;
+}
+.stButton>button:hover{
+  background:linear-gradient(110deg,rgba(0,212,191,0.18) 0%,rgba(0,130,120,0.12) 40%,rgba(255,70,85,0.10) 100%) !important;
+  border-left-color:#ff4655 !important;border-color:rgba(0,212,191,0.48) !important;
+  color:#ffffff !important;transform:translateX(6px) !important;
+  box-shadow:0 0 26px rgba(0,212,191,0.45),0 0 52px rgba(0,212,191,0.15) !important;
+}
+
+/* ── Image input row ── */
+.valo-img-row {
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  margin-bottom:4px;
+  position:relative;
+}
+
+/* The camera/upload icon button */
+.valo-cam-btn {
+  display:flex;align-items:center;justify-content:center;
+  width:46px;height:46px;flex-shrink:0;cursor:pointer;
+  background:linear-gradient(135deg,rgba(16,20,32,0.98),rgba(10,14,24,0.98));
+  border:1px solid rgba(189,147,249,0.4);
+  border-top:2px solid rgba(189,147,249,0.65);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
+  transition:all .15s ease;
+  position:relative;
+  box-shadow:0 0 12px rgba(189,147,249,0.15);
+}
+.valo-cam-btn:hover {
+  background:rgba(189,147,249,0.12);
+  border-color:rgba(189,147,249,0.7);
+  box-shadow:0 0 20px rgba(189,147,249,0.3);
+}
+.valo-cam-btn input[type=file] {
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.valo-cam-icon { font-size:20px;pointer-events:none; }
+
+/* Preview strip above input */
+.valo-img-preview {
+  background:linear-gradient(135deg,rgba(16,10,26,0.97),rgba(10,14,24,0.98));
+  border:1px solid rgba(189,147,249,0.3);
+  border-left:3px solid rgba(189,147,249,0.55);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  padding:8px 12px;
+  margin-bottom:4px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 0 16px rgba(189,147,249,0.1);
+}
+.valo-img-preview img {
+  height:52px;width:auto;object-fit:cover;
+  border:1px solid rgba(189,147,249,0.35);
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,0 100%);
+}
+.valo-img-preview-info {
+  flex:1;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;letter-spacing:1px;color:#8b86a0;
+}
+.valo-img-preview-info strong {
+  display:block;color:#bd93f9;font-size:12px;
+  text-shadow:0 0 6px rgba(189,147,249,0.4);
+}
+.valo-del-btn {
+  background:rgba(255,70,85,0.12);border:1px solid rgba(255,70,85,0.3);
+  color:#ff4655;cursor:pointer;
+  width:28px;height:28px;
+  clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;transition:all .12s ease;flex-shrink:0;
+}
+.valo-del-btn:hover { background:rgba(255,70,85,0.25);box-shadow:0 0 10px rgba(255,70,85,0.3); }
+
+/* Send image button */
+.valo-send-img-btn {
+  background:linear-gradient(90deg,rgba(120,50,210,0.88),rgba(80,30,170,0.82));
+  border:1px solid rgba(189,147,249,0.5);
+  border-top:2px solid rgba(200,160,255,0.65);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
+  color:#fff;cursor:pointer;
+  padding:0 16px;height:46px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;font-size:12px;letter-spacing:2px;
+  white-space:nowrap;flex-shrink:0;
+  box-shadow:0 0 14px rgba(189,147,249,0.2);
+  transition:all .12s ease;
+}
+.valo-send-img-btn:hover {
+  background:rgba(189,147,249,0.25);
+  box-shadow:0 0 22px rgba(189,147,249,0.4);
+}
+
+/* Caption input */
+.valo-caption-input {
+  flex:1;background:#0b0e16;
+  border:1px solid rgba(189,147,249,0.25);
+  border-bottom:2px solid rgba(189,147,249,0.4);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  color:#ece8e1;
+  font-family:'Barlow',sans-serif;font-size:13px;
+  padding:0 12px;height:46px;
+  caret-color:#bd93f9;
+  outline:none;
+}
+.valo-caption-input::placeholder { color:rgba(170,165,155,0.38);font-style:italic; }
+.valo-caption-input:focus { border-bottom-color:#bd93f9;box-shadow:0 3px 14px rgba(189,147,249,0.1); }
+
+/* Paste hint */
+.valo-paste-hint {
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:2px;color:#363a46;text-transform:uppercase;
+  text-align:right;margin-top:2px;padding-right:4px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ── Session state for image ──
+if "img_data"    not in st.session_state: st.session_state.img_data    = None
+if "img_name"    not in st.session_state: st.session_state.img_name    = ""
+if "img_b64"     not in st.session_state: st.session_state.img_b64     = ""
+if "img_caption" not in st.session_state: st.session_state.img_caption = ""
+if "send_img"    not in st.session_state: st.session_state.send_img    = False
+
+# ── File uploader hidden, triggered by JS icon ──
+# We use st.file_uploader but hide it visually and trigger via JS
+uploaded = st.file_uploader(
+    "img",
+    type=["jpg","jpeg","png","webp","gif"],
+    label_visibility="collapsed",
+    key="hidden_uploader"
+)
+
+# Process upload
+if uploaded is not None:
+    try:
+        img_obj = Image.open(uploaded).convert("RGB")
+        buf = io.BytesIO()
+        img_obj.save(buf, format="JPEG", quality=82)
+        st.session_state.img_data = buf.getvalue()
+        st.session_state.img_b64  = img_to_base64(st.session_state.img_data)
+        st.session_state.img_name = uploaded.name
+    except:
+        st.session_state.img_data = None
+
+# ── Preview strip (shows when image loaded) ──
+if st.session_state.img_data:
+    import base64 as _b64
+    preview_src = f"data:image/jpeg;base64,{st.session_state.img_b64}"
+    st.markdown(f"""
+    <div class="valo-img-preview">
+      <img src="{preview_src}" alt="preview"/>
+      <div class="valo-img-preview-info">
+        <strong>📷 ẢNH ĐÃ TẢI</strong>
+        {st.session_state.img_name[:28]}
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Caption + send row
+    col_cap, col_send = st.columns([3, 1])
+    with col_cap:
+        caption_val = st.text_input(
+            "caption",
+            value=st.session_state.img_caption,
+            placeholder="Hỏi về ảnh (không bắt buộc)...",
+            label_visibility="collapsed",
+            key="caption_input"
+        )
+        st.session_state.img_caption = caption_val
+
+    with col_send:
+        # Delete button
+        if st.button("✕ XÓA ẢNH", use_container_width=True, key="del_img"):
+            st.session_state.img_data    = None
+            st.session_state.img_b64     = ""
+            st.session_state.img_name    = ""
+            st.session_state.img_caption = ""
+            st.rerun()
+
+    if st.button("⚡ PHÂN TÍCH ẢNH", use_container_width=True, key="send_img_btn"):
+        st.session_state.greeted = True
+        cap = st.session_state.img_caption.strip()
+        q_text = f"📷 **Ảnh lỗi PC** — {cap}" if cap else "📷 **Ảnh lỗi PC** — phân tích giúp tôi"
+        st.session_state.messages.append({"role":"user","content":q_text})
+        with st.chat_message("user"):
+            st.markdown(q_text)
+        with st.chat_message("assistant"):
+            with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
+                try:
+                    ans = ask_vision(st.session_state.img_b64, cap, st.session_state.messages)
+                    st.markdown(ans)
+                    st.session_state.messages.append({"role":"assistant","content":ans})
+                except Exception as e:
+                    st.error(f"❌ {str(e)}")
+        # Clear image after send
+        st.session_state.img_data    = None
+        st.session_state.img_b64     = ""
+        st.session_state.img_name    = ""
+        st.session_state.img_caption = ""
+        st.rerun()
+
+# Style the hidden uploader to look like a camera icon beside the chat input
+st.markdown("""
+<style>
+/* Hide default uploader UI, show as small icon */
+[data-testid="stFileUploaderDropzone"] {
+  background: linear-gradient(135deg,rgba(16,20,32,0.98),rgba(10,14,24,0.98)) !important;
+  border: 1px solid rgba(189,147,249,0.4) !important;
+  border-top: 2px solid rgba(189,147,249,0.65) !important;
+  clip-path: polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%) !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 12px rgba(189,147,249,0.15) !important;
+  transition: all .15s ease !important;
+}
+[data-testid="stFileUploaderDropzone"]:hover {
+  background: rgba(189,147,249,0.10) !important;
+  box-shadow: 0 0 20px rgba(189,147,249,0.3) !important;
+}
+/* Hide all text inside — only show icon */
+[data-testid="stFileUploaderDropzoneInstructions"] {
+  display: none !important;
+}
+/* The "Browse files" button */
+[data-testid="stFileUploaderDropzone"] button {
+  all: unset !important;
+  width: 100% !important;
+  height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 22px !important;
+  cursor: pointer !important;
+  color: #bd93f9 !important;
+}
+[data-testid="stFileUploaderDropzone"] button::before {
+  content: '📷' !important;
+  font-size: 22px !important;
+}
+/* Delete button on uploaded file */
+[data-testid="stFileUploadDeleteBtn"] {
+  color: #ff4655 !important;
+  background: rgba(255,70,85,0.08) !important;
+}
+/* The whole uploader block — constrain to icon size */
+[data-testid="stFileUploader"] {
+  width: 54px !important;
+  flex-shrink: 0 !important;
+}
+[data-testid="stFileUploader"] section {
+  padding: 0 !important;
+}
+/* Layout: uploader icon + chat input side by side */
+[data-testid="stFileUploader"] + div,
+[data-testid="stChatInput"] {
+  flex: 1 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ════ TEXT HANDLER ════
 def handle(p):
     st.session_state.messages.append({"role":"user","content":p})
     with st.chat_message("user"): st.markdown(p)
@@ -506,5 +823,5 @@ def handle(p):
 
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
-if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
+if p:=st.chat_input("Nhập mã lỗi, linh kiện hoặc dán ảnh..."):
     st.session_state.greeted=True; handle(p)
