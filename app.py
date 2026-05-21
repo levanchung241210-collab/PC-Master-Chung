@@ -1,8 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import json, re, os, random, io, base64
+import json, re, os, random
 from groq import Groq
-from PIL import Image
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
@@ -24,6 +23,7 @@ components.html("""
   document.head.appendChild(styleEl);
 
   function fix(){
+    // Walk up from current window to find parent Streamlit frame
     try {
       var w = window.parent || window;
       var frames = w.document ? [w] : [];
@@ -64,22 +64,28 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 .stApp::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
+    /* V-SHAPE red light from top-center */
     conic-gradient(from 180deg at 50% -18%,
       transparent 60deg, rgba(255,55,65,0.10) 76deg,
       rgba(255,70,85,0.18) 90deg,
       rgba(255,55,65,0.10) 104deg, transparent 120deg),
+    /* Left red zone */
     radial-gradient(ellipse 50% 70% at -5% 20%, rgba(255,40,55,0.13) 0%,transparent 58%),
+    /* Right teal zone */
     radial-gradient(ellipse 50% 70% at 105% 80%, rgba(0,212,191,0.10) 0%,transparent 58%),
+    /* DIAGONAL RED SLASHES — bright enough to see */
     repeating-linear-gradient(-52deg,
       transparent 0, transparent 54px,
       rgba(255,70,85,0.13) 54px, rgba(255,70,85,0.13) 55.5px,
       rgba(255,70,85,0.05) 55.5px, rgba(255,70,85,0.05) 57px,
       transparent 57px),
+    /* DIAGONAL TEAL SLASHES */
     repeating-linear-gradient(38deg,
       transparent 0, transparent 84px,
       rgba(0,212,191,0.10) 84px, rgba(0,212,191,0.10) 85.5px,
       rgba(0,212,191,0.04) 85.5px, rgba(0,212,191,0.04) 87px,
       transparent 87px),
+    /* HUD GRID */
     linear-gradient(rgba(255,70,85,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,70,85,0.07) 1px, transparent 1px);
   background-size: auto,auto,auto,auto,auto,38px 38px,38px 38px;
@@ -286,18 +292,6 @@ section[data-testid="stSidebar"] .stButton>button:hover{background:rgba(255,70,8
 </style>
 """, unsafe_allow_html=True)
 
-# ════ STATE INIT ════
-if "messages" not in st.session_state: st.session_state.messages = []
-if "greeted" not in st.session_state: st.session_state.greeted = False
-if "suggestions" not in st.session_state: st.session_state.suggestions = []
-if "pending_query" not in st.session_state: st.session_state.pending_query = None
-
-if "img_data" not in st.session_state: st.session_state.img_data = None
-if "img_name" not in st.session_state: st.session_state.img_name = ""
-if "img_b64" not in st.session_state: st.session_state.img_b64 = ""
-if "img_caption" not in st.session_state: st.session_state.img_caption = ""
-if "uploader_key" not in st.session_state: st.session_state.uploader_key = 0
-
 # ════ GROQ ════
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
@@ -305,22 +299,6 @@ except KeyError:
     st.error("❌ Chưa cấu hình GROQ_API_KEY!"); st.stop()
 except Exception as e:
     st.error(f"❌ {e}"); st.stop()
-
-# ════ VISION & BASE64 HELPER ════
-def img_to_base64(img_bytes):
-    return base64.b64encode(img_bytes).decode('utf-8')
-
-def ask_vision(b64, caption, ch):
-    content = [
-        {"type": "text", "text": f"Bạn là chuyên gia phần cứng PC. Hãy phân tích ảnh này. Câu hỏi/Caption: {caption if caption else 'Hãy chẩn đoán lỗi phần cứng từ hình ảnh này.'}"},
-        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
-    ]
-    response = client.chat.completions.create(
-        model="llama-3.2-11b-vision-preview",
-        messages=[{"role": "user", "content": content}],
-        max_tokens=600
-    )
-    return response.choices[0].message.content
 
 def load_db():
     if os.path.exists("database_pc.json"):
@@ -354,6 +332,11 @@ st.markdown(f"""
 </div>
 <div class="valo-divider"><div class="valo-divider-inner"><div class="vd r"></div><div class="vdbar"></div><div class="vd t"></div></div></div>
 """, unsafe_allow_html=True)
+
+if "messages"      not in st.session_state: st.session_state.messages=[]
+if "greeted"       not in st.session_state: st.session_state.greeted=False
+if "suggestions"   not in st.session_state: st.session_state.suggestions=[]
+if "pending_query" not in st.session_state: st.session_state.pending_query=None
 
 ALL_S=[
     ("⚠  Màn hình xanh BSOD đột ngột","Máy tính bị màn hình xanh chết đột ngột, phải làm gì?"),
@@ -392,47 +375,41 @@ ALL_S=[
 if not st.session_state.suggestions:
     st.session_state.suggestions=random.sample(ALL_S,4)
 
-if not st.session_state.messages:
-    st.markdown(f"""
-    <div class="valo-greeting scan-wrap">
-      <div class="valo-bracket tl"></div><div class="valo-bracket tr"></div>
-      <div class="valo-bracket bl"></div><div class="valo-bracket br"></div>
-      <div class="vg-topline"></div><div class="vg-leftline"></div>
-      <div class="vg-cut-h"></div><div class="vg-cut-v"></div>
-      <div class="vg-smoke-r"></div><div class="vg-smoke-t"></div>
-      <div class="valo-vbar"></div>
-      <div class="valo-status-row">
-        <div class="valo-status-dot-wrap"><div class="valo-status-ring r1"></div><div class="valo-status-ring r2"></div><div class="valo-status-dot"></div></div>
-        <div class="valo-status-text">Hệ thống sẵn sàng</div>
-      </div>
-      <span class="valo-greeting-icon">⚡</span>
-      <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
-      <div class="valo-greeting-sub">Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi.<br>Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.</div>
-      <div class="valo-stats">
-        <div class="valo-stat"><span class="valo-stat-num">{db_loi}</span><span class="valo-stat-label">Lỗi hệ thống</span></div>
-        <div class="valo-stat-div"></div>
-        <div class="valo-stat"><span class="valo-stat-num">{db_lk}</span><span class="valo-stat-label">Linh kiện PC</span></div>
-        <div class="valo-stat-div"></div>
-        <div class="valo-stat"><span class="valo-stat-num" style="color:var(--t);text-shadow:0 0 14px rgba(0,212,191,0.7)">24/7</span><span class="valo-stat-label">Hỗ trợ</span></div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown(f"""
+<div class="valo-greeting scan-wrap">
+  <div class="valo-bracket tl"></div><div class="valo-bracket tr"></div>
+  <div class="valo-bracket bl"></div><div class="valo-bracket br"></div>
+  <div class="vg-topline"></div><div class="vg-leftline"></div>
+  <div class="vg-cut-h"></div><div class="vg-cut-v"></div>
+  <div class="vg-smoke-r"></div><div class="vg-smoke-t"></div>
+  <div class="valo-vbar"></div>
+  <div class="valo-status-row">
+    <div class="valo-status-dot-wrap"><div class="valo-status-ring r1"></div><div class="valo-status-ring r2"></div><div class="valo-status-dot"></div></div>
+    <div class="valo-status-text">Hệ thống sẵn sàng</div>
+  </div>
+  <span class="valo-greeting-icon">⚡</span>
+  <div class="valo-greeting-title">Hệ thống phân tích phần cứng máy tính</div>
+  <div class="valo-greeting-sub">Nhập mã hiệu linh kiện hoặc mô tả hiện tượng lỗi.<br>Thuật toán phân tích tự động sẽ đưa ra giải pháp ngay lập tức.</div>
+  <div class="valo-stats">
+    <div class="valo-stat"><span class="valo-stat-num">{db_loi}</span><span class="valo-stat-label">Lỗi hệ thống</span></div>
+    <div class="valo-stat-div"></div>
+    <div class="valo-stat"><span class="valo-stat-num">{db_lk}</span><span class="valo-stat-label">Linh kiện PC</span></div>
+    <div class="valo-stat-div"></div>
+    <div class="valo-stat"><span class="valo-stat-num" style="color:var(--t);text-shadow:0 0 14px rgba(0,212,191,0.7)">24/7</span><span class="valo-stat-label">Hỗ trợ</span></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("""<div class="smoke-1"></div><div class="smoke-2"></div>""", unsafe_allow_html=True)
-    st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
-    col1,col2=st.columns(2,gap="small")
-    for i,(lb,qr) in enumerate(st.session_state.suggestions):
-        with (col1 if i%2==0 else col2):
-            if st.button(lb,key=f"s{i}"):
-                st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
+st.markdown("""<div class="smoke-1"></div><div class="smoke-2"></div>""", unsafe_allow_html=True)
+st.markdown('<div class="valo-suggest-label"><span>CHỌN NHANH VẤN ĐỀ</span></div>', unsafe_allow_html=True)
+col1,col2=st.columns(2,gap="small")
+for i,(lb,qr) in enumerate(st.session_state.suggestions):
+    with (col1 if i%2==0 else col2):
+        if st.button(lb,key=f"s{i}"):
+            st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
-# ════ CHAT DISPLAY WITH IMAGE SUPPORT ════
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]): 
-        if msg.get("image"):
-            # Render ảnh đã gửi trong lịch sử chat
-            st.markdown(f'<img src="data:image/jpeg;base64,{msg["image"]}" style="max-width:100%; border-radius:8px; border: 1px solid #ff4655; margin-bottom:10px; box-shadow: 0 0 10px rgba(255,70,85,0.2);"/>', unsafe_allow_html=True)
-        st.markdown(msg["content"])
+    with st.chat_message(msg["role"]): st.markdown(msg["content"])
 
 # ════ DATABASE SEARCH ════
 def calc_score(item,qc,un):
@@ -460,7 +437,7 @@ def search_db(uq):
         else: return f"### ◆  {bm['ten']}\n*— Lê Văn Chung 10A4*\n\n**⚙ Thông số:** {bm.get('thong_so','')}\n\n**◉ Socket:** `{bm.get('socket','')}`\n\n**▶ Tư vấn:** {bm.get('chuyen_gia_tu_van','')}"
     return None
 
-# ════ SMART AI ENGINE ════
+# ════ SMART AI ENGINE — no template, full knowledge ════
 SYSTEM_PROMPT = """Bạn là chuyên gia phần cứng máy tính và điện tử hàng đầu, với kiến thức cực kỳ sâu rộng và cập nhật đến 2025.
 
 KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
@@ -476,197 +453,45 @@ KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
 - Mainboard: Intel 700/800 series, AMD X670/B650/B850
 - Nguồn: 80+ Bronze/Gold/Platinum, ATX 3.0
 
-QUY TẮC TRẢ LỜI:
+QUY TẮC TRẢ LỜI — QUAN TRỌNG:
 1. Đọc KỸ câu hỏi, trả lời ĐÚNG nội dung được hỏi — không trả lời template
 2. Nếu hỏi về linh kiện cụ thể: nêu thông số thực tế, so sánh, ưu nhược, giá tham khảo
 3. Nếu hỏi lỗi: nguyên nhân chính (1 câu) + bước fix (≤4 bước ngắn) + 1 tip
-4. Không mở đầu bằng "Xin chào", không lặp câu hỏi, không giải thích thừa
-5. Trả lời bằng tiếng Việt, súc tích, đúng trọng tâm
-6. TUYỆT ĐỐI KHÔNG nhắc "AI", "LLM", "Groq"
-7. Với câu hỏi về linh kiện mới (RTX 5090, Ryzen 9000): dùng kiến thức chuyên môn để trả lời.
-"""
+4. Nếu hỏi so sánh: phân tích khách quan từng mặt, kết luận rõ ràng
+5. Không mở đầu bằng "Xin chào", không lặp câu hỏi, không giải thích thừa
+6. Trả lời bằng tiếng Việt, súc tích, đúng trọng tâm
+7. TUYỆT ĐỐI KHÔNG nhắc "AI", "LLM", "Groq", "ngôn ngữ lớn"
+8. Với câu hỏi về linh kiện mới (RTX 5090, Ryzen 9000, chip mobile 2024-2025): dùng kiến thức chuyên môn của bạn để trả lời, không nói "không biết"
+
+Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng."""
 
 def ask(uq, ch):
     msgs = [{"role":"system","content":SYSTEM_PROMPT}]
+    # Chỉ lấy 8 tin gần nhất để không waste context
     for m in ch[-8:]:
         msgs.append({"role":m["role"],"content":m["content"]})
     msgs.append({"role":"user","content":uq})
 
+    # Chọn max_tokens dựa trên loại câu hỏi
     q = uq.lower()
     hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
     err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
     
-    if any(w in q for w in err_words): max_tok = 480
-    elif any(w in q for w in hw_words): max_tok = 750
-    else: max_tok = 580
+    if any(w in q for w in err_words):
+        max_tok = 480  # lỗi → ngắn gọn
+    elif any(w in q for w in hw_words):
+        max_tok = 750  # linh kiện → đủ chi tiết
+    else:
+        max_tok = 580
 
     r = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=msgs, max_tokens=max_tok, temperature=0.45
+        messages=msgs,
+        max_tokens=max_tok,
+        temperature=0.45  # ổn định, không lan man
     )
     return r.choices[0].message.content
 
-# ════ IMAGE + CHAT INPUT — PLUS ICON LIKE GEMINI ════
-st.markdown("""
-<style>
-/* ... Restoring teal suggestion buttons CSS ... */
-.stButton>button{
-  background:linear-gradient(110deg,rgba(0,58,52,0.92) 0%,rgba(0,32,28,0.88) 40%,rgba(5,10,20,0.95) 100%) !important;
-  color:#d8f8f4 !important;
-  border:1px solid rgba(0,212,191,0.28) !important; border-left:3px solid #00d4bf !important;
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%) !important;
-  border-radius:0 !important; font-family:'Barlow Condensed',sans-serif !important;
-  font-size:clamp(12px,3.2vw,14px) !important;font-weight:700 !important;letter-spacing:.8px !important;
-  padding:13px 16px !important;width:100% !important;text-align:left !important;
-  white-space:normal !important;min-height:52px !important;line-height:1.45 !important;
-  transition:all .12s ease !important; text-shadow:0 1px 6px rgba(0,0,0,0.7) !important;
-}
-.stButton>button:hover{
-  background:linear-gradient(110deg,rgba(0,212,191,0.18) 0%,rgba(0,130,120,0.12) 40%,rgba(255,70,85,0.10) 100%) !important;
-  border-left-color:#ff4655 !important;border-color:rgba(0,212,191,0.48) !important;
-  color:#ffffff !important;transform:translateX(6px) !important;
-  box-shadow:0 0 26px rgba(0,212,191,0.45),0 0 52px rgba(0,212,191,0.15) !important;
-}
-
-/* ── Image Preview Strip ── */
-.valo-img-preview {
-  background:linear-gradient(135deg,rgba(16,10,26,0.97),rgba(10,14,24,0.98));
-  border:1px solid rgba(189,147,249,0.3); border-left:3px solid rgba(189,147,249,0.55);
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
-  padding:8px 12px; margin-bottom:4px; display:flex;align-items:center;gap:10px;
-  box-shadow:0 0 16px rgba(189,147,249,0.1);
-}
-.valo-img-preview img {
-  height:52px;width:auto;object-fit:cover; border:1px solid rgba(189,147,249,0.35); clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,0 100%);
-}
-.valo-img-preview-info {
-  flex:1; font-family:'Barlow Condensed',sans-serif; font-size:11px;letter-spacing:1px;color:#8b86a0;
-}
-.valo-img-preview-info strong {
-  display:block;color:#bd93f9;font-size:12px; text-shadow:0 0 6px rgba(189,147,249,0.4);
-}
-
-/* File Uploader styling to look like a PLUS (+) icon next to the chat input */
-[data-testid="stFileUploaderDropzone"] {
-  background: linear-gradient(135deg,rgba(16,20,32,0.98),rgba(10,14,24,0.98)) !important;
-  border: 1px solid rgba(189,147,249,0.4) !important;
-  border-top: 2px solid rgba(189,147,249,0.65) !important;
-  clip-path: polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%) !important;
-  border-radius: 0 !important; padding: 0 !important;
-  min-height: 46px !important; max-height: 46px !important; overflow: hidden !important;
-  display: flex !important; align-items: center !important; justify-content: center !important;
-  cursor: pointer !important; box-shadow: 0 0 12px rgba(189,147,249,0.15) !important;
-  transition: all .15s ease !important;
-}
-[data-testid="stFileUploaderDropzone"]:hover {
-  background: rgba(189,147,249,0.10) !important; box-shadow: 0 0 20px rgba(189,147,249,0.3) !important;
-}
-[data-testid="stFileUploaderDropzoneInstructions"] { display: none !important; }
-
-/* Thay thế icon Camera bằng icon Dấu Cộng (+) giống Gemini */
-[data-testid="stFileUploaderDropzone"] button {
-  all: unset !important; width: 100% !important; height: 46px !important;
-  display: flex !important; align-items: center !important; justify-content: center !important;
-  font-size: 26px !important; cursor: pointer !important; color: #bd93f9 !important; font-weight: bold !important;
-}
-[data-testid="stFileUploaderDropzone"] button::before {
-  content: '＋' !important; font-size: 26px !important;
-}
-[data-testid="stFileUploadDeleteBtn"] {
-  color: #ff4655 !important; background: rgba(255,70,85,0.08) !important;
-}
-[data-testid="stFileUploader"] { width: 54px !important; flex-shrink: 0 !important; }
-[data-testid="stFileUploader"] section { padding: 0 !important; }
-/* Align uploader next to chat input */
-[data-testid="stFileUploader"] + div, [data-testid="stChatInput"] { flex: 1 !important; }
-</style>
-""", unsafe_allow_html=True)
-
-# ── File uploader với Dynamic Key để Sửa lỗi không xóa được ảnh ──
-uploaded = st.file_uploader(
-    "img", type=["jpg","jpeg","png","webp","gif"], 
-    label_visibility="collapsed", key=f"hidden_uploader_{st.session_state.uploader_key}"
-)
-
-if uploaded is not None:
-    try:
-        img_obj = Image.open(uploaded).convert("RGB")
-        buf = io.BytesIO()
-        img_obj.save(buf, format="JPEG", quality=82)
-        st.session_state.img_data = buf.getvalue()
-        st.session_state.img_b64 = img_to_base64(st.session_state.img_data)
-        st.session_state.img_name = uploaded.name
-        
-        # BƯỚC QUAN TRỌNG NHẤT: Tăng key để clear cache widget file uploader ngay
-        st.session_state.uploader_key += 1
-        st.rerun()
-    except:
-        st.session_state.img_data = None
-
-# ── Preview Strip ──
-if st.session_state.img_data:
-    preview_src = f"data:image/jpeg;base64,{st.session_state.img_b64}"
-    st.markdown(f"""
-    <div class="valo-img-preview">
-        <img src="{preview_src}" alt="preview"/>
-        <div class="valo-img-preview-info">
-            <strong>📷 ẢNH ĐÃ TẢI</strong> {st.session_state.img_name[:28]}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col_cap, col_send = st.columns([3, 1])
-    with col_cap:
-        caption_val = st.text_input(
-            "caption", value=st.session_state.img_caption, 
-            placeholder="Hỏi về ảnh (không bắt buộc)...", 
-            label_visibility="collapsed", key="caption_input"
-        )
-        st.session_state.img_caption = caption_val
-    with col_send:
-        if st.button("✕ XÓA ẢNH", use_container_width=True, key="del_img"):
-            # Lệnh XÓA hoạt động triệt để nhờ Dynamic Key
-            st.session_state.img_data = None
-            st.session_state.img_b64 = ""
-            st.session_state.img_name = ""
-            st.session_state.img_caption = ""
-            st.session_state.uploader_key += 1
-            st.rerun()
-            
-        if st.button("⚡ PHÂN TÍCH ẢNH", use_container_width=True, key="send_img_btn"):
-            st.session_state.greeted = True
-            cap = st.session_state.img_caption.strip()
-            q_text = f"📷 **Ảnh lỗi PC** — {cap}" if cap else "📷 **Ảnh lỗi PC** — phân tích giúp tôi"
-            
-            # Đã fix: Gắn hình ảnh vào log để nó không biến mất sau khi chat
-            st.session_state.messages.append({
-                "role":"user",
-                "content": q_text,
-                "image": st.session_state.img_b64
-            })
-            
-            with st.chat_message("user"): 
-                st.markdown(f'<img src="data:image/jpeg;base64,{st.session_state.img_b64}" style="max-width:100%; border-radius:8px; border: 1px solid #ff4655; margin-bottom:10px; box-shadow: 0 0 10px rgba(255,70,85,0.2);"/>', unsafe_allow_html=True)
-                st.markdown(q_text)
-                
-            with st.chat_message("assistant"):
-                with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
-                    try:
-                        ans = ask_vision(st.session_state.img_b64, cap, st.session_state.messages)
-                        st.markdown(ans)
-                        st.session_state.messages.append({"role":"assistant","content":ans})
-                    except Exception as e:
-                        st.error(f"❌ {str(e)}")
-            
-            # Clear ảnh sau khi gửi thành công
-            st.session_state.img_data = None
-            st.session_state.img_b64 = ""
-            st.session_state.img_name = ""
-            st.session_state.img_caption = ""
-            st.session_state.uploader_key += 1
-            st.rerun()
-
-# ════ TEXT HANDLER ════
 def handle(p):
     st.session_state.messages.append({"role":"user","content":p})
     with st.chat_message("user"): st.markdown(p)
@@ -681,6 +506,5 @@ def handle(p):
 
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
-
-if p:=st.chat_input("Nhập mã lỗi, linh kiện... (Nhấn '+' bên trái để tải ảnh)"):
+if p:=st.chat_input("Nhập mã lỗi hoặc linh kiện cần phân tích..."):
     st.session_state.greeted=True; handle(p)
