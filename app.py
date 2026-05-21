@@ -2,6 +2,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json, re, os, random
 from groq import Groq
+import base64
+from PIL import Image
+import io
 
 st.set_page_config(page_title="PC Solving — LVC 10A4", page_icon="⚡", layout="centered")
 
@@ -64,28 +67,22 @@ html,body,.stApp{background:var(--bg)!important;color:var(--c)!important;font-fa
 .stApp::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    /* V-SHAPE red light from top-center */
     conic-gradient(from 180deg at 50% -18%,
       transparent 60deg, rgba(255,55,65,0.10) 76deg,
       rgba(255,70,85,0.18) 90deg,
       rgba(255,55,65,0.10) 104deg, transparent 120deg),
-    /* Left red zone */
     radial-gradient(ellipse 50% 70% at -5% 20%, rgba(255,40,55,0.13) 0%,transparent 58%),
-    /* Right teal zone */
     radial-gradient(ellipse 50% 70% at 105% 80%, rgba(0,212,191,0.10) 0%,transparent 58%),
-    /* DIAGONAL RED SLASHES — bright enough to see */
     repeating-linear-gradient(-52deg,
       transparent 0, transparent 54px,
       rgba(255,70,85,0.13) 54px, rgba(255,70,85,0.13) 55.5px,
       rgba(255,70,85,0.05) 55.5px, rgba(255,70,85,0.05) 57px,
       transparent 57px),
-    /* DIAGONAL TEAL SLASHES */
     repeating-linear-gradient(38deg,
       transparent 0, transparent 84px,
       rgba(0,212,191,0.10) 84px, rgba(0,212,191,0.10) 85.5px,
       rgba(0,212,191,0.04) 85.5px, rgba(0,212,191,0.04) 87px,
       transparent 87px),
-    /* HUD GRID */
     linear-gradient(rgba(255,70,85,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,70,85,0.07) 1px, transparent 1px);
   background-size: auto,auto,auto,auto,auto,38px 38px,38px 38px;
@@ -408,6 +405,7 @@ for i,(lb,qr) in enumerate(st.session_state.suggestions):
         if st.button(lb,key=f"s{i}"):
             st.session_state.greeted=True; st.session_state.pending_query=qr; st.rerun()
 
+# ════ RENDER CHAT HISTORY HERE (So the upload logic appears below it) ════
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]): st.markdown(msg["content"])
 
@@ -437,7 +435,7 @@ def search_db(uq):
         else: return f"### ◆  {bm['ten']}\n*— Lê Văn Chung 10A4*\n\n**⚙ Thông số:** {bm.get('thong_so','')}\n\n**◉ Socket:** `{bm.get('socket','')}`\n\n**▶ Tư vấn:** {bm.get('chuyen_gia_tu_van','')}"
     return None
 
-# ════ SMART AI ENGINE — no template, full knowledge ════
+# ════ SMART AI ENGINE ════
 SYSTEM_PROMPT = """Bạn là chuyên gia phần cứng máy tính và điện tử hàng đầu, với kiến thức cực kỳ sâu rộng và cập nhật đến 2025.
 
 KIẾN THỨC BẮT BUỘC PHẢI BIẾT:
@@ -467,20 +465,18 @@ Tự xưng là "hệ thống chuyên gia" khi cần, hoặc không tự xưng.""
 
 def ask(uq, ch):
     msgs = [{"role":"system","content":SYSTEM_PROMPT}]
-    # Chỉ lấy 8 tin gần nhất để không waste context
     for m in ch[-8:]:
         msgs.append({"role":m["role"],"content":m["content"]})
     msgs.append({"role":"user","content":uq})
 
-    # Chọn max_tokens dựa trên loại câu hỏi
     q = uq.lower()
     hw_words = ["so sánh","mua","build","cấu hình","rtx","gtx","rx","ryzen","core ultra","i5","i7","i9","snapdragon","dimensity","apple a","iphone","samsung"]
     err_words = ["lỗi","bsod","xanh","đen","bíp","crash","sập","không bật","0x","boot","restart"]
     
     if any(w in q for w in err_words):
-        max_tok = 480  # lỗi → ngắn gọn
+        max_tok = 480 
     elif any(w in q for w in hw_words):
-        max_tok = 750  # linh kiện → đủ chi tiết
+        max_tok = 750
     else:
         max_tok = 580
 
@@ -488,20 +484,15 @@ def ask(uq, ch):
         model="llama-3.3-70b-versatile",
         messages=msgs,
         max_tokens=max_tok,
-        temperature=0.45  # ổn định, không lan man
+        temperature=0.45
     )
     return r.choices[0].message.content
-
-import base64
-from PIL import Image
-import io
 
 # ════ VISION — phân tích ảnh ════
 def img_to_base64(img_bytes):
     return base64.b64encode(img_bytes).decode("utf-8")
 
 def ask_vision(img_b64, caption, chat_history):
-    """Gửi ảnh lên Groq vision để phân tích lỗi PC"""
     user_text = caption.strip() if caption.strip() else "Hãy phân tích ảnh này. Đây là màn hình/linh kiện/lỗi PC. Cho tôi biết đây là lỗi gì và cách khắc phục."
     msgs = [
         {"role": "system", "content": """Bạn là chuyên gia phần cứng máy tính. Khi nhận được ảnh:
@@ -523,7 +514,7 @@ Trả lời bằng tiếng Việt, ngắn gọn, đúng trọng tâm. KHÔNG nh�
     )
     return r.choices[0].message.content
 
-# ════ IMAGE + CHAT INPUT — camera icon inside input row ════
+# ════ IMAGE + CHAT INPUT STYLING ════
 st.markdown("""
 <style>
 /* ── Restore teal suggestion buttons ── */
@@ -557,28 +548,6 @@ st.markdown("""
   position:relative;
 }
 
-/* The camera/upload icon button */
-.valo-cam-btn {
-  display:flex;align-items:center;justify-content:center;
-  width:46px;height:46px;flex-shrink:0;cursor:pointer;
-  background:linear-gradient(135deg,rgba(16,20,32,0.98),rgba(10,14,24,0.98));
-  border:1px solid rgba(189,147,249,0.4);
-  border-top:2px solid rgba(189,147,249,0.65);
-  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
-  transition:all .15s ease;
-  position:relative;
-  box-shadow:0 0 12px rgba(189,147,249,0.15);
-}
-.valo-cam-btn:hover {
-  background:rgba(189,147,249,0.12);
-  border-color:rgba(189,147,249,0.7);
-  box-shadow:0 0 20px rgba(189,147,249,0.3);
-}
-.valo-cam-btn input[type=file] {
-  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
-}
-.valo-cam-icon { font-size:20px;pointer-events:none; }
-
 /* Preview strip above input */
 .valo-img-preview {
   background:linear-gradient(135deg,rgba(16,10,26,0.97),rgba(10,14,24,0.98));
@@ -604,147 +573,7 @@ st.markdown("""
   display:block;color:#bd93f9;font-size:12px;
   text-shadow:0 0 6px rgba(189,147,249,0.4);
 }
-.valo-del-btn {
-  background:rgba(255,70,85,0.12);border:1px solid rgba(255,70,85,0.3);
-  color:#ff4655;cursor:pointer;
-  width:28px;height:28px;
-  clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);
-  font-size:14px;display:flex;align-items:center;justify-content:center;
-  font-weight:700;transition:all .12s ease;flex-shrink:0;
-}
-.valo-del-btn:hover { background:rgba(255,70,85,0.25);box-shadow:0 0 10px rgba(255,70,85,0.3); }
 
-/* Send image button */
-.valo-send-img-btn {
-  background:linear-gradient(90deg,rgba(120,50,210,0.88),rgba(80,30,170,0.82));
-  border:1px solid rgba(189,147,249,0.5);
-  border-top:2px solid rgba(200,160,255,0.65);
-  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
-  color:#fff;cursor:pointer;
-  padding:0 16px;height:46px;
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:800;font-size:12px;letter-spacing:2px;
-  white-space:nowrap;flex-shrink:0;
-  box-shadow:0 0 14px rgba(189,147,249,0.2);
-  transition:all .12s ease;
-}
-.valo-send-img-btn:hover {
-  background:rgba(189,147,249,0.25);
-  box-shadow:0 0 22px rgba(189,147,249,0.4);
-}
-
-/* Caption input */
-.valo-caption-input {
-  flex:1;background:#0b0e16;
-  border:1px solid rgba(189,147,249,0.25);
-  border-bottom:2px solid rgba(189,147,249,0.4);
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
-  color:#ece8e1;
-  font-family:'Barlow',sans-serif;font-size:13px;
-  padding:0 12px;height:46px;
-  caret-color:#bd93f9;
-  outline:none;
-}
-.valo-caption-input::placeholder { color:rgba(170,165,155,0.38);font-style:italic; }
-.valo-caption-input:focus { border-bottom-color:#bd93f9;box-shadow:0 3px 14px rgba(189,147,249,0.1); }
-
-/* Paste hint */
-.valo-paste-hint {
-  font-family:'Barlow Condensed',sans-serif;font-size:10px;
-  letter-spacing:2px;color:#363a46;text-transform:uppercase;
-  text-align:right;margin-top:2px;padding-right:4px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ── Session state for image ──
-if "img_data"    not in st.session_state: st.session_state.img_data    = None
-if "img_name"    not in st.session_state: st.session_state.img_name    = ""
-if "img_b64"     not in st.session_state: st.session_state.img_b64     = ""
-if "img_caption" not in st.session_state: st.session_state.img_caption = ""
-if "send_img"    not in st.session_state: st.session_state.send_img    = False
-
-# ── File uploader hidden, triggered by JS icon ──
-# We use st.file_uploader but hide it visually and trigger via JS
-uploaded = st.file_uploader(
-    "img",
-    type=["jpg","jpeg","png","webp","gif"],
-    label_visibility="collapsed",
-    key="hidden_uploader"
-)
-
-# Process upload
-if uploaded is not None:
-    try:
-        img_obj = Image.open(uploaded).convert("RGB")
-        buf = io.BytesIO()
-        img_obj.save(buf, format="JPEG", quality=82)
-        st.session_state.img_data = buf.getvalue()
-        st.session_state.img_b64  = img_to_base64(st.session_state.img_data)
-        st.session_state.img_name = uploaded.name
-    except:
-        st.session_state.img_data = None
-
-# ── Preview strip (shows when image loaded) ──
-if st.session_state.img_data:
-    import base64 as _b64
-    preview_src = f"data:image/jpeg;base64,{st.session_state.img_b64}"
-    st.markdown(f"""
-    <div class="valo-img-preview">
-      <img src="{preview_src}" alt="preview"/>
-      <div class="valo-img-preview-info">
-        <strong>📷 ẢNH ĐÃ TẢI</strong>
-        {st.session_state.img_name[:28]}
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Caption + send row
-    col_cap, col_send = st.columns([3, 1])
-    with col_cap:
-        caption_val = st.text_input(
-            "caption",
-            value=st.session_state.img_caption,
-            placeholder="Hỏi về ảnh (không bắt buộc)...",
-            label_visibility="collapsed",
-            key="caption_input"
-        )
-        st.session_state.img_caption = caption_val
-
-    with col_send:
-        # Delete button
-        if st.button("✕ XÓA ẢNH", use_container_width=True, key="del_img"):
-            st.session_state.img_data    = None
-            st.session_state.img_b64     = ""
-            st.session_state.img_name    = ""
-            st.session_state.img_caption = ""
-            st.rerun()
-
-    if st.button("⚡ PHÂN TÍCH ẢNH", use_container_width=True, key="send_img_btn"):
-        st.session_state.greeted = True
-        cap = st.session_state.img_caption.strip()
-        q_text = f"📷 **Ảnh lỗi PC** — {cap}" if cap else "📷 **Ảnh lỗi PC** — phân tích giúp tôi"
-        st.session_state.messages.append({"role":"user","content":q_text})
-        with st.chat_message("user"):
-            st.markdown(q_text)
-        with st.chat_message("assistant"):
-            with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
-                try:
-                    ans = ask_vision(st.session_state.img_b64, cap, st.session_state.messages)
-                    st.markdown(ans)
-                    st.session_state.messages.append({"role":"assistant","content":ans})
-                except Exception as e:
-                    st.error(f"❌ {str(e)}")
-        # Clear image after send
-        st.session_state.img_data    = None
-        st.session_state.img_b64     = ""
-        st.session_state.img_name    = ""
-        st.session_state.img_caption = ""
-        st.rerun()
-
-# Style the hidden uploader to look like a camera icon beside the chat input
-st.markdown("""
-<style>
 /* Hide default uploader UI, show as small icon */
 [data-testid="stFileUploaderDropzone"] {
   background: linear-gradient(135deg,rgba(16,20,32,0.98),rgba(10,14,24,0.98)) !important;
@@ -767,11 +596,9 @@ st.markdown("""
   background: rgba(189,147,249,0.10) !important;
   box-shadow: 0 0 20px rgba(189,147,249,0.3) !important;
 }
-/* Hide all text inside — only show icon */
 [data-testid="stFileUploaderDropzoneInstructions"] {
   display: none !important;
 }
-/* The "Browse files" button */
 [data-testid="stFileUploaderDropzone"] button {
   all: unset !important;
   width: 100% !important;
@@ -787,12 +614,10 @@ st.markdown("""
   content: '📷' !important;
   font-size: 22px !important;
 }
-/* Delete button on uploaded file */
 [data-testid="stFileUploadDeleteBtn"] {
   color: #ff4655 !important;
   background: rgba(255,70,85,0.08) !important;
 }
-/* The whole uploader block — constrain to icon size */
 [data-testid="stFileUploader"] {
   width: 54px !important;
   flex-shrink: 0 !important;
@@ -800,13 +625,90 @@ st.markdown("""
 [data-testid="stFileUploader"] section {
   padding: 0 !important;
 }
-/* Layout: uploader icon + chat input side by side */
 [data-testid="stFileUploader"] + div,
 [data-testid="stChatInput"] {
   flex: 1 !important;
 }
 </style>
 """, unsafe_allow_html=True)
+
+if "img_data"    not in st.session_state: st.session_state.img_data    = None
+if "img_name"    not in st.session_state: st.session_state.img_name    = ""
+if "img_b64"     not in st.session_state: st.session_state.img_b64     = ""
+if "img_caption" not in st.session_state: st.session_state.img_caption = ""
+if "send_img"    not in st.session_state: st.session_state.send_img    = False
+
+# ════ UPLOADER & PREVIEW LOGIC (Sát dưới cùng) ════
+uploaded = st.file_uploader(
+    "img",
+    type=["jpg","jpeg","png","webp","gif"],
+    label_visibility="collapsed",
+    key="hidden_uploader"
+)
+
+if uploaded is not None:
+    try:
+        img_obj = Image.open(uploaded).convert("RGB")
+        buf = io.BytesIO()
+        img_obj.save(buf, format="JPEG", quality=82)
+        st.session_state.img_data = buf.getvalue()
+        st.session_state.img_b64  = img_to_base64(st.session_state.img_data)
+        st.session_state.img_name = uploaded.name
+    except:
+        st.session_state.img_data = None
+
+if st.session_state.img_data:
+    preview_src = f"data:image/jpeg;base64,{st.session_state.img_b64}"
+    st.markdown(f"""
+    <div class="valo-img-preview">
+      <img src="{preview_src}" alt="preview"/>
+      <div class="valo-img-preview-info">
+        <strong>📷 ẢNH ĐÃ TẢI</strong>
+        {st.session_state.img_name[:28]}
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_cap, col_send = st.columns([3, 1])
+    with col_cap:
+        caption_val = st.text_input(
+            "caption",
+            value=st.session_state.img_caption,
+            placeholder="Hỏi về ảnh (không bắt buộc)...",
+            label_visibility="collapsed",
+            key="caption_input"
+        )
+        st.session_state.img_caption = caption_val
+
+    with col_send:
+        if st.button("✕ XÓA ẢNH", use_container_width=True, key="del_img"):
+            st.session_state.img_data    = None
+            st.session_state.img_b64     = ""
+            st.session_state.img_name    = ""
+            st.session_state.img_caption = ""
+            st.rerun()
+
+    if st.button("⚡ PHÂN TÍCH ẢNH", use_container_width=True, key="send_img_btn"):
+        st.session_state.greeted = True
+        cap = st.session_state.img_caption.strip()
+        q_text = f"📷 **Ảnh lỗi PC** — {cap}" if cap else "📷 **Ảnh lỗi PC** — phân tích giúp tôi"
+        st.session_state.messages.append({"role":"user","content":q_text})
+        with st.chat_message("user"):
+            st.markdown(q_text)
+        with st.chat_message("assistant"):
+            with st.spinner("🔍 ĐANG ĐỌC ẢNH..."):
+                try:
+                    ans = ask_vision(st.session_state.img_b64, cap, st.session_state.messages)
+                    st.markdown(ans)
+                    st.session_state.messages.append({"role":"assistant","content":ans})
+                except Exception as e:
+                    st.error(f"❌ {str(e)}")
+        
+        st.session_state.img_data    = None
+        st.session_state.img_b64     = ""
+        st.session_state.img_name    = ""
+        st.session_state.img_caption = ""
+        st.rerun()
 
 # ════ TEXT HANDLER ════
 def handle(p):
@@ -823,5 +725,6 @@ def handle(p):
 
 if st.session_state.pending_query:
     q=st.session_state.pending_query; st.session_state.pending_query=None; handle(q)
+
 if p:=st.chat_input("Nhập mã lỗi, linh kiện hoặc dán ảnh..."):
     st.session_state.greeted=True; handle(p)
